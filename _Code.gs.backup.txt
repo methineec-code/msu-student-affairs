@@ -1,0 +1,1127 @@
+/*******************************************************************
+ * ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม — Apps Script Backend
+ * v2.0  (ต่อยอดจากโค้ดเดิม — action เดิมใช้ได้ทั้งหมด ไม่ต้องแก้หน้า Login/นิสิต)
+ *
+ * ของเดิมที่คงไว้:
+ *   login, staffLogin, scan, getStudent, getHistory,
+ *   addPortfolio, getPortfolio, delPortfolio, changePass,
+ *   getActivities, addActivity, delActivity, getScanReport, initStudents
+ *
+ * ที่เพิ่มใหม่ (สำหรับหน้าเจ้าหน้าที่ / แอดมิน):
+ *   ping, getDashboard, getLeaderboard, getStudents, saveStudent,
+ *   resetStudentPass, toggleStudent, updateActivity, getActivityQR,
+ *   getAllScans, deleteScan, exportCSV, getStaff, saveStaff, delStaff,
+ *   staffChangePass, getAnnouncements, saveAnnouncement, delAnnouncement,
+ *   getSettings, saveSetting, getLogs, setupSheets
+ *
+ * ติดตั้ง
+ *   1) วางไฟล์นี้ทับ Code.gs เดิมทั้งไฟล์
+ *   2) รัน setupSheets()  1 ครั้ง (สร้างแท็บที่ยังไม่มี + หัวคอลัมน์ + บัญชีแอดมิน)
+ *   3) Deploy > New deployment > Web app
+ *        Execute as     : Me
+ *        Who has access : Anyone
+ *   4) คัดลอก URL /exec ไปใส่ API_URL ในหน้าเว็บ
+ *
+ * แอดมินตั้งต้น: admin@msu.ac.th / admin123   (เปลี่ยนทันทีหลังติดตั้ง)
+ *******************************************************************/
+
+/* ============================ CONFIG ============================ */
+
+const SHEET_ID = '1ZMme0nswN3iXDVayuiKszb6Y_4nQiSyXirIx4vTfK30';
+const SS = SpreadsheetApp.openById(SHEET_ID);
+const TZ = 'Asia/Bangkok';
+
+/* โครงสร้างแท็บ — คอลัมน์ตรงกับโค้ดเดิมทุกตัว (index เดิมไม่เปลี่ยน) */
+const SCHEMA = {
+  // A..I  (เดิม)
+  Students:      ['student_id','name','dept','year','email','gpa','password','status','nationality'],
+  // A..F  (เดิม)
+  Staff:         ['staff_id','name','email','password','role','status'],
+  // A..G  (เดิม)
+  Activities:    ['activity_id','name','score','description','created_by','created_date','active'],
+  // A..G  (เดิม)
+  Scan_Log:      ['log_id','student_id','activity_id','score','date','time','scanned_by'],
+  // A..F  (เดิม)
+  Portfolio:     ['port_id','student_id','name','type','description','date'],
+  // ใหม่
+  Announcements: ['ann_id','title_th','title_en','title_zh','body_th','body_en','body_zh','audience','pin','active','created_by','created_date'],
+  Settings:      ['key','value','label_th','label_en','label_zh'],
+  Logs:          ['log_id','timestamp','actor','role','action','target','detail','result']
+};
+
+/* action ที่ต้องเป็นเจ้าหน้าที่/แอดมิน (ตรวจด้วย staff_id + password ที่ส่งมากับคำขอ) */
+const STAFF_ACTIONS = [
+  'getDashboard','getStudents','saveStudent','resetStudentPass','toggleStudent',
+  'updateActivity','getAllScans','deleteScan','exportCSV','getScanReport',
+  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard'
+];
+const ADMIN_ACTIONS = [
+  'getStaff','saveStaff','delStaff','saveSetting','initStudents','setupSheets'
+];
+
+/* ========================= ENTRY POINTS ========================= */
+
+function doGet(e)  { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
+
+function handleRequest(e) {
+  e = e || {};
+  let params = {};
+  try {
+    if (e.postData && e.postData.contents) {
+      params = JSON.parse(e.postData.contents);
+    } else {
+      params = e.parameter || {};
+    }
+  } catch (err) {
+    params = e.parameter || {};
+  }
+
+  const action = params.action || '';
+  const lang = params.lang || 'th';
+  let result;
+
+  try {
+    // ---- ตรวจสิทธิ์สำหรับ action ฝั่งเจ้าหน้าที่/แอดมิน ----
+    if (STAFF_ACTIONS.indexOf(action) >= 0 || ADMIN_ACTIONS.indexOf(action) >= 0) {
+      const auth = authStaff(params);
+      if (!auth.ok) {
+        result = { success: false, error: msg('FORBIDDEN', lang) };
+        return jsonOut(result, e);
+      }
+      if (ADMIN_ACTIONS.indexOf(action) >= 0 && auth.staff.role !== 'admin') {
+        result = { success: false, error: msg('ADMIN_ONLY', lang) };
+        return jsonOut(result, e);
+      }
+      params._staff = auth.staff;
+    }
+
+    switch (action) {
+      /* ---------- เดิม ---------- */
+      case 'ping':            result = { success: true, time: nowStr(), version: '2.0.0' }; break;
+      case 'login':           result = login(params); break;
+      case 'staffLogin':      result = staffLogin(params); break;
+      case 'scan':            result = scanQR(params); break;
+      case 'getStudent':      result = getStudent(params); break;
+      case 'getHistory':      result = getScanHistory(params); break;
+      case 'addPortfolio':    result = addPortfolio(params); break;
+      case 'getPortfolio':    result = getPortfolio(params); break;
+      case 'delPortfolio':    result = deletePortfolio(params); break;
+      case 'changePass':      result = changePassword(params); break;
+      case 'getActivities':   result = getActivities(params); break;
+      case 'addActivity':     result = addActivity(params); break;
+      case 'delActivity':     result = deleteActivity(params); break;
+      case 'getScanReport':   result = getScanReport(params); break;
+      case 'initStudents':    result = initStudents(); break;
+
+      /* ---------- ใหม่ : เจ้าหน้าที่ ---------- */
+      case 'getDashboard':    result = getDashboard(params); break;
+      case 'getLeaderboard':  result = getLeaderboard(params); break;
+      case 'getStudents':     result = getStudents(params); break;
+      case 'saveStudent':     result = saveStudent(params); break;
+      case 'resetStudentPass':result = resetStudentPass(params); break;
+      case 'toggleStudent':   result = toggleStudent(params); break;
+      case 'updateActivity':  result = updateActivity(params); break;
+      case 'getActivityQR':   result = getActivityQR(params); break;
+      case 'getAllScans':     result = getAllScans(params); break;
+      case 'deleteScan':      result = deleteScan(params); break;
+      case 'exportCSV':       result = exportCSV(params); break;
+
+      /* ---------- ใหม่ : ประกาศ / ตั้งค่า / log ---------- */
+      case 'getAnnouncements':result = getAnnouncements(params); break;
+      case 'saveAnnouncement':result = saveAnnouncement(params); break;
+      case 'delAnnouncement': result = delAnnouncement(params); break;
+      case 'getSettings':     result = getSettings(params); break;
+      case 'saveSetting':     result = saveSetting(params); break;
+      case 'getLogs':         result = getLogs(params); break;
+
+      /* ---------- ใหม่ : แอดมินจัดการเจ้าหน้าที่ ---------- */
+      case 'getStaff':        result = getStaffList(params); break;
+      case 'saveStaff':       result = saveStaff(params); break;
+      case 'delStaff':        result = delStaff(params); break;
+      case 'staffChangePass': result = staffChangePass(params); break;
+      case 'setupSheets':     result = { success: true, message: setupSheets() }; break;
+
+      default:                result = { success: false, error: msg('UNKNOWN_ACTION', lang) };
+    }
+  } catch (err) {
+    result = { success: false, error: String(err && err.message || err) };
+    try { writeLog('', '', action, '', String(err), 'fail'); } catch (ignore) {}
+  }
+
+  return jsonOut(result, e);
+}
+
+function jsonOut(obj, e) {
+  const text = JSON.stringify(obj);
+  const cb = e && e.parameter && e.parameter.callback;
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + text + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(text)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ====================== ตรวจสิทธิ์เจ้าหน้าที่ ==================== */
+/* หน้าเว็บเก็บ staff_id + password ไว้หลัง staffLogin แล้วแนบมาทุกคำขอ */
+
+function authStaff(params) {
+  const id = String(params.staff_id || params.staffId || '');
+  const pw = String(params.staff_pass || params.staffPass || '');
+  if (!id || !pw) return { ok: false };
+
+  const data = sheetData('Staff');
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (String(r[0]) === id && String(r[3]) === pw) {
+      if (String(r[5]) === 'inactive') return { ok: false };
+      return { ok: true, staff: { id: r[0], name: r[1], email: r[2], role: r[4] || 'staff' } };
+    }
+  }
+  return { ok: false };
+}
+
+/* ========================= LOGIN (เดิม) ========================= */
+
+/* นิสิตล็อกอินด้วย "อีเมล" หรือ "รหัสนิสิต" ก็ได้
+   รหัสผ่านเริ่มต้น = รหัสนิสิต (ถ้าช่องรหัสผ่านในชีตว่าง ก็ยอมรับรหัสนิสิต) */
+function login(params) {
+  const id = params.id, password = params.password, lang = params.lang || 'th';
+  if (!id || !password) return { success: false, error: msg('MISSING', lang) };
+
+  const key = String(id).trim().toLowerCase();
+  const data = sheetData('Students');
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const sid   = String(row[0]).trim().toLowerCase();
+    const email = String(row[4]).trim().toLowerCase();
+    if (sid === key || (email && email === key)) {
+      const stored = String(row[6]).trim();
+      const ok = stored ? (stored === String(password))
+                        : (String(row[0]).trim() === String(password).trim());
+      if (!ok) {
+        writeLog(row[0], 'student', 'login', id, 'รหัสผ่านผิด', 'fail');
+        return { success: false, error: msg('WRONG_PASS', lang) };
+      }
+      if (row[7] === 'inactive') return { success: false, error: msg('DISABLED', lang) };
+      writeLog(row[0], 'student', 'login', id, '', 'success');
+      return {
+        success: true,
+        student: {
+          id: row[0], name: row[1], dept: row[2], year: row[3],
+          email: row[4], gpa: row[5], status: row[7], nationality: row[8]
+        },
+        mustChangePass: String(row[6]).trim() === String(row[0]).trim() || !String(row[6]).trim()
+      };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND_STUDENT', lang) };
+}
+
+function staffLogin(params) {
+  const email = params.email, password = params.password, lang = params.lang || 'th';
+  if (!email || !password) return { success: false, error: msg('MISSING', lang) };
+
+  const data = sheetData('Staff');
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (String(row[2]).toLowerCase() === String(email).toLowerCase()) {
+      if (String(row[3]) !== String(password)) {
+        writeLog(row[0], 'staff', 'staffLogin', email, 'รหัสผ่านผิด', 'fail');
+        return { success: false, error: msg('WRONG_PASS', lang) };
+      }
+      if (row[5] === 'inactive') return { success: false, error: msg('DISABLED', lang) };
+      writeLog(row[0], row[4] || 'staff', 'staffLogin', email, '', 'success');
+      return {
+        success: true,
+        staff: { id: row[0], name: row[1], email: row[2], role: row[4] || 'staff', status: row[5] },
+        // หน้าเว็บเก็บ 2 ค่านี้ไว้แนบกับคำขอฝั่งเจ้าหน้าที่
+        auth: { staff_id: row[0], staff_pass: row[3] }
+      };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND_STAFF', lang) };
+}
+
+/* ========================== สแกน QR ============================= */
+
+function scanQR(params) {
+  const studentId = params.studentId, activityId = params.activityId;
+  const scannedBy = params.scannedBy, lang = params.lang || 'th';
+  if (!studentId || !activityId) return { success: false, error: msg('MISSING', lang) };
+
+  const actData = sheetData('Activities');
+  let activity = null;
+  for (let i = 1; i < actData.length; i++) {
+    if (String(actData[i][0]) === String(activityId)) {
+      if (actData[i][6] === false || actData[i][6] === 'false') {
+        return { success: false, duplicate: false, error: msg('ACT_INACTIVE', lang) };
+      }
+      activity = { id: actData[i][0], name: actData[i][1], score: Number(actData[i][2]) || 0, description: actData[i][3] };
+      break;
+    }
+  }
+  if (!activity) return { success: false, duplicate: false, error: msg('ACT_NOT_FOUND', lang) };
+
+  // ตรวจว่านิสิตมีอยู่จริงและไม่ถูกระงับ
+  const stu = findStudent(studentId);
+  if (!stu) return { success: false, duplicate: false, error: msg('NOT_FOUND_STUDENT', lang) };
+  if (stu.row[7] === 'inactive') return { success: false, duplicate: false, error: msg('DISABLED', lang) };
+
+  const logSheet = SS.getSheetByName('Scan_Log');
+  const logData = logSheet.getDataRange().getValues();
+  for (let i = 1; i < logData.length; i++) {
+    if (String(logData[i][1]) === String(studentId) && String(logData[i][2]) === String(activityId)) {
+      return {
+        success: false, duplicate: true, error: msg('DUPLICATE', lang),
+        activity: activity, date: logData[i][4], time: logData[i][5]
+      };
+    }
+  }
+
+  const now = new Date();
+  const logId = 'LOG' + now.getTime();
+  const dateStr = Utilities.formatDate(now, TZ, 'dd/MM/yyyy');
+  const timeStr = Utilities.formatDate(now, TZ, 'HH:mm');
+
+  logSheet.appendRow([logId, studentId, activityId, activity.score, dateStr, timeStr, scannedBy || studentId]);
+  writeLog(studentId, 'student', 'scan', activityId, activity.name, 'success');
+
+  // คะแนนสะสมล่าสุด
+  let total = activity.score;
+  for (let i = 1; i < logData.length; i++) {
+    if (String(logData[i][1]) === String(studentId)) total += Number(logData[i][3]) || 0;
+  }
+
+  return {
+    success: true, duplicate: false, activity: activity,
+    score: activity.score, totalScore: total, date: dateStr, time: timeStr,
+    studentName: stu.row[1]
+  };
+}
+
+/* ======================= ข้อมูลนิสิต (เดิม) ===================== */
+
+function getStudent(params) {
+  const s = findStudent(params.id);
+  if (!s) return { success: false, error: msg('NOT_FOUND_STUDENT', params.lang || 'th') };
+  const r = s.row;
+  return {
+    success: true,
+    student: { id: r[0], name: r[1], dept: r[2], year: r[3], email: r[4], gpa: r[5], status: r[7], nationality: r[8] }
+  };
+}
+
+function getScanHistory(params) {
+  const studentId = params.studentId;
+  const logData = sheetData('Scan_Log');
+  const actData = sheetData('Activities');
+
+  const actMap = {};
+  for (let i = 1; i < actData.length; i++) actMap[String(actData[i][0])] = actData[i][1];
+
+  const history = [];
+  let totalScore = 0;
+  for (let i = 1; i < logData.length; i++) {
+    if (String(logData[i][1]) === String(studentId)) {
+      const score = Number(logData[i][3]) || 0;
+      totalScore += score;
+      history.push({
+        logId: logData[i][0], activityId: logData[i][2],
+        activityName: actMap[String(logData[i][2])] || logData[i][2],
+        score: score, date: logData[i][4], time: logData[i][5]
+      });
+    }
+  }
+  history.reverse();
+  return { success: true, history: history, totalScore: totalScore, count: history.length };
+}
+
+/* ========================= Portfolio (เดิม) ===================== */
+
+function addPortfolio(params) {
+  const studentId = params.studentId, name = params.name;
+  if (!studentId || !name) return { success: false, error: msg('MISSING', params.lang || 'th') };
+  const sheet = SS.getSheetByName('Portfolio');
+  const portId = 'PORT' + new Date().getTime();
+  const dateStr = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
+  sheet.appendRow([portId, studentId, name, params.type || 'other', params.description || '', dateStr]);
+  return { success: true, portId: portId };
+}
+
+function getPortfolio(params) {
+  const data = sheetData('Portfolio');
+  const portfolio = [];
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][1]) === String(params.studentId)) {
+      portfolio.push({
+        portId: data[i][0], name: data[i][2], type: data[i][3],
+        description: data[i][4], date: data[i][5]
+      });
+    }
+  }
+  portfolio.reverse();
+  return { success: true, portfolio: portfolio };
+}
+
+function deletePortfolio(params) {
+  const sheet = SS.getSheetByName('Portfolio');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.portId) && String(data[i][1]) === String(params.studentId)) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND', params.lang || 'th') };
+}
+
+/* ===================== เปลี่ยนรหัสผ่าน (เดิม+) ================== */
+
+function changePassword(params) {
+  const studentId = params.studentId, newPassword = params.newPassword;
+  const lang = params.lang || 'th';
+  if (!studentId || !newPassword) return { success: false, error: msg('MISSING', lang) };
+  if (String(newPassword).length < 6) return { success: false, error: msg('WEAK_PASS', lang) };
+
+  const s = findStudent(studentId);
+  if (!s) return { success: false, error: msg('NOT_FOUND_STUDENT', lang) };
+
+  // ถ้าส่ง oldPassword มาด้วย ให้ตรวจก่อน (หน้าเว็บใหม่ควรส่ง)
+  if (params.oldPassword !== undefined && String(params.oldPassword) !== String(s.row[6])) {
+    return { success: false, error: msg('WRONG_OLD_PASS', lang) };
+  }
+
+  SS.getSheetByName('Students').getRange(s.index, 7).setValue(newPassword);
+  writeLog(studentId, 'student', 'changePass', studentId, '', 'success');
+  return { success: true };
+}
+
+function staffChangePass(params) {
+  const auth = authStaff(params);
+  if (!auth.ok) return { success: false, error: msg('FORBIDDEN', params.lang || 'th') };
+  const newPw = String(params.newPassword || '');
+  if (newPw.length < 6) return { success: false, error: msg('WEAK_PASS', params.lang || 'th') };
+
+  const sheet = SS.getSheetByName('Staff');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(auth.staff.id)) {
+      sheet.getRange(i + 1, 4).setValue(newPw);
+      writeLog(auth.staff.id, auth.staff.role, 'staffChangePass', auth.staff.id, '', 'success');
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND', params.lang || 'th') };
+}
+
+/* ========================== กิจกรรม ============================= */
+
+function getActivities(params) {
+  const data = sheetData('Activities');
+  const onlyActive = String(params.activeOnly || '') === 'true';
+  const activities = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const active = !(data[i][6] === false || data[i][6] === 'false');
+    if (onlyActive && !active) continue;
+    activities.push({
+      id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
+      description: data[i][3], createdBy: data[i][4],
+      createdDate: data[i][5], active: active
+    });
+  }
+  activities.reverse();
+  return { success: true, activities: activities, total: activities.length };
+}
+
+function addActivity(params) {
+  const name = params.name, score = params.score;
+  const lang = params.lang || 'th';
+  if (!name || score === undefined || score === '') return { success: false, error: msg('MISSING', lang) };
+
+  const sheet = SS.getSheetByName('Activities');
+  const actId = 'ACT' + new Date().getTime();
+  const dateStr = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
+  sheet.appendRow([actId, name, Number(score), params.description || '', params.createdBy || '', dateStr, true]);
+  writeLog(params.createdBy || '', 'staff', 'addActivity', actId, name, 'success');
+
+  const qrData = JSON.stringify({ id: actId, name: name, score: Number(score) });
+  return {
+    success: true, activityId: actId, qrData: qrData,
+    qrUrl: qrImageUrl(qrData)
+  };
+}
+
+function updateActivity(params) {
+  const sheet = SS.getSheetByName('Activities');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.activityId)) {
+      if (params.name !== undefined)        sheet.getRange(i + 1, 2).setValue(params.name);
+      if (params.score !== undefined)       sheet.getRange(i + 1, 3).setValue(Number(params.score));
+      if (params.description !== undefined) sheet.getRange(i + 1, 4).setValue(params.description);
+      if (params.active !== undefined)      sheet.getRange(i + 1, 7).setValue(params.active === true || params.active === 'true');
+      writeLog(params.staff_id || '', 'staff', 'updateActivity', params.activityId, '', 'success');
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
+}
+
+function deleteActivity(params) {
+  const sheet = SS.getSheetByName('Activities');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.activityId)) {
+      sheet.getRange(i + 1, 7).setValue(false);   // ปิดใช้งาน ไม่ลบจริง (คงประวัติสแกน)
+      writeLog(params.staff_id || '', 'staff', 'delActivity', params.activityId, '', 'success');
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
+}
+
+function getActivityQR(params) {
+  const data = sheetData('Activities');
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.activityId)) {
+      const payload = JSON.stringify({ id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0 });
+      return { success: true, qrData: payload, qrUrl: qrImageUrl(payload), activity: { id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0 } };
+    }
+  }
+  return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
+}
+
+function qrImageUrl(payload) {
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(payload);
+}
+
+/* ===================== รายงาน / แดชบอร์ด ======================== */
+
+function getScanReport(params) {
+  const logData = sheetData('Scan_Log');
+  const stuData = sheetData('Students');
+  const actData = sheetData('Activities');
+
+  const stuMap = {}, actMap = {};
+  for (let i = 1; i < stuData.length; i++) stuMap[String(stuData[i][0])] = { name: stuData[i][1], dept: stuData[i][2], year: stuData[i][3] };
+  for (let i = 1; i < actData.length; i++) actMap[String(actData[i][0])] = actData[i][1];
+
+  const report = [];
+  for (let i = 1; i < logData.length; i++) {
+    if (params.activityId && String(logData[i][2]) !== String(params.activityId)) continue;
+    if (params.dept) {
+      const s = stuMap[String(logData[i][1])] || {};
+      if (String(s.dept) !== String(params.dept)) continue;
+    }
+    const stu = stuMap[String(logData[i][1])] || {};
+    report.push({
+      logId: logData[i][0],
+      studentId: logData[i][1],
+      studentName: stu.name || logData[i][1],
+      dept: stu.dept || '', year: stu.year || '',
+      activityId: logData[i][2],
+      activityName: actMap[String(logData[i][2])] || logData[i][2],
+      score: Number(logData[i][3]) || 0,
+      date: logData[i][4], time: logData[i][5],
+      scannedBy: logData[i][6]
+    });
+  }
+  report.reverse();
+  return { success: true, report: report, total: report.length };
+}
+
+function getAllScans(params) {
+  const r = getScanReport(params);
+  if (!r.success) return r;
+  const page = Number(params.page || 1);
+  const per = Number(params.per_page || 100);
+  const start = (page - 1) * per;
+  return {
+    success: true,
+    scans: r.report.slice(start, start + per),
+    total: r.total, page: page, per_page: per,
+    pages: Math.ceil(r.total / per)
+  };
+}
+
+function deleteScan(params) {
+  const sheet = SS.getSheetByName('Scan_Log');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.logId)) {
+      sheet.deleteRow(i + 1);
+      writeLog(params.staff_id || '', 'staff', 'deleteScan', params.logId, '', 'success');
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND', params.lang || 'th') };
+}
+
+function getDashboard(params) {
+  const stuData = sheetData('Students');
+  const actData = sheetData('Activities');
+  const logData = sheetData('Scan_Log');
+
+  const today = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
+  let activeStudents = 0, activeActivities = 0, todayScans = 0, totalScore = 0;
+  const byDept = {}, byActivity = {}, byDate = {};
+
+  for (let i = 1; i < stuData.length; i++) {
+    if (!stuData[i][0]) continue;
+    if (stuData[i][7] !== 'inactive') activeStudents++;
+    const d = stuData[i][2] || '-';
+    byDept[d] = (byDept[d] || 0) + 1;
+  }
+  const actName = {};
+  for (let i = 1; i < actData.length; i++) {
+    if (!actData[i][0]) continue;
+    actName[String(actData[i][0])] = actData[i][1];
+    if (!(actData[i][6] === false || actData[i][6] === 'false')) activeActivities++;
+  }
+  for (let i = 1; i < logData.length; i++) {
+    if (!logData[i][0]) continue;
+    totalScore += Number(logData[i][3]) || 0;
+    if (String(logData[i][4]) === today) todayScans++;
+    const an = actName[String(logData[i][2])] || logData[i][2];
+    byActivity[an] = (byActivity[an] || 0) + 1;
+    const dt = String(logData[i][4]);
+    byDate[dt] = (byDate[dt] || 0) + 1;
+  }
+
+  return {
+    success: true,
+    summary: {
+      students: stuData.length - 1,
+      activeStudents: activeStudents,
+      activities: actData.length - 1,
+      activeActivities: activeActivities,
+      scans: logData.length - 1,
+      todayScans: todayScans,
+      totalScore: totalScore,
+      portfolios: Math.max(0, sheetData('Portfolio').length - 1)
+    },
+    byDept: byDept,
+    byActivity: byActivity,
+    byDate: byDate,
+    announcements: activeAnnouncements('staff')
+  };
+}
+
+function getLeaderboard(params) {
+  const logData = sheetData('Scan_Log');
+  const stuData = sheetData('Students');
+  const stuMap = {};
+  for (let i = 1; i < stuData.length; i++) stuMap[String(stuData[i][0])] = { name: stuData[i][1], dept: stuData[i][2], year: stuData[i][3] };
+
+  const tally = {};
+  for (let i = 1; i < logData.length; i++) {
+    const sid = String(logData[i][1]);
+    if (!sid) continue;
+    if (!tally[sid]) tally[sid] = { studentId: sid, score: 0, count: 0 };
+    tally[sid].score += Number(logData[i][3]) || 0;
+    tally[sid].count++;
+  }
+
+  let rows = Object.keys(tally).map(function (sid) {
+    const s = stuMap[sid] || {};
+    return {
+      studentId: sid, name: s.name || sid, dept: s.dept || '', year: s.year || '',
+      score: tally[sid].score, count: tally[sid].count
+    };
+  });
+  if (params.dept) rows = rows.filter(function (r) { return String(r.dept) === String(params.dept); });
+  rows.sort(function (a, b) { return b.score - a.score; });
+  rows = rows.slice(0, Number(params.limit || 50));
+  rows.forEach(function (r, i) { r.rank = i + 1; });
+  return { success: true, leaderboard: rows, total: rows.length };
+}
+
+function exportCSV(params) {
+  const type = params.type || 'scans';
+  let head = [], rows = [];
+
+  if (type === 'students') {
+    head = ['รหัสนิสิต','ชื่อ-สกุล','สาขา','ชั้นปี','อีเมล','เกรด','สถานะ','คะแนนสะสม'];
+    const scores = {};
+    const logData = sheetData('Scan_Log');
+    for (let i = 1; i < logData.length; i++) {
+      const sid = String(logData[i][1]);
+      scores[sid] = (scores[sid] || 0) + (Number(logData[i][3]) || 0);
+    }
+    const d = sheetData('Students');
+    for (let i = 1; i < d.length; i++) {
+      if (!d[i][0]) continue;
+      rows.push([d[i][0], d[i][1], d[i][2], d[i][3], d[i][4], d[i][5], d[i][7], scores[String(d[i][0])] || 0]);
+    }
+  } else if (type === 'activities') {
+    head = ['รหัสกิจกรรม','ชื่อกิจกรรม','คะแนน','รายละเอียด','ผู้สร้าง','วันที่สร้าง','เปิดใช้งาน','จำนวนผู้เข้าร่วม'];
+    const counts = {};
+    const logData = sheetData('Scan_Log');
+    for (let i = 1; i < logData.length; i++) {
+      const aid = String(logData[i][2]);
+      counts[aid] = (counts[aid] || 0) + 1;
+    }
+    const d = sheetData('Activities');
+    for (let i = 1; i < d.length; i++) {
+      if (!d[i][0]) continue;
+      rows.push([d[i][0], d[i][1], d[i][2], d[i][3], d[i][4], d[i][5], d[i][6], counts[String(d[i][0])] || 0]);
+    }
+  } else {
+    head = ['รหัสนิสิต','ชื่อ-สกุล','สาขา','กิจกรรม','คะแนน','วันที่','เวลา','ผู้สแกน'];
+    const r = getScanReport(params);
+    r.report.forEach(function (x) {
+      rows.push([x.studentId, x.studentName, x.dept, x.activityName, x.score, x.date, x.time, x.scannedBy]);
+    });
+  }
+
+  const csv = [head].concat(rows).map(function (r) {
+    return r.map(function (c) {
+      const s = String(c === null || c === undefined ? '' : c);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',');
+  }).join('\r\n');
+
+  // ﻿ = BOM ให้ Excel อ่านภาษาไทยถูก
+  return {
+    success: true,
+    filename: type + '_' + Utilities.formatDate(new Date(), TZ, 'yyyyMMdd_HHmm') + '.csv',
+    csv: '﻿' + csv,
+    total: rows.length
+  };
+}
+
+/* =================== จัดการนิสิต (เจ้าหน้าที่) ================== */
+
+function getStudents(params) {
+  const data = sheetData('Students');
+  const logData = sheetData('Scan_Log');
+  const scores = {}, counts = {};
+  for (let i = 1; i < logData.length; i++) {
+    const sid = String(logData[i][1]);
+    scores[sid] = (scores[sid] || 0) + (Number(logData[i][3]) || 0);
+    counts[sid] = (counts[sid] || 0) + 1;
+  }
+
+  let rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const sid = String(data[i][0]);
+    rows.push({
+      id: data[i][0], name: data[i][1], dept: data[i][2], year: data[i][3],
+      email: data[i][4], gpa: data[i][5], status: data[i][7] || 'active',
+      nationality: data[i][8], totalScore: scores[sid] || 0, scanCount: counts[sid] || 0
+    });
+  }
+
+  if (params.dept)   rows = rows.filter(function (r) { return String(r.dept) === String(params.dept); });
+  if (params.year)   rows = rows.filter(function (r) { return String(r.year) === String(params.year); });
+  if (params.status) rows = rows.filter(function (r) { return String(r.status) === String(params.status); });
+  if (params.q) {
+    const q = String(params.q).toLowerCase();
+    rows = rows.filter(function (r) {
+      return [r.id, r.name, r.dept, r.email].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+  }
+
+  const page = Number(params.page || 1), per = Number(params.per_page || 50);
+  const total = rows.length;
+  const start = (page - 1) * per;
+
+  return {
+    success: true,
+    students: rows.slice(start, start + per),
+    total: total, page: page, per_page: per, pages: Math.ceil(total / per),
+    depts: uniq(rows.map(function (r) { return r.dept; }))
+  };
+}
+
+function saveStudent(params) {
+  const sheet = SS.getSheetByName('Students');
+  const s = findStudent(params.id);
+  const lang = params.lang || 'th';
+
+  if (s) {   // แก้ไข
+    const map = { name: 2, dept: 3, year: 4, email: 5, gpa: 6, status: 8, nationality: 9 };
+    for (const k in map) if (params[k] !== undefined) sheet.getRange(s.index, map[k]).setValue(params[k]);
+    writeLog(params.staff_id || '', 'staff', 'updateStudent', params.id, '', 'success');
+    return { success: true, id: params.id };
+  }
+
+  if (!params.id || !params.name) return { success: false, error: msg('MISSING', lang) };
+  const pass = params.password || String(params.id);
+  sheet.appendRow([
+    params.id, params.name, params.dept || '', params.year || '',
+    params.email || '', params.gpa || '', pass, 'active', params.nationality || ''
+  ]);
+  writeLog(params.staff_id || '', 'staff', 'addStudent', params.id, params.name, 'success');
+  return { success: true, id: params.id, password: pass };
+}
+
+function resetStudentPass(params) {
+  const s = findStudent(params.id);
+  if (!s) return { success: false, error: msg('NOT_FOUND_STUDENT', params.lang || 'th') };
+  const pass = params.newPassword || String(params.id);   // ค่าเริ่มต้น = รหัสนิสิต
+  SS.getSheetByName('Students').getRange(s.index, 7).setValue(pass);
+  writeLog(params.staff_id || '', 'staff', 'resetStudentPass', params.id, '', 'success');
+  return { success: true, password: pass };
+}
+
+function toggleStudent(params) {
+  const s = findStudent(params.id);
+  if (!s) return { success: false, error: msg('NOT_FOUND_STUDENT', params.lang || 'th') };
+  const next = (s.row[7] === 'inactive') ? 'active' : 'inactive';
+  SS.getSheetByName('Students').getRange(s.index, 8).setValue(next);
+  writeLog(params.staff_id || '', 'staff', 'toggleStudent', params.id, next, 'success');
+  return { success: true, status: next };
+}
+
+/* ==================== จัดการเจ้าหน้าที่ (แอดมิน) ================ */
+
+function getStaffList(params) {
+  const data = sheetData('Staff');
+  const staff = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    staff.push({ id: data[i][0], name: data[i][1], email: data[i][2], role: data[i][4] || 'staff', status: data[i][5] || 'active' });
+  }
+  return { success: true, staff: staff, total: staff.length };
+}
+
+function saveStaff(params) {
+  const sheet = SS.getSheetByName('Staff');
+  const data = sheet.getDataRange().getValues();
+  const lang = params.lang || 'th';
+
+  if (params.staffIdEdit) {   // แก้ไข
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(params.staffIdEdit)) {
+        if (params.name !== undefined)  sheet.getRange(i + 1, 2).setValue(params.name);
+        if (params.email !== undefined) sheet.getRange(i + 1, 3).setValue(params.email);
+        if (params.password)            sheet.getRange(i + 1, 4).setValue(params.password);
+        if (params.role !== undefined)  sheet.getRange(i + 1, 5).setValue(params.role);
+        if (params.status !== undefined)sheet.getRange(i + 1, 6).setValue(params.status);
+        writeLog(params.staff_id || '', 'admin', 'updateStaff', params.staffIdEdit, '', 'success');
+        return { success: true, id: params.staffIdEdit };
+      }
+    }
+    return { success: false, error: msg('NOT_FOUND_STAFF', lang) };
+  }
+
+  if (!params.email || !params.name) return { success: false, error: msg('MISSING', lang) };
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][2]).toLowerCase() === String(params.email).toLowerCase()) {
+      return { success: false, error: msg('DUP_EMAIL', lang) };
+    }
+  }
+  const id = 'STF' + new Date().getTime();
+  const pw = params.password || ('msu' + Math.floor(1000 + Math.random() * 9000));
+  sheet.appendRow([id, params.name, params.email, pw, params.role || 'staff', 'active']);
+  writeLog(params.staff_id || '', 'admin', 'addStaff', id, params.email, 'success');
+  return { success: true, id: id, password: pw };
+}
+
+function delStaff(params) {
+  const sheet = SS.getSheetByName('Staff');
+  const data = sheet.getDataRange().getValues();
+  if (String(params.staffIdEdit) === String(params.staff_id)) {
+    return { success: false, error: msg('SELF_DELETE', params.lang || 'th') };
+  }
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.staffIdEdit)) {
+      sheet.getRange(i + 1, 6).setValue('inactive');   // ระงับ ไม่ลบจริง
+      writeLog(params.staff_id || '', 'admin', 'delStaff', params.staffIdEdit, '', 'success');
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND_STAFF', params.lang || 'th') };
+}
+
+/* ========================= ประกาศข่าวสาร ======================== */
+
+function getAnnouncements(params) {
+  return { success: true, announcements: activeAnnouncements(params.audience || 'all') };
+}
+
+function activeAnnouncements(audience) {
+  const data = sheetData('Announcements');
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const active = !(data[i][9] === false || data[i][9] === 'false');
+    if (!active) continue;
+    const aud = data[i][7] || 'all';
+    if (aud !== 'all' && audience !== 'all' && String(aud) !== String(audience)) continue;
+    rows.push({
+      id: data[i][0],
+      title: { th: data[i][1], en: data[i][2], zh: data[i][3] },
+      body:  { th: data[i][4], en: data[i][5], zh: data[i][6] },
+      audience: aud,
+      pin: data[i][8] === true || data[i][8] === 'true',
+      createdBy: data[i][10], createdDate: data[i][11]
+    });
+  }
+  rows.sort(function (a, b) { return (b.pin ? 1 : 0) - (a.pin ? 1 : 0); });
+  return rows;
+}
+
+function saveAnnouncement(params) {
+  const sheet = SS.getSheetByName('Announcements');
+  const data = sheet.getDataRange().getValues();
+
+  if (params.annId) {
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(params.annId)) {
+        const map = { title_th:2, title_en:3, title_zh:4, body_th:5, body_en:6, body_zh:7, audience:8, pin:9, active:10 };
+        for (const k in map) if (params[k] !== undefined) sheet.getRange(i + 1, map[k]).setValue(params[k]);
+        return { success: true, annId: params.annId };
+      }
+    }
+    return { success: false, error: msg('NOT_FOUND', params.lang || 'th') };
+  }
+
+  const id = 'ANN' + new Date().getTime();
+  sheet.appendRow([
+    id, params.title_th || '', params.title_en || '', params.title_zh || '',
+    params.body_th || '', params.body_en || '', params.body_zh || '',
+    params.audience || 'all',
+    params.pin === true || params.pin === 'true',
+    true,
+    params.staff_id || '',
+    Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy')
+  ]);
+  writeLog(params.staff_id || '', 'staff', 'saveAnnouncement', id, params.title_th || '', 'success');
+  return { success: true, annId: id };
+}
+
+function delAnnouncement(params) {
+  const sheet = SS.getSheetByName('Announcements');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.annId)) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false, error: msg('NOT_FOUND', params.lang || 'th') };
+}
+
+/* ========================== ตั้งค่าระบบ ========================= */
+
+function getSettings(params) {
+  const data = sheetData('Settings');
+  const map = {}, rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    map[data[i][0]] = data[i][1];
+    rows.push({ key: data[i][0], value: data[i][1], label: { th: data[i][2], en: data[i][3], zh: data[i][4] } });
+  }
+  return { success: true, settings: map, rows: rows };
+}
+
+function saveSetting(params) {
+  if (!params.key) return { success: false, error: msg('MISSING', params.lang || 'th') };
+  const sheet = SS.getSheetByName('Settings');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.key)) {
+      sheet.getRange(i + 1, 2).setValue(params.value);
+      return { success: true };
+    }
+  }
+  sheet.appendRow([params.key, params.value, params.label_th || params.key, '', '']);
+  return { success: true };
+}
+
+/* ============================ Logs ============================== */
+
+function writeLog(actor, role, action, target, detail, result) {
+  try {
+    const sheet = SS.getSheetByName('Logs');
+    if (!sheet) return;
+    sheet.appendRow([
+      'L' + new Date().getTime() + Math.floor(Math.random() * 100),
+      nowStr(), actor || '', role || '', action || '', target || '',
+      String(detail || '').substring(0, 300), result || ''
+    ]);
+  } catch (e) { /* ไม่ให้ log ทำให้คำขอล้ม */ }
+}
+
+function getLogs(params) {
+  const data = sheetData('Logs');
+  let rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    rows.push({
+      id: data[i][0], timestamp: data[i][1], actor: data[i][2], role: data[i][3],
+      action: data[i][4], target: data[i][5], detail: data[i][6], result: data[i][7]
+    });
+  }
+  if (params.action) rows = rows.filter(function (r) { return r.action === params.action; });
+  if (params.actor)  rows = rows.filter(function (r) { return String(r.actor) === String(params.actor); });
+  rows.reverse();
+  const per = Number(params.per_page || 100);
+  return { success: true, logs: rows.slice(0, per), total: rows.length };
+}
+
+/* ====================== นำเข้าข้อมูลนิสิต ======================= */
+
+function initStudents() {
+  const sourceSheet = SS.getSheetByName('ชีต1') || SS.getSheetByName('Sheet1');
+  const targetSheet = SS.getSheetByName('Students');
+  if (!sourceSheet) return { success: false, error: 'ไม่พบแท็บ "ชีต1"' };
+
+  const data = sourceSheet.getDataRange().getValues();
+  const existing = targetSheet.getDataRange().getValues();
+
+  const existingIds = {};
+  for (let i = 1; i < existing.length; i++) existingIds[String(existing[i][0])] = true;
+
+  // ชีต1: A=Timestamp, B=Email, C=ชื่อ-สกุล, D=รหัสนิสิต, E=สาขา, F=ชั้นปี, G=เกรด
+  const toAppend = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const studentId = String(row[3] || '').trim();
+    if (!studentId || studentId === 'undefined' || existingIds[studentId]) continue;
+    toAppend.push([
+      studentId,      // A: รหัสนิสิต
+      row[2],         // B: ชื่อ-สกุล
+      row[4],         // C: สาขา
+      row[5],         // D: ชั้นปี
+      row[1],         // E: อีเมล  <-- ใช้เป็นชื่อผู้ใช้
+      row[6],         // F: เกรด
+      studentId,      // G: รหัสผ่านเริ่มต้น = รหัสนิสิต
+      'active', ''
+    ]);
+    existingIds[studentId] = true;
+  }
+
+  if (toAppend.length) {
+    targetSheet.getRange(targetSheet.getLastRow() + 1, 1, toAppend.length, 9).setValues(toAppend);
+  }
+  writeLog('', 'admin', 'initStudents', '', toAppend.length + ' คน', 'success');
+  return { success: true, added: toAppend.length, message: 'นำเข้าข้อมูลแล้ว ' + toAppend.length + ' คน' };
+}
+
+/* =========================== HELPERS ============================ */
+
+function sheetData(name) {
+  const sh = SS.getSheetByName(name);
+  if (!sh) throw new Error('ไม่พบแท็บ "' + name + '" — กรุณารัน setupSheets() ก่อน');
+  return sh.getDataRange().getValues();
+}
+
+function findStudent(id) {
+  const data = sheetData('Students');
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(id)) return { row: data[i], index: i + 1 };
+  }
+  return null;
+}
+
+function uniq(arr) {
+  const seen = {}, out = [];
+  arr.forEach(function (x) {
+    const k = String(x || '');
+    if (!k || seen[k]) return;
+    seen[k] = true;
+    out.push(x);
+  });
+  return out.sort();
+}
+
+function nowStr() {
+  return Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm:ss');
+}
+
+/* ====================== ข้อความ 3 ภาษา ========================== */
+
+const MESSAGES = {
+  MISSING:            { th:'กรอกข้อมูลไม่ครบ',               en:'Missing required fields',   zh:'必填项未填写' },
+  WRONG_PASS:         { th:'รหัสผ่านไม่ถูกต้อง',              en:'Wrong password',            zh:'密码错误' },
+  WRONG_OLD_PASS:     { th:'รหัสผ่านเดิมไม่ถูกต้อง',          en:'Current password incorrect',zh:'原密码不正确' },
+  WEAK_PASS:          { th:'รหัสผ่านต้องยาวอย่างน้อย 6 ตัว',  en:'Password must be 6+ chars', zh:'密码至少6位' },
+  DISABLED:           { th:'บัญชีนี้ถูกระงับการใช้งาน',        en:'Account disabled',          zh:'账号已停用' },
+  NOT_FOUND:          { th:'ไม่พบข้อมูล',                    en:'Not found',                 zh:'未找到数据' },
+  NOT_FOUND_STUDENT:  { th:'ไม่พบข้อมูลนิสิต',                en:'Student not found',         zh:'未找到学生' },
+  NOT_FOUND_STAFF:    { th:'ไม่พบข้อมูลเจ้าหน้าที่',           en:'Staff not found',           zh:'未找到工作人员' },
+  ACT_NOT_FOUND:      { th:'ไม่พบกิจกรรมนี้',                 en:'Activity not found',        zh:'未找到活动' },
+  ACT_INACTIVE:       { th:'กิจกรรมนี้ปิดรับการสแกนแล้ว',      en:'Activity is inactive',      zh:'活动已关闭' },
+  DUPLICATE:          { th:'คุณสแกนกิจกรรมนี้ไปแล้ว',          en:'Already scanned',           zh:'您已扫描过此活动' },
+  FORBIDDEN:          { th:'ไม่มีสิทธิ์ใช้งานส่วนนี้',          en:'Permission denied',         zh:'没有权限' },
+  ADMIN_ONLY:         { th:'เฉพาะผู้ดูแลระบบเท่านั้น',         en:'Admin only',                zh:'仅限管理员' },
+  DUP_EMAIL:          { th:'อีเมลนี้ถูกใช้แล้ว',               en:'Email already exists',      zh:'邮箱已存在' },
+  SELF_DELETE:        { th:'ไม่สามารถลบบัญชีตนเองได้',        en:'Cannot delete yourself',    zh:'不能删除自己' },
+  UNKNOWN_ACTION:     { th:'ไม่รู้จักคำสั่งนี้',               en:'Unknown action',            zh:'未知操作' }
+};
+
+function msg(code, lang) {
+  const m = MESSAGES[code];
+  if (!m) return code;
+  return m[lang] || m.th;
+}
+
+/* ==================== ติดตั้ง / ตรวจสอบระบบ ==================== */
+/* รัน setupSheets() 1 ครั้งหลังวางโค้ด */
+
+function setupSheets() {
+  const created = [];
+  for (const name in SCHEMA) {
+    let sh = SS.getSheetByName(name);
+    if (!sh) { sh = SS.insertSheet(name); created.push(name); }
+    const head = SCHEMA[name];
+    // เขียนหัวคอลัมน์เฉพาะเมื่อยังว่าง (ไม่ทับข้อมูลเดิม)
+    const first = sh.getRange(1, 1).getValue();
+    if (!first) {
+      sh.getRange(1, 1, 1, head.length).setValues([head]);
+    }
+    sh.getRange(1, 1, 1, head.length)
+      .setFontWeight('bold').setBackground('#4b2e83').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+
+  // บัญชีแอดมินตั้งต้น
+  const staff = SS.getSheetByName('Staff');
+  if (staff.getLastRow() < 2) {
+    staff.appendRow(['STF001', 'ผู้ดูแลระบบ', 'admin@msu.ac.th', 'admin123', 'admin', 'active']);
+    staff.appendRow(['STF002', 'เจ้าหน้าที่กิจการนิสิต', 'staff@msu.ac.th', 'staff123', 'staff', 'active']);
+    created.push('บัญชีตั้งต้น admin@msu.ac.th / admin123');
+  }
+
+  // ค่าตั้งต้นของระบบ
+  const setting = SS.getSheetByName('Settings');
+  if (setting.getLastRow() < 2) {
+    [
+      ['site_name', 'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม', 'ชื่อระบบ', 'Site name', '系统名称'],
+      ['academic_year', '2569', 'ปีการศึกษา', 'Academic year', '学年'],
+      ['min_score', '30', 'คะแนนกิจกรรมขั้นต่ำ', 'Minimum score', '最低活动分'],
+      ['allow_self_scan', 'true', 'ให้นิสิตสแกนเองได้', 'Allow self scan', '允许自助扫码'],
+      ['contact_email', 'student.affairs@msu.ac.th', 'อีเมลติดต่อ', 'Contact email', '联系邮箱']
+    ].forEach(function (r) { setting.appendRow(r); });
+  }
+
+  SpreadsheetApp.flush();
+  const out = 'ติดตั้งเรียบร้อย' + (created.length ? ' — สร้างใหม่: ' + created.join(', ') : ' — ครบอยู่แล้ว');
+  Logger.log(out);
+  return out;
+}
+
+/** รันเพื่อตรวจว่าหลังบ้านทำงานได้ ก่อน Deploy */
+function testBackend() {
+  Logger.log('ping     : ' + JSON.stringify(handleRequestTest({ action: 'ping' })));
+  Logger.log('staffLogin: ' + JSON.stringify(handleRequestTest({ action: 'staffLogin', email: 'admin@msu.ac.th', password: 'admin123' })));
+  const auth = handleRequestTest({ action: 'staffLogin', email: 'admin@msu.ac.th', password: 'admin123' });
+  if (auth.success) {
+    const a = auth.auth;
+    Logger.log('dashboard : ' + JSON.stringify(handleRequestTest({ action: 'getDashboard', staff_id: a.staff_id, staff_pass: a.staff_pass })));
+    Logger.log('students  : ' + JSON.stringify(handleRequestTest({ action: 'getStudents', staff_id: a.staff_id, staff_pass: a.staff_pass, per_page: 3 })));
+    Logger.log('activities: ' + JSON.stringify(handleRequestTest({ action: 'getActivities' })));
+  }
+}
+
+function handleRequestTest(params) {
+  const res = handleRequest({ parameter: params });
+  return JSON.parse(res.getContent());
+}

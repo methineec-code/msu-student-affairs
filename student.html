@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="manifest.json">
+<title>หน้านิสิต — กิจการนิสิต มมส</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
+  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
+  --blue:#0ea5e9; --blue-soft:#e8f6fe; --sky:#38bdf8;
+  --good:#15785c; --good-bg:#e1f3ed;
+  --warn:#8f5f12; --warn-bg:#fbf0db;
+  --bad:#a32a3c;  --bad-bg:#fae7ea;
+  --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
+  --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
+  --r:24px; --r-s:14px; --r-p:999px; color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+h1,h2,h3,.dsp{font-family:var(--display);margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.wrap{max-width:560px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px))}
+.crest{width:46px;height:46px;border-radius:var(--r-p);background:var(--blue);color:#fff;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:16px;flex:none}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700;margin-bottom:5px}
+.field{margin-bottom:13px}
+input,select,textarea{width:100%;padding:11px 15px;border:1px solid var(--line);
+  border-radius:var(--r-s);background:var(--paper)}
+textarea{min-height:70px;resize:vertical;font-family:inherit}
+.btn{border:1px solid transparent;border-radius:var(--r-p);padding:10px 18px;font-weight:600;
+  cursor:pointer;background:var(--blue);color:#fff}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--blue-soft);filter:none}
+.btn.sm{padding:6px 14px;font-size:13px}
+.btn.wide{width:100%;padding:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(11,15,20,.04)}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:var(--r-s);
+  padding:10px 14px;font-size:13px;margin-bottom:12px}
+.muted{color:var(--ink-3);font-size:13px}
+
+/* ---- เข้าสู่ระบบ ---- */
+#gate{min-height:100%;display:grid;place-items:center}
+.gate-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
+  border-radius:28px;padding:32px;box-shadow:0 10px 40px -28px rgba(11,15,20,.4)}
+.gate-card h1{font-size:21px;margin-top:16px;letter-spacing:-.2px}
+.gate-card p.sub{color:var(--ink-2);font-size:13.5px;margin:5px 0 22px}
+
+/* ---- หัวหน้าจอ ---- */
+.top{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+.top h1{font-size:17px}
+.top .meta{font-size:12.5px;color:var(--ink-3)}
+.top .right{margin-left:auto;display:flex;gap:7px;align-items:center}
+.top select{width:auto;padding:6px 10px;font-size:13px;border-radius:var(--r-p)}
+
+/* ---- การ์ดคะแนน ---- */
+.score{background:var(--blue);color:#fff;border-color:var(--blue);text-align:center;padding:26px 20px}
+.score .lab{font-size:13px;opacity:.9;font-weight:600}
+.score .n{font-family:var(--display);font-size:52px;font-weight:700;line-height:1.05;
+  margin:4px 0;font-variant-numeric:tabular-nums}
+.score .sub{font-size:13px;opacity:.9}
+.bar{height:9px;background:rgba(255,255,255,.3);border-radius:var(--r-p);overflow:hidden;margin-top:14px}
+.bar span{display:block;height:100%;background:#fff;border-radius:var(--r-p)}
+
+.tabs{display:flex;gap:6px;background:var(--blue-soft);padding:4px;border-radius:var(--r-p);margin-bottom:14px}
+.tabs button{flex:1;border:none;background:none;padding:9px 6px;border-radius:var(--r-p);
+  cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink-2);white-space:nowrap}
+.tabs button[aria-pressed="true"]{background:var(--card);color:var(--blue);
+  box-shadow:0 1px 4px rgba(11,15,20,.1)}
+
+.it{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+  padding:13px 0;border-bottom:1px solid var(--line)}
+.it:last-child{border-bottom:none}
+.it .nm{min-width:0}
+.it .nm b{font-weight:600;display:block}
+.it .sc{flex:none;font-variant-numeric:tabular-nums;font-weight:700;color:var(--blue)}
+.pill{display:inline-block;padding:2px 10px;border-radius:var(--r-p);font-size:11.5px;font-weight:700;
+  background:var(--blue-soft);color:var(--blue)}
+.empty{padding:32px 10px;text-align:center;color:var(--ink-3);font-size:13.5px}
+.ann{background:var(--blue-soft);border:1px solid #cde9fb;border-radius:var(--r-s);
+  padding:13px 16px;margin-bottom:12px}
+.ann b{display:block;font-family:var(--display);font-size:14.5px}
+.ann p{margin:3px 0 0;font-size:13.5px;color:var(--ink-2)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;
+  padding:11px 20px;border-radius:var(--r-p);font-size:13.5px;z-index:40}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ===================== เข้าสู่ระบบ ===================== -->
+<div id="gate">
+  <form class="gate-card" id="loginForm">
+    <div class="crest">MSU</div>
+    <h1 data-i18n="title">หน้านิสิต</h1>
+    <p class="sub" data-i18n="sub">ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ</p>
+    <div id="loginErr" class="err" hidden></div>
+    <div class="field"><label for="uid" data-i18n="lblUser">อีเมลมหาวิทยาลัย</label>
+      <input id="uid" type="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
+    <div class="field"><label for="upw" data-i18n="lblPass">รหัสผ่าน</label>
+      <input id="upw" type="password" autocomplete="current-password" required></div>
+    <button class="btn wide" type="submit" data-i18n="signIn">เข้าสู่ระบบ</button>
+    <p style="text-align:center;margin:16px 0 0"><a href="index.html" style="color:var(--blue);font-size:13.5px;font-weight:600;text-decoration:none">‹ กลับหน้าแรก</a></p>
+    <p class="muted" style="margin:14px 0 0" data-i18n="hint">รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ</p>
+  </form>
+</div>
+
+<!-- ===================== หน้าหลัก ===================== -->
+<div id="app" hidden>
+  <div class="wrap">
+    <div class="top">
+      <div class="crest">MSU</div>
+      <div style="min-width:0">
+        <h1 id="myName">—</h1>
+        <div class="meta" id="myMeta">—</div>
+      </div>
+      <div class="right">
+        <a class="btn ghost sm" href="index.html" style="text-decoration:none;white-space:nowrap">‹ หน้าแรก</a>
+        <select id="lang" aria-label="Language">
+          <option value="th">ไทย</option><option value="en">EN</option><option value="zh">中文</option>
+        </select>
+        <button class="btn ghost sm" id="logout" data-i18n="signOut">ออก</button>
+      </div>
+    </div>
+
+    <div id="annBox"></div>
+
+    <div class="card score">
+      <div class="lab" data-i18n="totalLab">คะแนนกิจกรรมสะสม</div>
+      <div class="n" id="totalScore">0</div>
+      <div class="sub"><span id="scanCount">0</span> <span data-i18n="timesWord">กิจกรรม</span></div>
+      <div class="bar"><span id="progBar" style="width:0%"></span></div>
+      <div class="sub" style="margin-top:7px" id="progText"></div>
+    </div>
+
+    <div class="tabs">
+      <button type="button" data-tab="history" aria-pressed="true" data-i18n="tabHistory">ประวัติ</button>
+      <button type="button" data-tab="port" aria-pressed="false" data-i18n="tabPort">ผลงาน</button>
+      <button type="button" data-tab="me" aria-pressed="false" data-i18n="tabMe">บัญชี</button>
+    </div>
+
+    <!-- ประวัติกิจกรรม -->
+    <section data-pane="history">
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:10px" data-i18n="histTitle">กิจกรรมที่เข้าร่วม</h3>
+        <div id="histList"><div class="empty" data-i18n="loading">กำลังโหลด…</div></div>
+      </div>
+    </section>
+
+    <!-- Portfolio -->
+    <section data-pane="port" hidden>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="addPort">เพิ่มผลงาน</h3>
+        <form id="portForm">
+          <div class="field"><label for="pName" data-i18n="pName">ชื่อผลงาน</label>
+            <input id="pName" required placeholder="รางวัลชนะเลิศการแข่งขันหุ่นยนต์"></div>
+          <div class="row2">
+            <div class="field"><label for="pType" data-i18n="pType">ประเภท</label>
+              <select id="pType">
+                <option value="award" data-i18n="tAward">รางวัล</option>
+                <option value="training" data-i18n="tTraining">อบรม/สัมมนา</option>
+                <option value="volunteer" data-i18n="tVolunteer">จิตอาสา</option>
+                <option value="sport" data-i18n="tSport">กีฬา</option>
+                <option value="other" data-i18n="tOther">อื่นๆ</option>
+              </select></div>
+            <div class="field"><label for="pDate" data-i18n="pDate">วันที่</label>
+              <input id="pDate" type="date"></div>
+          </div>
+          <div class="field"><label for="pDesc" data-i18n="pDesc">รายละเอียด</label>
+            <textarea id="pDesc" placeholder="เล่าสั้นๆ ว่าทำอะไร ได้อะไรมา"></textarea></div>
+          <button class="btn wide" type="submit" data-i18n="save">บันทึก</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:10px" data-i18n="myPort">ผลงานของฉัน</h3>
+        <div id="portList"><div class="empty" data-i18n="loading">กำลังโหลด…</div></div>
+      </div>
+    </section>
+
+    <!-- บัญชี -->
+    <section data-pane="me" hidden>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="myInfo">ข้อมูลของฉัน</h3>
+        <div id="infoList"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="changePw">เปลี่ยนรหัสผ่าน</h3>
+        <form id="pwForm">
+          <div id="pwErr" class="err" hidden></div>
+          <div class="field"><label for="oldPw" data-i18n="oldPw">รหัสผ่านเดิม</label>
+            <input id="oldPw" type="password" autocomplete="current-password" required></div>
+          <div class="field"><label for="newPw" data-i18n="newPw">รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)</label>
+            <input id="newPw" type="password" autocomplete="new-password" minlength="6" required></div>
+          <button class="btn wide" type="submit" data-i18n="changePw">เปลี่ยนรหัสผ่าน</button>
+        </form>
+      </div>
+    </section>
+
+    <p class="muted" style="text-align:center;margin-top:18px">
+      <a href="scan.html" style="color:var(--blue);font-weight:600" data-i18n="goScan">ไปหน้าสแกน QR →</a>
+    </p>
+  </div>
+</div>
+
+<script>
+/* ============ ตั้งค่า: URL /exec ของ Apps Script ============ */
+var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec';
+
+var I18N = {
+ th:{title:'หน้านิสิต', sub:'ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ',
+   lblUser:'อีเมลมหาวิทยาลัย', lblPass:'รหัสผ่าน', signIn:'เข้าสู่ระบบ', signOut:'ออก',
+   hint:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ', totalLab:'คะแนนกิจกรรมสะสม', timesWord:'กิจกรรม',
+   tabHistory:'ประวัติ', tabPort:'ผลงาน', tabMe:'บัญชี', histTitle:'กิจกรรมที่เข้าร่วม',
+   addPort:'เพิ่มผลงาน', myPort:'ผลงานของฉัน', pName:'ชื่อผลงาน', pType:'ประเภท', pDate:'วันที่',
+   pDesc:'รายละเอียด', save:'บันทึก', myInfo:'ข้อมูลของฉัน', changePw:'เปลี่ยนรหัสผ่าน',
+   oldPw:'รหัสผ่านเดิม', newPw:'รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)', loading:'กำลังโหลด…',
+   goScan:'ไปหน้าสแกน QR →', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
+   tSport:'กีฬา', tOther:'อื่นๆ', noHist:'ยังไม่มีกิจกรรมที่เข้าร่วม', noPort:'ยังไม่มีผลงาน',
+   saved:'บันทึกแล้ว', deleted:'ลบแล้ว', del:'ลบ', confirmDel:'กดอีกครั้ง',
+   netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง', pwOk:'เปลี่ยนรหัสผ่านแล้ว',
+   goal:'จากเกณฑ์ขั้นต่ำ', passed:'ผ่านเกณฑ์แล้ว',
+   fId:'รหัสนิสิต', fDept:'สาขา', fYear:'ชั้นปี', fEmail:'อีเมล', fGpa:'เกรดเฉลี่ย'},
+ en:{title:'Student Portal', sub:'Your activity points, history and portfolio',
+   lblUser:'University email', lblPass:'Password', signIn:'Sign in', signOut:'Out',
+   hint:'Your default password is your student ID.', totalLab:'Total activity points', timesWord:'activities',
+   tabHistory:'History', tabPort:'Portfolio', tabMe:'Account', histTitle:'Activities attended',
+   addPort:'Add work', myPort:'My portfolio', pName:'Title', pType:'Type', pDate:'Date',
+   pDesc:'Details', save:'Save', myInfo:'My information', changePw:'Change password',
+   oldPw:'Current password', newPw:'New password (6+ characters)', loading:'Loading…',
+   goScan:'Go to QR scanner →', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
+   tSport:'Sport', tOther:'Other', noHist:'No activities yet', noPort:'Nothing here yet',
+   saved:'Saved', deleted:'Deleted', del:'Delete', confirmDel:'Click again',
+   netErr:'Connection failed, please try again', pwOk:'Password changed',
+   goal:'of the minimum requirement', passed:'Requirement met',
+   fId:'Student ID', fDept:'Department', fYear:'Year', fEmail:'Email', fGpa:'GPA'},
+ zh:{title:'学生页面', sub:'查看积分、活动记录与作品集',
+   lblUser:'校园邮箱', lblPass:'密码', signIn:'登录', signOut:'退出',
+   hint:'初始密码为您的学号。', totalLab:'累计活动积分', timesWord:'项活动',
+   tabHistory:'记录', tabPort:'作品集', tabMe:'账号', histTitle:'已参加的活动',
+   addPort:'添加作品', myPort:'我的作品集', pName:'名称', pType:'类型', pDate:'日期',
+   pDesc:'详情', save:'保存', myInfo:'我的信息', changePw:'修改密码',
+   oldPw:'原密码', newPw:'新密码（至少6位）', loading:'加载中…',
+   goScan:'前往扫码页面 →', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
+   tSport:'体育', tOther:'其他', noHist:'暂无活动记录', noPort:'暂无作品',
+   saved:'已保存', deleted:'已删除', del:'删除', confirmDel:'再次点击',
+   netErr:'连接失败，请重试', pwOk:'密码已修改',
+   goal:'的最低要求', passed:'已达标',
+   fId:'学号', fDept:'专业', fYear:'年级', fEmail:'邮箱', fGpa:'平均分'}
+};
+var lang='th';
+function t(k){ return (I18N[lang]&&I18N[lang][k]) || I18N.th[k] || k; }
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  if(me) render();
+}
+
+var me=null, D={history:[],portfolio:[],total:0,count:0}, minScore=30, tab='history';
+
+async function api(payload){
+  var res = await fetch(API_URL,{method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(Object.assign({lang:lang},payload)), redirect:'follow'});
+  return res.json();
+}
+
+/* -------- เข้าสู่ระบบ -------- */
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var box=document.getElementById('loginErr'); box.hidden=true;
+  var btn=e.target.querySelector('button'); btn.disabled=true;
+  try{
+    var r = await api({action:'login', id:document.getElementById('uid').value.trim(),
+                       password:document.getElementById('upw').value});
+    if(!r.success){ box.textContent=r.error; box.hidden=false; btn.disabled=false; return; }
+    me = r.student;
+    try{ sessionStorage.setItem('msu_stu', JSON.stringify(me)); }catch(_){}
+    enter();
+  }catch(err){ box.textContent=t('netErr'); box.hidden=false; }
+  btn.disabled=false;
+});
+
+function enter(){
+  document.getElementById('gate').hidden=true;
+  document.getElementById('app').hidden=false;
+  document.getElementById('myName').textContent=me.name;
+  document.getElementById('myMeta').textContent=me.id+' · '+(me.dept||'');
+  loadAll();
+}
+
+document.getElementById('logout').addEventListener('click', function(){
+  me=null;
+  try{ sessionStorage.removeItem('msu_stu'); }catch(_){}
+  document.getElementById('app').hidden=true;
+  document.getElementById('gate').hidden=false;
+});
+
+document.getElementById('lang').addEventListener('change', function(e){ lang=e.target.value; applyLang(); });
+
+/* -------- แท็บ -------- */
+document.querySelectorAll('.tabs button').forEach(function(b){
+  b.addEventListener('click', function(){
+    tab=b.dataset.tab;
+    document.querySelectorAll('.tabs button').forEach(function(x){
+      x.setAttribute('aria-pressed', x.dataset.tab===tab); });
+    document.querySelectorAll('[data-pane]').forEach(function(p){ p.hidden = p.dataset.pane!==tab; });
+  });
+});
+
+/* -------- โหลดข้อมูล -------- */
+async function loadAll(){
+  try{
+    var s = await api({action:'getSettings'});
+    if(s.success && s.settings && s.settings.min_score) minScore = Number(s.settings.min_score)||30;
+  }catch(e){}
+  try{
+    var a = await api({action:'getAnnouncements', audience:'student'});
+    if(a.success) renderAnn(a.announcements||[]);
+  }catch(e){}
+  try{
+    var h = await api({action:'getHistory', studentId:me.id});
+    if(h.success){ D.history=h.history||[]; D.total=h.totalScore||0; D.count=h.count||0; }
+  }catch(e){}
+  try{
+    var p = await api({action:'getPortfolio', studentId:me.id});
+    if(p.success) D.portfolio=p.portfolio||[];
+  }catch(e){}
+  render();
+}
+
+function render(){
+  document.getElementById('totalScore').textContent = fmt(D.total);
+  document.getElementById('scanCount').textContent = D.count;
+  var pct = Math.min(100, Math.round(D.total/minScore*100));
+  document.getElementById('progBar').style.width = pct+'%';
+  document.getElementById('progText').textContent =
+    D.total >= minScore ? t('passed') : (fmt(D.total)+' / '+fmt(minScore)+' '+t('goal'));
+
+  var hl=document.getElementById('histList');
+  hl.innerHTML = D.history.length ? D.history.map(function(x){
+    return '<div class="it"><span class="nm"><b>'+esc(x.activityName)+'</b>'+
+      '<span class="muted">'+esc(x.date+' '+x.time)+'</span></span>'+
+      '<span class="sc">+'+x.score+'</span></div>';
+  }).join('') : '<div class="empty">'+t('noHist')+'</div>';
+
+  var pl=document.getElementById('portList');
+  pl.innerHTML = D.portfolio.length ? D.portfolio.map(function(x){
+    return '<div class="it"><span class="nm"><b>'+esc(x.name)+'</b>'+
+      '<span class="pill">'+t('t'+cap(x.type||'other'))+'</span> '+
+      '<span class="muted">'+esc(x.date||'')+'</span>'+
+      (x.description?'<div class="muted" style="margin-top:3px">'+esc(x.description)+'</div>':'')+
+      '</span><button class="btn ghost sm" data-delport="'+esc(x.portId)+'">'+t('del')+'</button></div>';
+  }).join('') : '<div class="empty">'+t('noPort')+'</div>';
+
+  var rows=[['fId',me.id],['fDept',me.dept],['fYear',me.year],['fEmail',me.email],['fGpa',me.gpa]];
+  document.getElementById('infoList').innerHTML = rows.map(function(r){
+    return '<div class="it"><span class="nm muted">'+t(r[0])+'</span><span>'+esc(r[1]||'-')+'</span></div>';
+  }).join('');
+}
+
+function renderAnn(list){
+  document.getElementById('annBox').innerHTML = list.slice(0,3).map(function(a){
+    var ti=(a.title&&(a.title[lang]||a.title.th))||'';
+    var bo=(a.body&&(a.body[lang]||a.body.th))||'';
+    if(!ti && !bo) return '';
+    return '<div class="ann"><b>'+esc(ti)+'</b><p>'+esc(bo)+'</p></div>';
+  }).join('');
+}
+
+/* -------- Portfolio -------- */
+document.getElementById('portForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var btn=e.target.querySelector('button'); btn.disabled=true;
+  try{
+    var r = await api({action:'addPortfolio', studentId:me.id,
+      name:document.getElementById('pName').value.trim(),
+      type:document.getElementById('pType').value,
+      description:(document.getElementById('pDate').value?document.getElementById('pDate').value+' · ':'')+
+                  document.getElementById('pDesc').value.trim()});
+    if(r.success){
+      toast(t('saved')); e.target.reset();
+      var p = await api({action:'getPortfolio', studentId:me.id});
+      if(p.success){ D.portfolio=p.portfolio||[]; render(); }
+    } else toast(r.error||t('netErr'));
+  }catch(err){ toast(t('netErr')); }
+  btn.disabled=false;
+});
+
+document.getElementById('portList').addEventListener('click', async function(e){
+  var b=e.target.closest('[data-delport]'); if(!b) return;
+  if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent=t('confirmDel'); return; }
+  try{
+    await api({action:'delPortfolio', portId:b.dataset.delport, studentId:me.id});
+    D.portfolio = D.portfolio.filter(function(x){ return x.portId!==b.dataset.delport; });
+    render(); toast(t('deleted'));
+  }catch(err){ toast(t('netErr')); }
+});
+
+/* -------- เปลี่ยนรหัสผ่าน -------- */
+document.getElementById('pwForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var box=document.getElementById('pwErr'); box.hidden=true;
+  try{
+    var r = await api({action:'changePass', studentId:me.id,
+      oldPassword:document.getElementById('oldPw').value,
+      newPassword:document.getElementById('newPw').value});
+    if(!r.success){ box.textContent=r.error; box.hidden=false; return; }
+    e.target.reset(); toast(t('pwOk'));
+  }catch(err){ box.textContent=t('netErr'); box.hidden=false; }
+});
+
+/* -------- helpers -------- */
+var toastTimer;
+function toast(m){
+  var o=document.querySelector('.toast'); if(o) o.remove();
+  var el=document.createElement('div'); el.className='toast'; el.textContent=m;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){ el.remove(); },2400);
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
+function cap(s){ return String(s).charAt(0).toUpperCase()+String(s).slice(1); }
+
+/* จำการล็อกอินระหว่างแท็บเดียวกัน */
+try{
+  var saved = sessionStorage.getItem('msu_stu');
+  if(saved){ me = JSON.parse(saved); enter(); }
+}catch(e){}
+
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>

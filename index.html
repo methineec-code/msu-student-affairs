@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="manifest.json">
+<title>ระบบกิจการนิสิต มมส</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
+  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
+  --blue:#0ea5e9; --blue-soft:#e8f6fe; --sky:#38bdf8;
+  --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
+  --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
+  --r:24px; color-scheme:light; --r-p:999px;
+}
+
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:15px;line-height:1.55;display:grid;place-items:center}
+h1,h2,.dsp{font-family:var(--display);margin:0;text-wrap:balance}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+.wrap{width:100%;max-width:520px;padding-block:40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px))}
+.head{text-align:center;margin-bottom:28px}
+.crest{width:64px;height:64px;border-radius:var(--r-p);background:var(--blue);color:#fff;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:20px;
+  margin:0 auto 14px;letter-spacing:.5px}
+.head h1{font-size:23px;letter-spacing:-.3px}
+.head p{margin:6px 0 0;color:var(--ink-2);font-size:14px}
+.head .en{color:var(--ink-3);font-size:12.5px;margin-top:2px}
+
+.grid{display:flex;flex-direction:column;gap:12px}
+.tile{display:flex;align-items:center;gap:15px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:18px 20px;transition:border-color .15s, transform .15s}
+.tile:hover{border-color:var(--blue);transform:translateY(-1px)}
+.tile .ic{width:46px;height:46px;border-radius:var(--r-p);background:var(--blue-soft);color:var(--blue);
+  display:grid;place-items:center;font-size:20px;flex:none}
+.tile.primary .ic{background:var(--blue);color:#fff}
+.tile b{display:block;font-family:var(--display);font-size:16px}
+.tile span{font-size:13px;color:var(--ink-2)}
+.tile .go{margin-left:auto;color:var(--ink-3);font-size:18px;flex:none}
+
+.foot{margin-top:26px;text-align:center;font-size:12.5px;color:var(--ink-3);line-height:1.8}
+.foot .sep{opacity:.4;margin:0 7px}
+.langs{display:flex;gap:6px;justify-content:center;margin-top:18px}
+.langs button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  border-radius:var(--r-p);padding:5px 14px;font:inherit;font-size:13px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="crest">MSU</div>
+    <h1 data-i18n="title">ระบบกิจการนิสิต</h1>
+    <p data-i18n="uni">มหาวิทยาลัยมหาสารคาม</p>
+    <p class="en">Mahasarakham University · Student Affairs</p>
+  </div>
+
+  <div class="grid">
+    <a class="tile primary" href="scan.html">
+      <span class="ic" aria-hidden="true">▣</span>
+      <span><b data-i18n="t1">สแกน QR กิจกรรม</b><span data-i18n="d1">เก็บคะแนนกิจกรรม สำหรับนิสิตและเจ้าหน้าที่</span></span>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+
+    <a class="tile" href="student.html">
+      <span class="ic" aria-hidden="true">◉</span>
+      <span><b data-i18n="t2">หน้านิสิต</b><span data-i18n="d2">ดูคะแนนสะสม ประวัติกิจกรรม และ Portfolio</span></span>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+
+    <a class="tile" href="staff.html">
+      <span class="ic" aria-hidden="true">◧</span>
+      <span><b data-i18n="t3">หน้าเจ้าหน้าที่</b><span data-i18n="d3">จัดการกิจกรรม ทะเบียนนิสิต และรายงาน</span></span>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+
+    <a class="tile" href="admin.html">
+      <span class="ic" aria-hidden="true">⚙</span>
+      <span><b data-i18n="t4">ผู้ดูแลระบบ</b><span data-i18n="d4">จัดการเจ้าหน้าที่ ประกาศ และตั้งค่าระบบ</span></span>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+  </div>
+
+  <div class="langs">
+    <button type="button" data-lang="th" aria-pressed="true">ไทย</button>
+    <button type="button" data-lang="en" aria-pressed="false">English</button>
+    <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+  </div>
+
+  <p class="foot">
+    <span data-i18n="help">นิสิตเข้าระบบด้วยอีเมลมหาวิทยาลัย รหัสผ่านคือรหัสนิสิต</span><br>
+    <span data-i18n="contact">ติดต่อ</span><span class="sep">·</span>student.affairs@msu.ac.th
+  </p>
+</div>
+
+<script>
+var I18N = {
+  th:{ title:'ระบบกิจการนิสิต', uni:'มหาวิทยาลัยมหาสารคาม',
+    t1:'สแกน QR กิจกรรม', d1:'เก็บคะแนนกิจกรรม สำหรับนิสิตและเจ้าหน้าที่',
+    t2:'หน้านิสิต',       d2:'ดูคะแนนสะสม ประวัติกิจกรรม และ Portfolio',
+    t3:'หน้าเจ้าหน้าที่',  d3:'จัดการกิจกรรม ทะเบียนนิสิต และรายงาน',
+    t4:'ผู้ดูแลระบบ',     d4:'จัดการเจ้าหน้าที่ ประกาศ และตั้งค่าระบบ',
+    help:'นิสิตเข้าระบบด้วยอีเมลมหาวิทยาลัย รหัสผ่านคือรหัสนิสิต', contact:'ติดต่อ' },
+  en:{ title:'Student Affairs', uni:'Mahasarakham University',
+    t1:'Scan activity QR',  d1:'Collect activity points — students and staff',
+    t2:'Student portal',    d2:'Points, activity history and portfolio',
+    t3:'Staff console',     d3:'Activities, student registry and reports',
+    t4:'Administrator',     d4:'Staff accounts, announcements and settings',
+    help:'Students sign in with their university email; the password is the student ID.', contact:'Contact' },
+  zh:{ title:'学生事务系统', uni:'玛哈沙拉堪大学',
+    t1:'扫描活动二维码', d1:'积累活动分 — 学生与工作人员',
+    t2:'学生页面',      d2:'查看积分、活动记录与作品集',
+    t3:'工作人员页面',   d3:'管理活动、学籍与报表',
+    t4:'系统管理员',     d4:'管理工作人员、公告与系统设置',
+    help:'学生使用校园邮箱登录，密码为学号。', contact:'联系' }
+};
+
+function setLang(l){
+  var m = I18N[l] || I18N.th;
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    if(m[el.dataset.i18n]) el.textContent = m[el.dataset.i18n];
+  });
+  document.querySelectorAll('[data-lang]').forEach(function(b){
+    b.setAttribute('aria-pressed', b.dataset.lang === l);
+  });
+  try{ localStorage.setItem('msu_lang', l); }catch(e){}
+}
+document.querySelectorAll('[data-lang]').forEach(function(b){
+  b.addEventListener('click', function(){ setLang(b.dataset.lang); });
+});
+try{
+  var saved = localStorage.getItem('msu_lang');
+  if(saved && I18N[saved]) setLang(saved);
+}catch(e){}
+
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>

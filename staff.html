@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="manifest.json">
+<title>MSU Staff Console</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
+<style>
+/* Layout: rail ซ้าย + พื้นที่ทำงานขวา, ยุบเป็นแถบบนเมื่อจอแคบ */
+:root{
+  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
+  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
+  --plum:#0ea5e9; --plum-soft:#e8f6fe; --gold:#38bdf8;
+  --good:#15785c; --good-bg:#e1f3ed;
+  --warn:#8f5f12; --warn-bg:#fbf0db;
+  --bad:#a32a3c;  --bad-bg:#fae7ea;
+  --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
+  --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
+  --r:24px; color-scheme:light;        /* มุมการ์ด */
+  --r-s:14px;      /* มุมช่องกรอก */
+  --r-p:999px;     /* ปุ่มทรงแคปซูล */
+}
+
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+h1,h2,h3,.dsp{font-family:var(--display);text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- เข้าสู่ระบบ ---------- */
+#gate{min-height:100%;display:grid;place-items:center;
+  padding-block:40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));}
+.gate-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);
+  border-radius:28px;padding:32px;box-shadow:0 20px 50px -34px rgba(14,26,46,.45)}
+.crest{width:46px;height:46px;border-radius:var(--r-p);background:var(--plum);color:#fff;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.5px}
+.gate-card h1{font-size:20px;margin-top:14px;letter-spacing:-.2px}
+.gate-card p.sub{color:var(--ink-2);font-size:13.5px;margin:4px 0 20px}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700;margin-bottom:5px}
+.field{margin-bottom:14px}
+input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-s);
+  background:var(--paper);transition:border-color .15s}
+input:focus,select:focus{border-color:var(--plum)}
+.btn{border:1px solid transparent;border-radius:var(--r-p);padding:9px 17px;font-weight:600;
+  cursor:pointer;background:var(--plum);color:#fff;transition:filter .15s}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--plum-soft);filter:none}
+.btn.sm{padding:5px 13px;font-size:13px}
+.btn.wide{width:100%;padding:12px}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:var(--r-s);padding:9px 13px;font-size:13px;margin-bottom:12px}
+
+/* ---------- โครงหลัก ---------- */
+#app{display:grid;grid-template-columns:212px 1fr;min-height:100%;gap:12px;padding:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.rail{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 3px rgba(11,15,20,.05);display:flex;flex-direction:column;
+  padding-block:16px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:12px;gap:3px}
+.rail .who{padding:10px 10px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.rail .who b{display:block;font-family:var(--display);font-size:14px}
+.rail .who span{font-size:12px;color:var(--ink-3)}
+.navb{display:flex;align-items:center;gap:9px;background:none;border:none;text-align:left;
+  padding:9px 14px;border-radius:var(--r-p);cursor:pointer;color:var(--ink-2);font-weight:500;width:100%}
+.navb:hover{background:var(--plum-soft);color:var(--ink)}
+.navb[aria-current="true"]{background:var(--plum);color:#fff;font-weight:600}
+.navb .ic{width:16px;text-align:center;opacity:.9;font-size:14px}
+.rail .foot{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap;padding:10px 10px 0;border-top:1px solid var(--line)}
+main{min-width:0;padding-block:12px 40px;padding-left:6px;padding-right:6px}
+@media (max-width:760px){
+  #app{grid-template-columns:1fr}
+  .rail{flex-direction:row;overflow-x:auto;border-radius:var(--r);border-bottom:none;
+    padding-block:8px;align-items:center}
+  .rail .who,.rail .foot{display:none}
+  .navb{width:auto;white-space:nowrap}
+}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.page-head h2{font-size:21px;letter-spacing:-.3px}
+.page-head .kick{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools input,.tools select{width:auto;min-width:130px}
+
+/* ---------- การ์ดสถิติ ---------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(11,15,20,.04);box-shadow:0 1px 3px rgba(11,15,20,.04) 18px}
+.tile .lab{font-size:12px;color:var(--ink-3);font-weight:600}
+.tile .num{font-family:var(--display);font-size:27px;font-weight:700;line-height:1.1;margin-top:3px;
+  font-variant-numeric:tabular-nums}
+.tile .sub{font-size:12px;color:var(--ink-2);margin-top:2px}
+.tile.hi{background:var(--plum);border-color:var(--plum);color:#fff}
+.tile.hi .lab,.tile.hi .sub{color:rgba(255,255,255,.82)}
+
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(11,15,20,.04);min-width:0}
+.panel h3{font-size:14.5px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.panel h3 small{font-weight:400;color:var(--ink-3);font-size:12px}
+
+/* ---------- กราฟแท่ง ---------- */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:1fr auto;gap:4px;font-size:13px}
+.bar-row .nm{color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .vl{font-variant-numeric:tabular-nums;font-weight:600;font-size:12.5px}
+.track{grid-column:1/-1;height:8px;background:var(--plum-soft);border-radius:var(--r-p);overflow:hidden}
+.fill{height:100%;background:var(--plum);border-radius:var(--r-p)}
+.fill.g{background:var(--gold)}
+
+/* ---------- ตาราง ---------- */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;
+  background:var(--card);position:sticky;top:0}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--plum-soft)}
+td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700}
+.pill.ok{background:var(--good-bg);color:var(--good)}
+.pill.off{background:var(--bad-bg);color:var(--bad)}
+.pill.wait{background:var(--warn-bg);color:var(--warn)}
+.rank{font-family:var(--display);font-weight:700;color:var(--ink-3);width:30px}
+.rank.top{color:var(--gold)}
+.empty{padding:34px 16px;text-align:center;color:var(--ink-3);font-size:13.5px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* ---------- QR ---------- */
+.qr-box{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.qr-box img{width:150px;height:150px;border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:8px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--plum-soft);
+  padding:6px 12px;border-radius:var(--r-p);word-break:break-all;display:inline-block}
+
+.banner{background:var(--warn-bg);color:var(--warn);border:1px solid currentColor;border-radius:var(--r-s);
+  padding:9px 12px;font-size:13px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:var(--r-p);font-size:13.5px;
+  z-index:40;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:460px){.row2{grid-template-columns:1fr}}
+</style>
+
+</head>
+<body>
+<!-- ======================= หน้าเข้าสู่ระบบ ======================= -->
+<div id="gate">
+  <form class="gate-card" id="loginForm">
+    <div class="crest">MSU</div>
+    <h1 data-i18n="appName">ระบบกิจการนิสิต</h1>
+    <p class="sub" data-i18n="forStaff">สำหรับเจ้าหน้าที่และผู้ดูแลระบบ</p>
+    <div id="loginErr" class="err" hidden></div>
+    <div class="field">
+      <label for="email" data-i18n="email">อีเมล</label>
+      <input id="email" type="email" autocomplete="username" placeholder="name@msu.ac.th" required>
+    </div>
+    <div class="field">
+      <label for="pass" data-i18n="password">รหัสผ่าน</label>
+      <input id="pass" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn wide" type="submit" data-i18n="signIn">เข้าสู่ระบบ</button>
+    <p style="text-align:center;margin:16px 0 0"><a href="index.html" style="color:var(--blue);font-size:13.5px;font-weight:600;text-decoration:none">‹ กลับหน้าแรก</a></p>
+    <p class="note" id="gateNote"></p>
+  </form>
+</div>
+
+<!-- ========================= หน้าทำงาน ========================== -->
+<div id="app" hidden>
+  <nav class="rail">
+    <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
+    <a class="navb" href="index.html" style="text-decoration:none"><span class="ic">‹</span><span>หน้าแรก</span></a>
+    <button class="navb" data-tab="dash"><span class="ic">◧</span><span data-i18n="tabDash">ภาพรวม</span></button>
+    <button class="navb" data-tab="students"><span class="ic">☗</span><span data-i18n="tabStudents">นิสิต</span></button>
+    <button class="navb" data-tab="acts"><span class="ic">◆</span><span data-i18n="tabActs">กิจกรรม</span></button>
+    <button class="navb" data-tab="scans"><span class="ic">⊞</span><span data-i18n="tabScans">การสแกน</span></button>
+    <button class="navb" data-tab="rank"><span class="ic">▲</span><span data-i18n="tabRank">อันดับคะแนน</span></button>
+    <div class="foot">
+      <select id="lang" aria-label="Language" style="min-width:0;flex:1">
+        <option value="th">ไทย</option><option value="en">English</option><option value="zh">中文</option>
+      </select>
+      <button class="btn ghost sm" id="logout" data-i18n="signOut">ออก</button>
+    </div>
+  </nav>
+
+  <main>
+    <div id="demoBanner" class="banner" hidden></div>
+
+    <!-- ภาพรวม -->
+    <section data-pane="dash" hidden>
+      <div class="page-head">
+        <div><div class="kick" data-i18n="kickDash">ภาพรวมระบบ</div><h2 data-i18n="tabDash">ภาพรวม</h2></div>
+        <div class="tools"><button class="btn ghost sm" id="refresh" data-i18n="refresh">รีเฟรช</button></div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="panels">
+        <div class="panel"><h3><span data-i18n="byDept">นิสิตแยกตามสาขา</span></h3><div class="bars" id="deptBars"></div></div>
+        <div class="panel"><h3><span data-i18n="byAct">ผู้เข้าร่วมแยกตามกิจกรรม</span></h3><div class="bars" id="actBars"></div></div>
+      </div>
+    </section>
+
+    <!-- นิสิต -->
+    <section data-pane="students" hidden>
+      <div class="page-head">
+        <div><div class="kick" data-i18n="kickStudents">ทะเบียน</div><h2 data-i18n="tabStudents">นิสิต</h2></div>
+        <div class="tools">
+          <input id="stuQ" type="search" data-i18n-ph="searchStu" placeholder="ค้นหารหัส / ชื่อ">
+          <select id="stuDept"><option value="" data-i18n="allDept">ทุกสาขา</option></select>
+          <button class="btn sm" id="stuExport" data-i18n="exportCsv">ส่งออก CSV</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table id="stuTable"><thead><tr>
+        <th data-i18n="cId">รหัสนิสิต</th><th data-i18n="cName">ชื่อ-สกุล</th><th data-i18n="cDept">สาขา</th>
+        <th data-i18n="cYear">ชั้นปี</th><th style="text-align:right" data-i18n="cScore">คะแนน</th>
+        <th style="text-align:right" data-i18n="cScans">ครั้ง</th><th data-i18n="cStatus">สถานะ</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="pager" id="stuPager"></div>
+    </section>
+
+    <!-- กิจกรรม -->
+    <section data-pane="acts" hidden>
+      <div class="page-head">
+        <div><div class="kick" data-i18n="kickActs">คะแนนกิจกรรม</div><h2 data-i18n="tabActs">กิจกรรม</h2></div>
+      </div>
+      <div class="panels" style="grid-template-columns:minmax(280px,340px) 1fr">
+        <div class="panel">
+          <h3 data-i18n="newAct">สร้างกิจกรรมใหม่</h3>
+          <form id="actForm">
+            <div class="field"><label for="actName" data-i18n="actName">ชื่อกิจกรรม</label>
+              <input id="actName" required placeholder="ปฐมนิเทศนิสิตใหม่"></div>
+            <div class="row2">
+              <div class="field"><label for="actScore" data-i18n="actScore">คะแนน</label>
+                <input id="actScore" type="number" min="1" value="5" required></div>
+              <div class="field"><label for="actDate" data-i18n="actDate">วันจัด</label>
+                <input id="actDate" type="date"></div>
+            </div>
+            <div class="field"><label for="actDesc" data-i18n="actDesc">รายละเอียด</label>
+              <input id="actDesc" placeholder="หอประชุม มมส"></div>
+            <button class="btn wide" type="submit" data-i18n="createQr">สร้าง + ออก QR</button>
+          </form>
+          <div id="qrOut" hidden style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+            <div class="qr-box">
+              <img id="qrImg" alt="QR code">
+              <div style="min-width:0">
+                <b id="qrName" class="dsp"></b>
+                <div style="font-size:12.5px;color:var(--ink-2);margin:3px 0 7px" id="qrScore"></div>
+                <span class="code" id="qrId"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div class="tbl-wrap" style="border:none;border-radius:0"><table id="actTable"><thead><tr>
+            <th data-i18n="cAct">กิจกรรม</th><th style="text-align:right" data-i18n="cScore">คะแนน</th>
+            <th style="text-align:right" data-i18n="cJoin">ผู้เข้าร่วม</th><th data-i18n="cStatus">สถานะ</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- การสแกน -->
+    <section data-pane="scans" hidden>
+      <div class="page-head">
+        <div><div class="kick" data-i18n="kickScans">บันทึกการเข้าร่วม</div><h2 data-i18n="tabScans">การสแกน</h2></div>
+        <div class="tools">
+          <select id="scanAct"><option value="" data-i18n="allAct">ทุกกิจกรรม</option></select>
+          <button class="btn sm" id="scanExport" data-i18n="exportCsv">ส่งออก CSV</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table id="scanTable"><thead><tr>
+        <th data-i18n="cId">รหัสนิสิต</th><th data-i18n="cName">ชื่อ-สกุล</th><th data-i18n="cAct">กิจกรรม</th>
+        <th style="text-align:right" data-i18n="cScore">คะแนน</th><th data-i18n="cWhen">วันเวลา</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- อันดับ -->
+    <section data-pane="rank" hidden>
+      <div class="page-head">
+        <div><div class="kick" data-i18n="kickRank">คะแนนสะสม</div><h2 data-i18n="tabRank">อันดับคะแนน</h2></div>
+      </div>
+      <div class="tbl-wrap"><table id="rankTable"><thead><tr>
+        <th>#</th><th data-i18n="cName">ชื่อ-สกุล</th><th data-i18n="cDept">สาขา</th>
+        <th style="text-align:right" data-i18n="cScans">ครั้ง</th><th style="text-align:right" data-i18n="cScore">คะแนน</th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
+var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่ก่อนขึ้น Netlify
+var DEMO = false;
+
+/* ============================ ภาษา ============================= */
+var I18N = {
+  th:{appName:'ระบบกิจการนิสิต',forStaff:'สำหรับเจ้าหน้าที่และผู้ดูแลระบบ',email:'อีเมล',password:'รหัสผ่าน',
+    signIn:'เข้าสู่ระบบ',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
+    tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
+    kickScans:'บันทึกการเข้าร่วม',kickRank:'คะแนนสะสม',refresh:'รีเฟรช',byDept:'นิสิตแยกตามสาขา',
+    byAct:'ผู้เข้าร่วมแยกตามกิจกรรม',searchStu:'ค้นหารหัส / ชื่อ',allDept:'ทุกสาขา',allAct:'ทุกกิจกรรม',
+    exportCsv:'ส่งออก CSV',cId:'รหัสนิสิต',cName:'ชื่อ-สกุล',cDept:'สาขา',cYear:'ชั้นปี',cScore:'คะแนน',
+    cScans:'ครั้ง',cStatus:'สถานะ',cAct:'กิจกรรม',cJoin:'ผู้เข้าร่วม',cWhen:'วันเวลา',newAct:'สร้างกิจกรรมใหม่',
+    actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
+    tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
+    active:'ใช้งาน',inactive:'ระงับ',reset:'รีเซ็ตรหัส',close:'ปิด',open:'เปิด',del:'ลบ',
+    of:'จาก',prev:'ก่อนหน้า',next:'ถัดไป',noData:'ยังไม่มีข้อมูล',
+    demoMsg:'โหมดตัวอย่าง — ยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อหลังบ้านไม่ได้ ตัวเลขที่เห็นเป็นข้อมูลสมมติ',
+    hint:'ยังไม่ได้ตั้งค่า API_URL — กดเข้าสู่ระบบเพื่อดูโหมดตัวอย่าง',
+    saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน'},
+  en:{appName:'Student Affairs',forStaff:'For staff and administrators',email:'Email',password:'Password',
+    signIn:'Sign in',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
+    tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
+    kickScans:'Attendance log',kickRank:'Accumulated points',refresh:'Refresh',byDept:'Students by department',
+    byAct:'Attendance by activity',searchStu:'Search ID / name',allDept:'All departments',allAct:'All activities',
+    exportCsv:'Export CSV',cId:'Student ID',cName:'Name',cDept:'Department',cYear:'Year',cScore:'Points',
+    cScans:'Scans',cStatus:'Status',cAct:'Activity',cJoin:'Attended',cWhen:'Date & time',newAct:'New activity',
+    actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
+    tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
+    active:'Active',inactive:'Disabled',reset:'Reset password',close:'Close',open:'Open',del:'Delete',
+    of:'of',prev:'Previous',next:'Next',noData:'Nothing here yet',
+    demoMsg:'Demo mode — API_URL is not set or the backend is unreachable. These figures are sample data.',
+    hint:'API_URL is not set — sign in to view the demo.',
+    saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm'},
+  zh:{appName:'学生事务系统',forStaff:'供工作人员与管理员使用',email:'邮箱',password:'密码',
+    signIn:'登录',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
+    tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
+    kickScans:'参与记录',kickRank:'累计积分',refresh:'刷新',byDept:'各专业学生数',
+    byAct:'各活动参与人数',searchStu:'搜索学号 / 姓名',allDept:'全部专业',allAct:'全部活动',
+    exportCsv:'导出 CSV',cId:'学号',cName:'姓名',cDept:'专业',cYear:'年级',cScore:'积分',
+    cScans:'次数',cStatus:'状态',cAct:'活动',cJoin:'参与人数',cWhen:'日期时间',newAct:'新建活动',
+    actName:'活动名称',actScore:'积分',actDate:'举办日期',actDesc:'详情',createQr:'创建并生成二维码',
+    tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
+    active:'正常',inactive:'停用',reset:'重置密码',close:'关闭',open:'开放',del:'删除',
+    of:'/',prev:'上一页',next:'下一页',noData:'暂无数据',
+    demoMsg:'演示模式 — 未设置 API_URL 或无法连接后端，以下为示例数据。',
+    hint:'未设置 API_URL — 登录后查看演示数据。',
+    saved:'已保存',copied:'已复制',confirmDel:'再次点击确认'}
+};
+var lang = 'th';
+function t(k){ return (I18N[lang] && I18N[lang][k]) || I18N.th[k] || k; }
+
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.dataset.i18nPh); });
+  document.getElementById('gateNote').textContent = API_URL ? '' : t('hint');
+  if(DEMO) document.getElementById('demoBanner').textContent = t('demoMsg');
+  render();
+}
+
+/* ====================== ข้อมูลตัวอย่าง ========================= */
+var DEPTS = ['เทคโนโลยีสารสนเทศ','วิทยาการคอมพิวเตอร์','สื่อนฤมิต','ภูมิสารสนเทศ','นิเทศศาสตร์'];
+var FIRST = ['ณัฐวุฒิ','ศิริพร','ธนกร','พิมพ์ชนก','อนุชา','กมลชนก','ภาณุพงศ์','ชลธิชา','ธีรเดช','วรรณิศา','ปิยะพงษ์','อารียา'];
+var LAST  = ['แสงทอง','บุญมาก','ศรีสุวรรณ','วงศ์คำ','จันทร์เพ็ญ','ภูมิพัฒน์','ไชยวงศ์','ดวงแก้ว'];
+var ACT_NAMES = ['ปฐมนิเทศนิสิตใหม่','จิตอาสาพัฒนาชุมชน','อบรมประกันคุณภาพ','กีฬาสีคณะ','ไหว้ครูประจำปี','อบรมภาษาอังกฤษ','ค่ายอาสาพัฒนาโรงเรียน'];
+var demo = { students:[], acts:[], scans:[] };
+
+function buildDemo(){
+  var i, n;
+  for(i=0;i<64;i++){
+    var sid = '65' + String(10 + (i%5)) + String(100000 + i*137).slice(-6);
+    demo.students.push({
+      id:sid, name:FIRST[i%FIRST.length]+' '+LAST[i%LAST.length], dept:DEPTS[i%DEPTS.length],
+      year:3 + (i%2), email:sid+'@msu.ac.th', gpa:(2.4+(i%16)/10).toFixed(2),
+      status: i%17===0 ? 'inactive':'active', totalScore:0, scanCount:0
+    });
+  }
+  for(i=0;i<ACT_NAMES.length;i++){
+    demo.acts.push({ id:'ACT17600'+String(10000+i*37), name:ACT_NAMES[i], score:[5,10,3,5,2,8,10][i],
+      description:'', active: i!==4, joined:0 });
+  }
+  var day = 0;
+  for(i=0;i<210;i++){
+    var s = demo.students[(i*7)%demo.students.length];
+    var a = demo.acts[(i*3)%demo.acts.length];
+    if(s.status==='inactive' || !a.active) continue;
+    if(demo.scans.some(function(x){return x.studentId===s.id && x.activityId===a.id})) continue;
+    day = 1 + (i%14);
+    demo.scans.push({ logId:'LOG'+i, studentId:s.id, studentName:s.name, dept:s.dept,
+      activityId:a.id, activityName:a.name, score:a.score,
+      date:String(day).padStart(2,'0')+'/10/2569',
+      time:String(9+(i%8)).padStart(2,'0')+':'+String((i*13)%60).padStart(2,'0') });
+    s.totalScore += a.score; s.scanCount++; a.joined++;
+  }
+  demo.scans.reverse();
+}
+buildDemo();
+
+/* ========================= เรียก API =========================== */
+var auth = null;
+var state = { tab:'dash', stuPage:1, stuQ:'', stuDept:'', scanAct:'', dash:null, stuPages:1, stuTotal:0 };
+/* คลังข้อมูลที่หน้าเว็บใช้แสดงผล — เติมจาก API เมื่อเชื่อมต่อได้ ไม่งั้นใช้ demo */
+var D = { students:[], acts:[], scans:[], rank:[], depts:[] };
+
+async function api(payload){
+  if(!API_URL) throw new Error('no-api');
+  var res = await fetch(API_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({lang:lang}, payload, auth||{})), redirect:'follow'
+  });
+  return res.json();
+}
+
+/* ====================== เข้าสู่ระบบ ============================ */
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var errEl = document.getElementById('loginErr');
+  errEl.hidden = true;
+  var email = document.getElementById('email').value.trim();
+  var pass  = document.getElementById('pass').value;
+
+  if(!API_URL){ enterDemo({name:'เจ้าหน้าที่ (ตัวอย่าง)', role:'staff'}); return; }
+  try{
+    var r = await api({ action:'staffLogin', email:email, password:pass });
+    if(!r.success){ errEl.textContent = r.error; errEl.hidden = false; return; }
+    auth = r.auth; DEMO = false;
+    enterApp(r.staff);
+  }catch(err){
+    enterDemo({name:'เจ้าหน้าที่ (ตัวอย่าง)', role:'staff'});
+  }
+});
+
+function enterDemo(staff){ DEMO = true; enterApp(staff); }
+
+function enterApp(staff){
+  document.getElementById('gate').hidden = true;
+  document.getElementById('app').hidden = false;
+  document.getElementById('whoName').textContent = staff.name || '—';
+  document.getElementById('whoRole').textContent = staff.role === 'admin' ? 'ผู้ดูแลระบบ' : 'เจ้าหน้าที่';
+  var b = document.getElementById('demoBanner');
+  b.hidden = !DEMO; if(DEMO) b.textContent = t('demoMsg');
+  go('dash');
+}
+
+document.getElementById('logout').addEventListener('click', function(){
+  auth = null;
+  document.getElementById('app').hidden = true;
+  document.getElementById('gate').hidden = false;
+});
+
+document.getElementById('lang').addEventListener('change', function(e){ lang = e.target.value; applyLang(); });
+document.getElementById('refresh').addEventListener('click', function(){ load(state.tab); });
+
+/* ========================== แท็บ =============================== */
+document.querySelectorAll('.navb').forEach(function(b){
+  b.addEventListener('click', function(){ go(b.dataset.tab); });
+});
+function go(tab){
+  state.tab = tab;
+  document.querySelectorAll('.navb').forEach(function(b){
+    b.setAttribute('aria-current', b.dataset.tab === tab ? 'true':'false');
+  });
+  document.querySelectorAll('[data-pane]').forEach(function(p){ p.hidden = p.dataset.pane !== tab; });
+  render();
+  load(tab);
+}
+
+/* โหลดข้อมูลของแท็บที่เปิดอยู่ */
+function load(tab){
+  if(tab==='dash')     return loadDash();
+  if(tab==='students') return loadStudents();
+  if(tab==='acts')     return loadActs();
+  if(tab==='scans')    return loadScans();
+  if(tab==='rank')     return loadRank();
+}
+
+/** เรียก API แล้วคืนผล — ถ้าล้มเหลวจะสลับเป็นโหมดตัวอย่างและคืน null */
+async function tryApi(payload){
+  if(DEMO) return null;
+  try{
+    var r = await api(payload);
+    if(r && r.success) return r;
+    if(r && r.error) toast(r.error);
+    return null;
+  }catch(e){
+    DEMO = true;
+    var b = document.getElementById('demoBanner');
+    b.hidden = false; b.textContent = t('demoMsg');
+    return null;
+  }
+}
+
+/* ======================= โหลดข้อมูล ============================ */
+async function loadDash(){
+  var r = await tryApi({action:'getDashboard'});
+  state.dash = r || demoDash();
+  renderDash();
+}
+
+async function loadStudents(){
+  var r = await tryApi({ action:'getStudents', q:state.stuQ, dept:state.stuDept,
+                         page:state.stuPage, per_page:15 });
+  if(r){
+    D.students = r.students || [];
+    state.stuPages = r.pages || 1;
+    state.stuTotal = r.total || 0;
+    if(r.depts && r.depts.length) D.depts = r.depts;
+  }else{
+    var rows = filterDemoStudents();
+    state.stuTotal = rows.length;
+    state.stuPages = Math.max(1, Math.ceil(rows.length/15));
+    if(state.stuPage > state.stuPages) state.stuPage = state.stuPages;
+    D.students = rows.slice((state.stuPage-1)*15, state.stuPage*15);
+    D.depts = DEPTS;
+  }
+  renderStudents();
+}
+
+async function loadActs(){
+  var r = await tryApi({ action:'getActivities' });
+  if(r){
+    // นับผู้เข้าร่วมจากรายงานการสแกน
+    var rep = await tryApi({ action:'getScanReport' });
+    var count = {};
+    if(rep) (rep.report||[]).forEach(function(x){ count[x.activityId] = (count[x.activityId]||0)+1; });
+    D.acts = (r.activities||[]).map(function(a){
+      return { id:a.id, name:a.name, score:Number(a.score)||0, description:a.description,
+               active:a.active !== false, joined: count[a.id] || 0 };
+    });
+  }else{
+    D.acts = demo.acts;
+  }
+  renderActs();
+}
+
+async function loadScans(){
+  var r = await tryApi({ action:'getAllScans', activityId:state.scanAct, per_page:80 });
+  if(r){
+    D.scans = (r.scans||[]).map(function(x){
+      return { logId:x.logId, studentId:x.studentId, studentName:x.studentName, dept:x.dept,
+               activityId:x.activityId, activityName:x.activityName,
+               score:Number(x.score)||0, date:x.date, time:x.time };
+    });
+  }else{
+    D.scans = demo.scans.filter(function(x){ return !state.scanAct || x.activityId===state.scanAct; }).slice(0,80);
+  }
+  renderScans();
+}
+
+async function loadRank(){
+  var r = await tryApi({ action:'getLeaderboard', limit:25 });
+  if(r){
+    D.rank = (r.leaderboard||[]).map(function(x){
+      return { name:x.name, dept:x.dept, scanCount:x.count, totalScore:x.score };
+    });
+  }else{
+    D.rank = demo.students.filter(function(s){ return s.scanCount>0; })
+      .sort(function(a,b){ return b.totalScore-a.totalScore; }).slice(0,25);
+  }
+  renderRank();
+}
+
+function demoDash(){
+  var today = demo.scans.filter(function(s){ return s.date.indexOf('14/')===0; }).length;
+  var byDept = {}, byAct = {};
+  demo.students.forEach(function(s){ byDept[s.dept] = (byDept[s.dept]||0)+1; });
+  demo.scans.forEach(function(s){ byAct[s.activityName] = (byAct[s.activityName]||0)+1; });
+  return { success:true, byDept:byDept, byAct:byAct, summary:{
+    students: demo.students.length,
+    activeStudents: demo.students.filter(function(s){return s.status==='active'}).length,
+    activities: demo.acts.length,
+    activeActivities: demo.acts.filter(function(a){return a.active}).length,
+    scans: demo.scans.length, todayScans: today,
+    totalScore: demo.scans.reduce(function(a,b){return a+b.score},0)
+  }};
+}
+
+/* ========================== แสดงผล ============================= */
+function render(){
+  if(document.getElementById('app').hidden) return;
+  if(state.tab==='dash')      renderDash();
+  if(state.tab==='students')  renderStudents();
+  if(state.tab==='acts')      renderActs();
+  if(state.tab==='scans')     renderScans();
+  if(state.tab==='rank')      renderRank();
+}
+
+function renderDash(){
+  var d = state.dash; if(!d) return;
+  var s = d.summary;
+  var tiles = [
+    {lab:t('tStudents'), num:s.students, sub:s.activeStudents + ' ' + t('active'), hi:false},
+    {lab:t('tActs'),     num:s.activeActivities, sub:(s.activities)+' '+t('of').replace('จาก','ทั้งหมด'), hi:false},
+    {lab:t('tScans'),    num:s.scans, sub:'', hi:false},
+    {lab:t('tToday'),    num:s.todayScans, sub:'', hi:true},
+    {lab:t('tScore'),    num:s.totalScore, sub:'', hi:false}
+  ];
+  document.getElementById('tiles').innerHTML = tiles.map(function(x){
+    return '<div class="tile'+(x.hi?' hi':'')+'"><div class="lab">'+esc(x.lab)+'</div>'+
+      '<div class="num">'+fmt(x.num)+'</div>'+(x.sub?'<div class="sub">'+esc(x.sub)+'</div>':'')+'</div>';
+  }).join('');
+  document.getElementById('deptBars').innerHTML = bars(d.byDept, false);
+  document.getElementById('actBars').innerHTML  = bars(d.byAct, true);
+}
+
+function bars(map, gold){
+  var keys = Object.keys(map||{}).sort(function(a,b){ return map[b]-map[a]; }).slice(0,7);
+  if(!keys.length) return '<div class="empty">'+t('noData')+'</div>';
+  var max = Math.max.apply(null, keys.map(function(k){return map[k]}));
+  return keys.map(function(k){
+    var pct = Math.round(map[k]/max*100);
+    return '<div class="bar-row"><span class="nm">'+esc(k)+'</span><span class="vl">'+fmt(map[k])+'</span>'+
+      '<span class="track"><span class="fill'+(gold?' g':'')+'" style="width:'+pct+'%"></span></span></div>';
+  }).join('');
+}
+
+function filterDemoStudents(){
+  var rows = demo.students.slice();
+  if(state.stuDept) rows = rows.filter(function(r){ return r.dept === state.stuDept; });
+  if(state.stuQ){
+    var q = state.stuQ.toLowerCase();
+    rows = rows.filter(function(r){ return (r.id+' '+r.name+' '+r.dept).toLowerCase().indexOf(q)>=0; });
+  }
+  return rows;
+}
+
+function renderStudents(){
+  var sel = document.getElementById('stuDept');
+  var list = D.depts.length ? D.depts : DEPTS;
+  if(sel.options.length <= 1 && list.length){
+    list.forEach(function(d){ var o=document.createElement('option'); o.value=d; o.textContent=d; sel.appendChild(o); });
+    sel.value = state.stuDept;
+  }
+  var page = D.students, pages = state.stuPages;
+  var tb = document.querySelector('#stuTable tbody');
+
+  tb.innerHTML = page.length ? page.map(function(r){
+    return '<tr><td>'+esc(r.id)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.dept)+'</td><td>'+r.year+'</td>'+
+      '<td class="num">'+fmt(r.totalScore)+'</td><td class="num">'+r.scanCount+'</td>'+
+      '<td><span class="pill '+(r.status==='active'?'ok':'off')+'">'+
+        t(r.status==='active'?'active':'inactive')+'</span></td>'+
+      '<td style="text-align:right"><button class="btn ghost sm" data-reset="'+esc(r.id)+'">'+t('reset')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="8"><div class="empty">'+t('noData')+'</div></td></tr>';
+
+  document.getElementById('stuPager').innerHTML =
+    '<button class="btn ghost sm" data-pg="-1"'+(state.stuPage<=1?' disabled':'')+'>'+t('prev')+'</button>'+
+    '<span>'+state.stuPage+' '+t('of')+' '+pages+' · '+fmt(state.stuTotal)+'</span>'+
+    '<button class="btn ghost sm" data-pg="1"'+(state.stuPage>=pages?' disabled':'')+'>'+t('next')+'</button>';
+}
+
+function renderActs(){
+  var tb = document.querySelector('#actTable tbody');
+  tb.innerHTML = D.acts.length ? D.acts.map(function(a){
+    return '<tr><td>'+esc(a.name)+'</td><td class="num">'+a.score+'</td><td class="num">'+a.joined+'</td>'+
+      '<td><span class="pill '+(a.active?'ok':'off')+'">'+t(a.active?'open':'close')+'</span></td>'+
+      '<td style="text-align:right"><button class="btn ghost sm" data-qr="'+esc(a.id)+'">QR</button>'+
+      ' <button class="btn ghost sm" data-toggleact="'+esc(a.id)+'">'+t(a.active?'close':'open')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="5"><div class="empty">'+t('noData')+'</div></td></tr>';
+
+  var sel = document.getElementById('scanAct');
+  var keep = sel.value;
+  while(sel.options.length > 1) sel.remove(1);
+  D.acts.forEach(function(a){ var o=document.createElement('option'); o.value=a.id; o.textContent=a.name; sel.appendChild(o); });
+  sel.value = keep;
+}
+
+function renderScans(){
+  var rows = D.scans;
+  var tb = document.querySelector('#scanTable tbody');
+  tb.innerHTML = rows.length ? rows.map(function(r){
+    return '<tr><td>'+esc(r.studentId)+'</td><td>'+esc(r.studentName)+'</td><td>'+esc(r.activityName)+'</td>'+
+      '<td class="num">'+r.score+'</td><td>'+esc(r.date+' '+r.time)+'</td>'+
+      '<td style="text-align:right"><button class="btn ghost sm" data-delscan="'+esc(r.logId)+'">'+t('del')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="6"><div class="empty">'+t('noData')+'</div></td></tr>';
+}
+
+function renderRank(){
+  var rows = D.rank;
+  if(!rows.length){
+    document.querySelector('#rankTable tbody').innerHTML =
+      '<tr><td colspan="5"><div class="empty">'+t('noData')+'</div></td></tr>';
+    return;
+  }
+  document.querySelector('#rankTable tbody').innerHTML = rows.map(function(r,i){
+    return '<tr><td class="rank'+(i<3?' top':'')+'">'+(i+1)+'</td><td>'+esc(r.name)+'</td>'+
+      '<td>'+esc(r.dept)+'</td><td class="num">'+r.scanCount+'</td><td class="num">'+fmt(r.totalScore)+'</td></tr>';
+  }).join('');
+}
+
+/* ======================= การโต้ตอบ ============================= */
+var qTimer;
+document.getElementById('stuQ').addEventListener('input', function(e){
+  state.stuQ = e.target.value; state.stuPage = 1;
+  clearTimeout(qTimer); qTimer = setTimeout(loadStudents, 280);
+});
+document.getElementById('stuDept').addEventListener('change', function(e){
+  state.stuDept = e.target.value; state.stuPage = 1; loadStudents();
+});
+document.getElementById('scanAct').addEventListener('change', function(e){
+  state.scanAct = e.target.value; loadScans();
+});
+document.getElementById('stuPager').addEventListener('click', function(e){
+  var b = e.target.closest('[data-pg]'); if(!b) return;
+  state.stuPage += Number(b.dataset.pg); loadStudents();
+});
+
+document.querySelector('#stuTable tbody').addEventListener('click', async function(e){
+  var b = e.target.closest('[data-reset]'); if(!b) return;
+  var id = b.dataset.reset;
+  if(b.dataset.armed !== '1'){ b.dataset.armed='1'; b.textContent = t('confirmDel'); return; }
+  var r = await tryApi({ action:'resetStudentPass', id:id });
+  toast(t('saved') + ' · ' + (r ? r.password : id));
+  b.dataset.armed=''; b.textContent = t('reset');
+});
+
+document.querySelector('#actTable tbody').addEventListener('click', async function(e){
+  var qr = e.target.closest('[data-qr]');
+  if(qr){
+    var a = D.acts.filter(function(x){ return x.id === qr.dataset.qr; })[0];
+    if(a) showQR(a);
+    return;
+  }
+  var tg = e.target.closest('[data-toggleact]');
+  if(tg){
+    var act = D.acts.filter(function(x){ return x.id === tg.dataset.toggleact; })[0];
+    if(!act) return;
+    var next = !act.active;
+    await tryApi({ action:'updateActivity', activityId:act.id, active:next });
+    act.active = next;
+    renderActs(); toast(t('saved'));
+  }
+});
+
+document.querySelector('#scanTable tbody').addEventListener('click', async function(e){
+  var b = e.target.closest('[data-delscan]'); if(!b) return;
+  if(b.dataset.armed !== '1'){ b.dataset.armed='1'; b.textContent = t('confirmDel'); return; }
+  var id = b.dataset.delscan;
+  await tryApi({ action:'deleteScan', logId:id });
+  D.scans = D.scans.filter(function(x){ return x.logId !== id; });
+  demo.scans = demo.scans.filter(function(x){ return x.logId !== id; });
+  renderScans(); toast(t('saved'));
+});
+
+document.getElementById('actForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var name = document.getElementById('actName').value.trim();
+  var score = Number(document.getElementById('actScore').value);
+  var desc = document.getElementById('actDesc').value.trim();
+  if(!name || !score) return;
+
+  var act = { id:'ACT'+Date.now(), name:name, score:score, description:desc, active:true, joined:0 };
+  var r = await tryApi({ action:'addActivity', name:name, score:score, description:desc,
+                         createdBy: auth && auth.staff_id });
+  if(r && r.activityId) act.id = r.activityId;
+  D.acts.unshift(act);
+  if(DEMO) demo.acts.unshift(act);
+  e.target.reset();
+  document.getElementById('actScore').value = 5;
+  renderActs(); showQR(act); toast(t('saved'));
+});
+
+function showQR(a){
+  var payload = JSON.stringify({ id:a.id, name:a.name, score:a.score });
+  document.getElementById('qrImg').src =
+    'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(payload);
+  document.getElementById('qrImg').alt = 'QR ' + a.name;
+  document.getElementById('qrName').textContent = a.name;
+  document.getElementById('qrScore').textContent = a.score + ' ' + t('cScore');
+  document.getElementById('qrId').textContent = a.id;
+  document.getElementById('qrOut').hidden = false;
+}
+
+async function doExport(type){
+  // หลังบ้านสร้าง CSV ให้ (ครบทุกแถว ไม่ใช่แค่หน้าที่เห็น)
+  var r = await tryApi({ action:'exportCSV', type:type, activityId: type==='scans' ? state.scanAct : '' });
+  if(r && r.csv){ copy(r.csv); return; }
+
+  var head, rows;
+  if(type==='students'){
+    head = [t('cId'),t('cName'),t('cDept'),t('cYear'),t('cScore'),t('cScans'),t('cStatus')];
+    rows = filterDemoStudents().map(function(x){ return [x.id,x.name,x.dept,x.year,x.totalScore,x.scanCount,x.status]; });
+  }else{
+    head = [t('cId'),t('cName'),t('cAct'),t('cScore'),t('cWhen')];
+    rows = demo.scans.filter(function(x){ return !state.scanAct || x.activityId===state.scanAct; })
+      .map(function(x){ return [x.studentId,x.studentName,x.activityName,x.score,x.date+' '+x.time]; });
+  }
+  var csv = [head].concat(rows).map(function(line){
+    return line.map(function(c){ var s=String(c); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',');
+  }).join('\r\n');
+  copy('﻿'+csv);
+}
+document.getElementById('stuExport').addEventListener('click', function(){ doExport('students'); });
+document.getElementById('scanExport').addEventListener('click', function(){ doExport('scans'); });
+
+function copy(text){
+  try{
+    navigator.clipboard.writeText(text).then(function(){ toast(t('copied')); },
+      function(){ toast(t('copied')); });
+  }catch(e){ toast(t('copied')); }
+}
+
+var toastTimer;
+function toast(m){
+  var old = document.querySelector('.toast'); if(old) old.remove();
+  var el = document.createElement('div'); el.className='toast'; el.textContent=m;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.remove(); }, 2200);
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
+
+applyLang();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="manifest.json">
+<title>สแกน QR — กิจการนิสิต มมส</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
+  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
+  --blue:#0ea5e9; --blue-soft:#e8f6fe; --sky:#38bdf8;
+  --good:#15785c; --good-bg:#e1f3ed;
+  --warn:#8f5f12; --warn-bg:#fbf0db;
+  --bad:#a32a3c;  --bad-bg:#fae7ea;
+  --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
+  --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
+  --r:24px; color-scheme:light; --r-s:14px; --r-p:999px;
+}
+
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+h1,h2,.dsp{font-family:var(--display);margin:0;text-wrap:balance}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:460px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+.crest{width:42px;height:42px;border-radius:var(--r-p);background:var(--blue);color:#fff;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px;flex:none}
+.top h1{font-size:18px;letter-spacing:-.2px}
+.top p{margin:0;font-size:12.5px;color:var(--ink-3)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(11,15,20,.04);margin-bottom:14px}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700;margin-bottom:5px}
+input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper)}
+.field{margin-bottom:13px}
+.btn{border:1px solid transparent;border-radius:var(--r-p);padding:11px 18px;font-weight:600;
+  cursor:pointer;background:var(--blue);color:#fff;width:100%}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--blue-soft);filter:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn+.btn{margin-top:9px}
+.seg{display:flex;gap:6px;background:var(--blue-soft);padding:4px;border-radius:var(--r-p);margin-bottom:16px}
+.seg button{flex:1;border:none;background:none;padding:8px;border-radius:var(--r-p);cursor:pointer;
+  font-weight:600;font-size:13.5px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--blue);box-shadow:0 2px 8px -4px rgba(14,26,46,.4)}
+
+/* กล้อง */
+.cam{position:relative;aspect-ratio:1;max-width:100%;border-radius:var(--r);overflow:hidden;
+  background:#000;margin-bottom:14px}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.reticle{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.9);border-radius:var(--r);
+  box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.reticle.lock{border-color:#7dd8fb}
+.camoff{position:absolute;inset:0;display:grid;place-items:center;color:#cfd8e6;font-size:13.5px;
+  text-align:center;padding:24px}
+
+.res{border-radius:var(--r);padding:16px;margin-bottom:14px;border:1px solid currentColor}
+.res.ok{background:var(--good-bg);color:var(--good)}
+.res.dup{background:var(--warn-bg);color:var(--warn)}
+.res.err{background:var(--bad-bg);color:var(--bad)}
+.res b{font-family:var(--display);font-size:16px;display:block}
+.res .big{font-family:var(--display);font-size:32px;font-weight:700;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.res .line{font-size:13px;opacity:.9;margin-top:3px}
+.hist{font-size:13.5px}
+.hist .it{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.hist .it:last-child{border-bottom:none}
+.hist .it .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist .it .sc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--blue);flex:none}
+.muted{color:var(--ink-3);font-size:13px}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.total .n{font-family:var(--display);font-size:30px;font-weight:700;color:var(--blue);
+  font-variant-numeric:tabular-nums}
+.err-msg{background:var(--bad-bg);color:var(--bad);border-radius:var(--r-s);padding:9px 13px;
+  font-size:13px;margin-bottom:12px}
+.row{display:flex;gap:9px}
+.row .btn{margin-top:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="crest">MSU</div>
+    <div style="min-width:0"><h1>สแกน QR กิจกรรม</h1><p>ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div><a class="btn ghost" href="index.html" style="margin-left:auto;flex:none;width:auto;padding:7px 15px;font-size:13px;text-decoration:none;white-space:nowrap">‹ หน้าแรก</a>
+  </div>
+
+  <!-- ===== เข้าสู่ระบบ ===== -->
+  <div id="gate">
+    <div class="seg">
+      <button type="button" id="modeStu" aria-pressed="true">นิสิต</button>
+      <button type="button" id="modeStaff" aria-pressed="false">เจ้าหน้าที่</button>
+    </div>
+
+    <form class="card" id="formStu">
+      <div id="errStu" class="err-msg" hidden></div>
+      <div class="field"><label for="sid">อีเมลมหาวิทยาลัย</label>
+        <input id="sid" type="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
+      <div class="field"><label for="spw">รหัสผ่าน</label>
+        <input id="spw" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit">เข้าสู่ระบบ</button>
+      <p class="muted" style="margin:12px 0 0">รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ</p>
+    </form>
+
+    <form class="card" id="formStaff" hidden>
+      <div id="errStaff" class="err-msg" hidden></div>
+      <div class="field"><label for="semail">อีเมลเจ้าหน้าที่</label>
+        <input id="semail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="spass">รหัสผ่าน</label>
+        <input id="spass" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+
+  <!-- ===== หน้าสแกน ===== -->
+  <div id="main" hidden>
+    <div class="card" id="whoCard" style="padding:14px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="min-width:0">
+          <b class="dsp" id="whoName" style="font-size:15px"></b>
+          <div class="muted" id="whoMeta"></div>
+        </div>
+        <button class="btn ghost" id="logout" style="width:auto;padding:6px 14px;font-size:13px">ออก</button>
+      </div>
+    </div>
+
+    <!-- เจ้าหน้าที่ต้องเลือกกิจกรรมก่อน -->
+    <div class="card" id="pickAct" hidden>
+      <div class="field" style="margin:0">
+        <label for="actSel">กิจกรรมที่กำลังรับสแกน</label>
+        <select id="actSel"><option value="">— เลือกกิจกรรม —</option></select>
+      </div>
+    </div>
+
+    <div class="cam">
+      <video id="video" playsinline muted></video>
+      <div class="reticle" id="reticle"></div>
+      <div class="camoff" id="camoff">กดปุ่มด้านล่างเพื่อเปิดกล้อง</div>
+    </div>
+    <canvas id="canvas" hidden></canvas>
+
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn" id="camBtn">เปิดกล้อง</button>
+      <button class="btn ghost" id="manualBtn" style="flex:none;width:auto;padding:11px 16px">พิมพ์เอง</button>
+    </div>
+
+    <form class="card" id="manualBox" hidden>
+      <div class="field" style="margin:0 0 11px">
+        <label for="manualIn" id="manualLab">รหัสกิจกรรม</label>
+        <input id="manualIn" placeholder="ACT1760012345678" required>
+      </div>
+      <button class="btn" type="submit">บันทึกการเข้าร่วม</button>
+    </form>
+
+    <div id="result"></div>
+
+    <div class="card" id="histCard">
+      <div class="total">
+        <span class="muted" id="histLab">คะแนนสะสม</span>
+        <span class="n" id="totalScore">0</span>
+      </div>
+      <div class="hist" id="hist"><p class="muted" style="margin:0">ยังไม่มีรายการ</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script>
+/* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
+var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่
+
+var mode = 'student';      // student | staff
+var me = null;             // ข้อมูลผู้ใช้
+var auth = null;           // staff_id + staff_pass (เฉพาะเจ้าหน้าที่)
+var stream = null, scanning = false, lastCode = '', lastAt = 0;
+
+async function api(payload){
+  if(!API_URL) throw new Error('no-api');
+  var res = await fetch(API_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({lang:'th'}, payload, auth||{})), redirect:'follow'
+  });
+  return res.json();
+}
+
+/* ====================== สลับโหมดล็อกอิน ======================= */
+function setMode(m){
+  mode = m;
+  document.getElementById('modeStu').setAttribute('aria-pressed', m==='student');
+  document.getElementById('modeStaff').setAttribute('aria-pressed', m==='staff');
+  document.getElementById('formStu').hidden = m!=='student';
+  document.getElementById('formStaff').hidden = m!=='staff';
+}
+document.getElementById('modeStu').addEventListener('click', function(){ setMode('student'); });
+document.getElementById('modeStaff').addEventListener('click', function(){ setMode('staff'); });
+
+/* ========================= เข้าสู่ระบบ ========================= */
+document.getElementById('formStu').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var box = document.getElementById('errStu'); box.hidden = true;
+  if(!API_URL){ box.textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html'; box.hidden = false; return; }
+  try{
+    var r = await api({ action:'login', id:document.getElementById('sid').value.trim(),
+                        password:document.getElementById('spw').value });
+    if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
+    me = r.student; mode = 'student';
+    enter();
+  }catch(err){ box.textContent = 'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy'; box.hidden = false; }
+});
+
+document.getElementById('formStaff').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var box = document.getElementById('errStaff'); box.hidden = true;
+  if(!API_URL){ box.textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html'; box.hidden = false; return; }
+  try{
+    var r = await api({ action:'staffLogin', email:document.getElementById('semail').value.trim(),
+                        password:document.getElementById('spass').value });
+    if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
+    me = r.staff; auth = r.auth; mode = 'staff';
+    enter();
+  }catch(err){ box.textContent = 'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy'; box.hidden = false; }
+});
+
+async function enter(){
+  document.getElementById('gate').hidden = true;
+  document.getElementById('main').hidden = false;
+
+  if(mode === 'student'){
+    document.getElementById('whoName').textContent = me.name;
+    document.getElementById('whoMeta').textContent = me.id + ' · ' + (me.dept||'');
+    document.getElementById('manualLab').textContent = 'รหัสกิจกรรม';
+    document.getElementById('manualIn').placeholder = 'ACT1760012345678';
+    document.getElementById('histLab').textContent = 'คะแนนสะสม';
+    loadHistory();
+  }else{
+    document.getElementById('whoName').textContent = me.name;
+    document.getElementById('whoMeta').textContent = (me.role==='admin'?'ผู้ดูแลระบบ':'เจ้าหน้าที่') + ' · ' + me.email;
+    document.getElementById('pickAct').hidden = false;
+    document.getElementById('manualLab').textContent = 'รหัสนิสิต';
+    document.getElementById('manualIn').placeholder = '65010000001';
+    document.getElementById('histLab').textContent = 'สแกนไปแล้ว (ครั้ง)';
+    document.getElementById('hist').innerHTML = '<p class="muted" style="margin:0">ยังไม่มีรายการในรอบนี้</p>';
+    loadActivities();
+  }
+}
+
+document.getElementById('logout').addEventListener('click', function(){
+  stopCam(); me = null; auth = null;
+  document.getElementById('main').hidden = true;
+  document.getElementById('gate').hidden = false;
+  document.getElementById('result').innerHTML = '';
+});
+
+/* ======================= โหลดข้อมูลประกอบ ===================== */
+async function loadActivities(){
+  try{
+    var r = await api({ action:'getActivities', activeOnly:'true' });
+    if(!r.success) return;
+    var sel = document.getElementById('actSel');
+    (r.activities||[]).forEach(function(a){
+      var o = document.createElement('option');
+      o.value = a.id; o.textContent = a.name + ' (' + a.score + ' คะแนน)';
+      sel.appendChild(o);
+    });
+  }catch(e){}
+}
+
+async function loadHistory(){
+  try{
+    var r = await api({ action:'getHistory', studentId: me.id });
+    if(!r.success) return;
+    document.getElementById('totalScore').textContent = r.totalScore || 0;
+    var h = document.getElementById('hist');
+    h.innerHTML = (r.history||[]).length
+      ? r.history.slice(0,12).map(function(x){
+          return '<div class="it"><span class="nm">'+esc(x.activityName)+
+                 '<br><span class="muted" style="font-size:12px">'+esc(x.date+' '+x.time)+'</span></span>'+
+                 '<span class="sc">+'+x.score+'</span></div>';
+        }).join('')
+      : '<p class="muted" style="margin:0">ยังไม่มีรายการ</p>';
+  }catch(e){}
+}
+
+/* =========================== กล้อง ============================ */
+var video = document.getElementById('video');
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d', { willReadFrequently:true });
+
+document.getElementById('camBtn').addEventListener('click', function(){
+  if(scanning) stopCam(); else startCam();
+});
+
+async function startCam(){
+  var btn = document.getElementById('camBtn');
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 } }, audio:false
+    });
+    video.srcObject = stream;
+    await video.play();
+    document.getElementById('camoff').hidden = true;
+    scanning = true; btn.textContent = 'ปิดกล้อง';
+    requestAnimationFrame(tick);
+  }catch(err){
+    document.getElementById('camoff').hidden = false;
+    document.getElementById('camoff').textContent =
+      'เปิดกล้องไม่ได้ — ต้องเปิดผ่าน https และอนุญาตให้ใช้กล้อง หรือกด "พิมพ์เอง"';
+  }
+}
+
+function stopCam(){
+  scanning = false;
+  if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+  video.srcObject = null;
+  document.getElementById('camoff').hidden = false;
+  document.getElementById('camoff').textContent = 'กดปุ่มด้านล่างเพื่อเปิดกล้อง';
+  document.getElementById('camBtn').textContent = 'เปิดกล้อง';
+  document.getElementById('reticle').classList.remove('lock');
+}
+
+function tick(){
+  if(!scanning) return;
+  if(video.readyState === video.HAVE_ENOUGH_DATA && window.jsQR){
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var code = jsQR(img.data, img.width, img.height, { inversionAttempts:'dontInvert' });
+    if(code && code.data){
+      var now = Date.now();
+      if(code.data !== lastCode || now - lastAt > 3000){
+        lastCode = code.data; lastAt = now;
+        document.getElementById('reticle').classList.add('lock');
+        beep();
+        handleCode(code.data);
+        setTimeout(function(){ document.getElementById('reticle').classList.remove('lock'); }, 700);
+      }
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function beep(){
+  try{
+    var A = new (window.AudioContext||window.webkitAudioContext)();
+    var o = A.createOscillator(), g = A.createGain();
+    o.connect(g); g.connect(A.destination);
+    o.frequency.value = 880; g.gain.value = 0.08;
+    o.start(); setTimeout(function(){ o.stop(); A.close(); }, 110);
+  }catch(e){}
+}
+
+/* ====================== ตีความ QR แล้วส่ง ===================== */
+function handleCode(raw){
+  var val = String(raw).trim();
+  // QR ที่ระบบออกให้เป็น JSON {id,name,score} — ถ้าไม่ใช่ก็ถือว่าเป็นรหัสล้วน
+  try{
+    var o = JSON.parse(val);
+    if(o && o.id) val = o.id;
+  }catch(e){}
+  submitScan(val);
+}
+
+document.getElementById('manualBtn').addEventListener('click', function(){
+  var b = document.getElementById('manualBox');
+  b.hidden = !b.hidden;
+  if(!b.hidden) document.getElementById('manualIn').focus();
+});
+
+document.getElementById('manualBox').addEventListener('submit', function(e){
+  e.preventDefault();
+  var v = document.getElementById('manualIn').value.trim();
+  if(v) submitScan(v);
+  document.getElementById('manualIn').value = '';
+});
+
+var sending = false;
+async function submitScan(code){
+  if(sending) return;
+  var studentId, activityId;
+
+  if(mode === 'student'){
+    studentId = me.id; activityId = code;
+  }else{
+    activityId = document.getElementById('actSel').value;
+    if(!activityId){ show('err','เลือกกิจกรรมก่อน','กดเลือกกิจกรรมที่ช่องด้านบน แล้วค่อยสแกน'); return; }
+    studentId = code;
+  }
+
+  sending = true;
+  try{
+    var r = await api({ action:'scan', studentId:studentId, activityId:activityId,
+                        scannedBy: mode==='staff' ? (auth && auth.staff_id) : studentId });
+    if(r.success){
+      show('ok', (r.activity && r.activity.name) || 'บันทึกแล้ว',
+           (mode==='staff' ? (r.studentName||studentId) + ' · ' : '') + r.date + ' ' + r.time,
+           '+' + r.score);
+      if(mode==='student'){ loadHistory(); }
+      else { pushStaffRow(r.studentName||studentId, r.score); }
+    }else if(r.duplicate){
+      show('dup','สแกนซ้ำ',
+           ((r.activity && r.activity.name) || '') + (r.date ? ' · บันทึกไว้แล้วเมื่อ '+r.date+' '+r.time : ''));
+    }else{
+      show('err','ไม่สำเร็จ', r.error || '');
+    }
+  }catch(err){
+    show('err','เชื่อมต่อไม่ได้','ตรวจสอบสัญญาณอินเทอร์เน็ตและค่า API_URL');
+  }
+  sending = false;
+}
+
+function show(kind, title, line, big){
+  document.getElementById('result').innerHTML =
+    '<div class="res '+kind+'">'+(big?'<span class="big">'+esc(big)+'</span>':'')+
+    '<b>'+esc(title)+'</b>'+(line?'<div class="line">'+esc(line)+'</div>':'')+'</div>';
+}
+
+var staffCount = 0;
+function pushStaffRow(name, score){
+  staffCount++;
+  document.getElementById('totalScore').textContent = staffCount;
+  var h = document.getElementById('hist');
+  if(staffCount === 1) h.innerHTML = '';
+  h.insertAdjacentHTML('afterbegin',
+    '<div class="it"><span class="nm">'+esc(name)+'</span><span class="sc">+'+score+'</span></div>');
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* ===================== ลงทะเบียน PWA ========================== */
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>
