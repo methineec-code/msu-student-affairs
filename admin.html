@@ -122,14 +122,14 @@ tbody tr:hover{background:var(--blue-soft)}
 <div id="gate">
   <form class="gate-card" id="loginForm">
     <div class="crest">MSU</div>
-    <h1>ผู้ดูแลระบบ</h1>
-    <p class="sub">เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin</p>
+    <h1 data-i18n="h1">ผู้ดูแลระบบ</h1>
+    <p class="sub" data-i18n="sub">เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin</p>
     <div id="loginErr" class="err" hidden></div>
-    <div class="field"><label for="email">อีเมล</label>
+    <div class="field"><label for="email" data-i18n="lbEmail">อีเมล</label>
       <input id="email" type="email" autocomplete="username" placeholder="name@msu.ac.th" required></div>
-    <div class="field"><label for="pass">รหัสผ่าน</label>
+    <div class="field"><label for="pass" data-i18n="lbPass">รหัสผ่าน</label>
       <input id="pass" type="password" autocomplete="current-password" required></div>
-    <button class="btn wide" type="submit">เข้าสู่ระบบ</button>
+    <button class="btn wide" type="submit" data-i18n="btnLogin">เข้าสู่ระบบ</button>
     
   </form>
 </div>
@@ -137,85 +137,86 @@ tbody tr:hover{background:var(--blue-soft)}
 <div id="app" hidden>
   <nav class="rail">
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
+    <select id="lang" aria-label="Language" style="width:100%;margin-bottom:8px;padding:7px 10px;font-size:13px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper)"><option value="th">ไทย</option><option value="en">English</option><option value="zh">中文</option></select>
     
-    <button class="navb" data-tab="staff">เจ้าหน้าที่</button>
-    <button class="navb" data-tab="ann">ประกาศ</button>
-    <button class="navb" data-tab="settings">ตั้งค่าระบบ</button>
-    <button class="navb" data-tab="logs">ประวัติการใช้งาน</button>
-    <div class="foot"><button class="btn ghost sm" id="logout" style="width:100%">ออกจากระบบ</button></div>
+    <button class="navb" data-tab="staff" data-i18n="navStaff">เจ้าหน้าที่</button>
+    <button class="navb" data-tab="ann" data-i18n="navAnn">ประกาศ</button>
+    <button class="navb" data-tab="settings" data-i18n="navSet">ตั้งค่าระบบ</button>
+    <button class="navb" data-tab="logs" data-i18n="navLog">ประวัติการใช้งาน</button>
+    <div class="foot"><button class="btn ghost sm" id="logout" style="width:100%" data-i18n="btnOut">ออกจากระบบ</button></div>
   </nav>
 
   <main>
     <!-- เจ้าหน้าที่ -->
     <section data-pane="staff" hidden>
-      <div class="page-head"><div class="kick">สิทธิ์การเข้าถึง</div><h2>เจ้าหน้าที่</h2></div>
+      <div class="page-head"><div class="kick" data-i18n="kickStaff">สิทธิ์การเข้าถึง</div><h2 data-i18n="navStaff">เจ้าหน้าที่</h2></div>
       <div class="cols">
         <div class="panel">
           <h3 id="staffFormTitle">เพิ่มเจ้าหน้าที่</h3>
           <form id="staffForm">
             <input type="hidden" id="staffIdEdit">
-            <div class="field"><label for="stName">ชื่อ-สกุล</label><input id="stName" required></div>
-            <div class="field"><label for="stEmail">อีเมล</label><input id="stEmail" type="email" required></div>
+            <div class="field"><label for="stName" data-i18n="lbName">ชื่อ-สกุล</label><input id="stName" required></div>
+            <div class="field"><label for="stEmail" data-i18n="lbEmail">อีเมล</label><input id="stEmail" type="email" required></div>
             <div class="row2">
-              <div class="field"><label for="stRole">สิทธิ์</label>
-                <select id="stRole"><option value="staff">เจ้าหน้าที่</option><option value="admin">ผู้ดูแลระบบ</option></select></div>
-              <div class="field"><label for="stStatus">สถานะ</label>
-                <select id="stStatus"><option value="active">ใช้งาน</option><option value="inactive">ระงับ</option></select></div>
+              <div class="field"><label for="stRole" data-i18n="lbRole">สิทธิ์</label>
+                <select id="stRole"><option value="staff" data-i18n="roleStaff">เจ้าหน้าที่</option><option value="admin" data-i18n="roleAdmin">ผู้ดูแลระบบ</option></select></div>
+              <div class="field"><label for="stStatus" data-i18n="lbStatus">สถานะ</label>
+                <select id="stStatus"><option value="active" data-i18n="stActive">ใช้งาน</option><option value="inactive" data-i18n="stOff">ระงับ</option></select></div>
             </div>
-            <div class="field"><label for="stPass">รหัสผ่าน</label>
+            <div class="field"><label for="stPass" data-i18n="lbPass">รหัสผ่าน</label>
               <input id="stPass" placeholder="เว้นว่างเพื่อสุ่มให้"></div>
-            <button class="btn wide" type="submit">บันทึก</button>
-            <button class="btn ghost wide" type="button" id="staffCancel" hidden style="margin-top:9px">ยกเลิกการแก้ไข</button>
+            <button class="btn wide" type="submit" data-i18n="btnSave">บันทึก</button>
+            <button class="btn ghost wide" type="button" id="staffCancel" hidden style="margin-top:9px" data-i18n="btnCancel">ยกเลิกการแก้ไข</button>
           </form>
         </div>
         <div class="tbl-wrap"><table id="staffTable"><thead><tr>
-          <th>ชื่อ-สกุล</th><th>อีเมล</th><th>สิทธิ์</th><th>สถานะ</th><th></th>
+          <th data-i18n="lbName">ชื่อ-สกุล</th><th data-i18n="lbEmail">อีเมล</th><th data-i18n="lbRole">สิทธิ์</th><th data-i18n="lbStatus">สถานะ</th><th></th>
         </tr></thead><tbody></tbody></table></div>
       </div>
     </section>
 
     <!-- ประกาศ -->
     <section data-pane="ann" hidden>
-      <div class="page-head"><div class="kick">ข่าวสารถึงผู้ใช้</div><h2>ประกาศ</h2></div>
+      <div class="page-head"><div class="kick" data-i18n="kickAnn">ข่าวสารถึงผู้ใช้</div><h2 data-i18n="navAnn">ประกาศ</h2></div>
       <div class="cols">
         <div class="panel">
-          <h3>เขียนประกาศใหม่</h3>
+          <h3 data-i18n="annNew">เขียนประกาศใหม่</h3>
           <form id="annForm">
-            <div class="field"><label for="anTh">หัวข้อ (ไทย)</label><input id="anTh" required></div>
-            <div class="field"><label for="anBodyTh">เนื้อหา (ไทย)</label><textarea id="anBodyTh" required></textarea></div>
-            <div class="field"><label for="anEn">หัวข้อ (English)</label><input id="anEn"></div>
-            <div class="field"><label for="anBodyEn">เนื้อหา (English)</label><textarea id="anBodyEn"></textarea></div>
-            <div class="field"><label for="anZh">หัวข้อ (中文)</label><input id="anZh"></div>
-            <div class="field"><label for="anBodyZh">เนื้อหา (中文)</label><textarea id="anBodyZh"></textarea></div>
+            <div class="field"><label for="anTh" data-i18n="anTh">หัวข้อ (ไทย)</label><input id="anTh" required></div>
+            <div class="field"><label for="anBodyTh" data-i18n="anBodyTh">เนื้อหา (ไทย)</label><textarea id="anBodyTh" required></textarea></div>
+            <div class="field"><label for="anEn" data-i18n="anEn">หัวข้อ (English)</label><input id="anEn"></div>
+            <div class="field"><label for="anBodyEn" data-i18n="anBodyEn">เนื้อหา (English)</label><textarea id="anBodyEn"></textarea></div>
+            <div class="field"><label for="anZh" data-i18n="anZh">หัวข้อ (中文)</label><input id="anZh"></div>
+            <div class="field"><label for="anBodyZh" data-i18n="anBodyZh">เนื้อหา (中文)</label><textarea id="anBodyZh"></textarea></div>
             <div class="row2">
-              <div class="field"><label for="anAud">แสดงกับใคร</label>
-                <select id="anAud"><option value="all">ทุกคน</option><option value="student">นิสิต</option><option value="staff">เจ้าหน้าที่</option></select></div>
-              <div class="field"><label for="anPin">ปักหมุด</label>
-                <select id="anPin"><option value="false">ไม่ปัก</option><option value="true">ปักไว้บนสุด</option></select></div>
+              <div class="field"><label for="anAud" data-i18n="lbAud">แสดงกับใคร</label>
+                <select id="anAud"><option value="all" data-i18n="audAll">ทุกคน</option><option value="student" data-i18n="audStu">นิสิต</option><option value="staff" data-i18n="roleStaff">เจ้าหน้าที่</option></select></div>
+              <div class="field"><label for="anPin" data-i18n="lbPin">ปักหมุด</label>
+                <select id="anPin"><option value="false" data-i18n="pinNo">ไม่ปัก</option><option value="true" data-i18n="pinYes">ปักไว้บนสุด</option></select></div>
             </div>
-            <button class="btn wide" type="submit">เผยแพร่</button>
+            <button class="btn wide" type="submit" data-i18n="btnPub">เผยแพร่</button>
           </form>
         </div>
         <div class="tbl-wrap"><table id="annTable"><thead><tr>
-          <th>หัวข้อ</th><th>แสดงกับ</th><th>วันที่</th><th></th>
+          <th data-i18n="thTitle">หัวข้อ</th><th data-i18n="thAud">แสดงกับ</th><th data-i18n="thDate">วันที่</th><th></th>
         </tr></thead><tbody></tbody></table></div>
       </div>
     </section>
 
     <!-- ตั้งค่า -->
     <section data-pane="settings" hidden>
-      <div class="page-head"><div class="kick">ค่ากลางของระบบ</div><h2>ตั้งค่าระบบ</h2></div>
+      <div class="page-head"><div class="kick" data-i18n="kickSet">ค่ากลางของระบบ</div><h2 data-i18n="navSet">ตั้งค่าระบบ</h2></div>
       <div class="panel" style="max-width:720px">
-        <div id="setList"><div class="empty">กำลังโหลด…</div></div>
-        <p class="muted" style="margin:14px 0 0">แก้ค่าแล้วกดบันทึกทีละบรรทัด ค่าเหล่านี้อ่านได้จากทุกหน้าผ่าน action <code>getSettings</code></p>
+        <div id="setList"><div class="empty" data-i18n="loading">กำลังโหลด…</div></div>
+        <p class="muted" style="margin:14px 0 0" data-i18n="setNote">แก้ค่าแล้วกดบันทึกทีละบรรทัด</p>
       </div>
     </section>
 
     <!-- log -->
     <section data-pane="logs" hidden>
-      <div class="page-head"><div class="kick">ตรวจสอบย้อนหลัง</div><h2>ประวัติการใช้งาน</h2></div>
+      <div class="page-head"><div class="kick" data-i18n="kickLog">ตรวจสอบย้อนหลัง</div><h2 data-i18n="navLog">ประวัติการใช้งาน</h2></div>
       <div class="tbl-wrap"><table id="logTable"><thead><tr>
-        <th>เวลา</th><th>ผู้ใช้</th><th>สิทธิ์</th><th>การกระทำ</th><th>เป้าหมาย</th><th>ผล</th>
+        <th data-i18n="thTime">เวลา</th><th data-i18n="thUser">ผู้ใช้</th><th data-i18n="lbRole">สิทธิ์</th><th data-i18n="thAction">การกระทำ</th><th data-i18n="thTarget">เป้าหมาย</th><th data-i18n="thResult">ผล</th>
       </tr></thead><tbody></tbody></table></div>
     </section>
   </main>
@@ -225,6 +226,85 @@ tbody tr:hover{background:var(--blue-soft)}
 /* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่
 
+
+var I18N={
+ th:{h1:'ผู้ดูแลระบบ',sub:'เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin',lbEmail:'อีเมล',lbPass:'รหัสผ่าน',
+  btnLogin:'เข้าสู่ระบบ',btnOut:'ออกจากระบบ',navStaff:'เจ้าหน้าที่',navAnn:'ประกาศ',
+  navSet:'ตั้งค่าระบบ',navLog:'ประวัติการใช้งาน',kickStaff:'สิทธิ์การเข้าถึง',kickAnn:'ข่าวสารถึงผู้ใช้',
+  kickSet:'ค่ากลางของระบบ',kickLog:'ตรวจสอบย้อนหลัง',lbName:'ชื่อ-สกุล',lbRole:'สิทธิ์',lbStatus:'สถานะ',
+  roleStaff:'เจ้าหน้าที่',roleAdmin:'ผู้ดูแลระบบ',stActive:'ใช้งาน',stOff:'ระงับ',
+  btnSave:'บันทึก',btnCancel:'ยกเลิกการแก้ไข',btnPub:'เผยแพร่',btnEdit:'แก้ไข',btnSuspend:'ระงับ',
+  btnDel:'ลบ',again:'กดอีกครั้ง',addStaff:'เพิ่มเจ้าหน้าที่',editPre:'แก้ไข: ',
+  phRandom:'เว้นว่างเพื่อสุ่มให้',phKeep:'เว้นว่างเพื่อใช้รหัสเดิม',
+  annNew:'เขียนประกาศใหม่',anTh:'หัวข้อ (ไทย)',anBodyTh:'เนื้อหา (ไทย)',anEn:'หัวข้อ (English)',
+  anBodyEn:'เนื้อหา (English)',anZh:'หัวข้อ (中文)',anBodyZh:'เนื้อหา (中文)',
+  lbAud:'แสดงกับใคร',audAll:'ทุกคน',audStu:'นิสิต',lbPin:'ปักหมุด',pinNo:'ไม่ปัก',pinYes:'ปักไว้บนสุด',
+  pinned:'ปักหมุด',thTitle:'หัวข้อ',thAud:'แสดงกับ',thDate:'วันที่',
+  thTime:'เวลา',thUser:'ผู้ใช้',thAction:'การกระทำ',thTarget:'เป้าหมาย',thResult:'ผล',
+  loading:'กำลังโหลด…',setNote:'แก้ค่าแล้วกดบันทึกทีละบรรทัด',
+  noStaff:'ยังไม่มีเจ้าหน้าที่',noAnn:'ยังไม่มีประกาศ',noLog:'ยังไม่มีประวัติ',
+  noSet:'ยังไม่มีค่าตั้งค่า — รัน setupSheets() ใน Apps Script ก่อน',
+  errApi:'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ admin.html',
+  errConn:'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy',
+  errRole:'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ',
+  okSaved:'บันทึกแล้ว',okPass:'บันทึกแล้ว · รหัสผ่าน ',okSuspend:'ระงับบัญชีแล้ว',
+  okDel:'ลบแล้ว',okPub:'เผยแพร่แล้ว',okSet:'บันทึกแล้ว: '},
+ en:{h1:'Administrator',sub:'Admin accounts only',lbEmail:'Email',lbPass:'Password',
+  btnLogin:'Sign in',btnOut:'Sign out',navStaff:'Staff',navAnn:'Announcements',
+  navSet:'System settings',navLog:'Activity log',kickStaff:'Access control',kickAnn:'News for users',
+  kickSet:'System-wide values',kickLog:'Audit trail',lbName:'Full name',lbRole:'Role',lbStatus:'Status',
+  roleStaff:'Staff',roleAdmin:'Administrator',stActive:'Active',stOff:'Suspended',
+  btnSave:'Save',btnCancel:'Cancel editing',btnPub:'Publish',btnEdit:'Edit',btnSuspend:'Suspend',
+  btnDel:'Delete',again:'Tap again',addStaff:'Add staff member',editPre:'Editing: ',
+  phRandom:'Leave blank to generate one',phKeep:'Leave blank to keep current',
+  annNew:'Write an announcement',anTh:'Title (Thai)',anBodyTh:'Body (Thai)',anEn:'Title (English)',
+  anBodyEn:'Body (English)',anZh:'Title (Chinese)',anBodyZh:'Body (Chinese)',
+  lbAud:'Audience',audAll:'Everyone',audStu:'Students',lbPin:'Pin',pinNo:'No',pinYes:'Pin to top',
+  pinned:'Pinned',thTitle:'Title',thAud:'Audience',thDate:'Date',
+  thTime:'Time',thUser:'User',thAction:'Action',thTarget:'Target',thResult:'Result',
+  loading:'Loading…',setNote:'Edit a value and save it row by row.',
+  noStaff:'No staff members yet',noAnn:'No announcements yet',noLog:'No history yet',
+  noSet:'No settings yet — run setupSheets() in Apps Script first',
+  errApi:'API_URL is not set in admin.html',
+  errConn:'Cannot reach the backend. Check API_URL and the deployment.',
+  errRole:'This account does not have administrator rights',
+  okSaved:'Saved',okPass:'Saved · password ',okSuspend:'Account suspended',
+  okDel:'Deleted',okPub:'Published',okSet:'Saved: '},
+ zh:{h1:'管理员',sub:'仅限具有管理员权限的账号',lbEmail:'邮箱',lbPass:'密码',
+  btnLogin:'登录',btnOut:'退出登录',navStaff:'职员',navAnn:'公告',
+  navSet:'系统设置',navLog:'操作记录',kickStaff:'权限管理',kickAnn:'用户通知',
+  kickSet:'系统参数',kickLog:'审计记录',lbName:'姓名',lbRole:'权限',lbStatus:'状态',
+  roleStaff:'职员',roleAdmin:'管理员',stActive:'启用',stOff:'停用',
+  btnSave:'保存',btnCancel:'取消编辑',btnPub:'发布',btnEdit:'编辑',btnSuspend:'停用',
+  btnDel:'删除',again:'再按一次',addStaff:'添加职员',editPre:'编辑：',
+  phRandom:'留空则自动生成',phKeep:'留空则保持原密码',
+  annNew:'撰写新公告',anTh:'标题（泰文）',anBodyTh:'内容（泰文）',anEn:'标题（英文）',
+  anBodyEn:'内容（英文）',anZh:'标题（中文）',anBodyZh:'内容（中文）',
+  lbAud:'发布对象',audAll:'所有人',audStu:'学生',lbPin:'置顶',pinNo:'不置顶',pinYes:'置顶显示',
+  pinned:'置顶',thTitle:'标题',thAud:'对象',thDate:'日期',
+  thTime:'时间',thUser:'用户',thAction:'操作',thTarget:'目标',thResult:'结果',
+  loading:'加载中…',setNote:'修改后逐行点击保存。',
+  noStaff:'暂无职员',noAnn:'暂无公告',noLog:'暂无记录',
+  noSet:'暂无设置 — 请先在 Apps Script 运行 setupSheets()',
+  errApi:'admin.html 中尚未设置 API_URL',
+  errConn:'无法连接后端，请检查 API_URL 与部署状态',
+  errRole:'该账号没有管理员权限',
+  okSaved:'已保存',okPass:'已保存 · 密码 ',okSuspend:'账号已停用',
+  okDel:'已删除',okPub:'已发布',okSet:'已保存：'}
+};
+var lang='th';
+try{ var _sv=localStorage.getItem('msu_lang'); if(_sv&&I18N[_sv]) lang=_sv; }catch(e){}
+function t(k){ return (I18N[lang]&&I18N[lang][k]) || I18N.th[k] || k; }
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.title=t('h1')+' — MSU';
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  var fid=document.getElementById('staffIdEdit').value;
+  document.getElementById('stPass').placeholder = fid? t('phKeep') : t('phRandom');
+  if(!fid) document.getElementById('staffFormTitle').textContent = t('addStaff');
+  if(me) go(tab);
+}
+
 var auth = null, me = null, tab = 'staff';
 var cache = { staff:[], ann:[], settings:[] };
 
@@ -232,7 +312,7 @@ async function api(payload){
   if(!API_URL) throw new Error('no-api');
   var res = await fetch(API_URL, {
     method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify(Object.assign({lang:'th'}, payload, auth||{})), redirect:'follow'
+    body: JSON.stringify(Object.assign({lang:lang}, payload, auth||{})), redirect:'follow'
   });
   return res.json();
 }
@@ -243,7 +323,7 @@ async function call(payload){
     if(!r.success && r.error) toast(r.error);
     return r;
   }catch(e){
-    toast('เชื่อมต่อหลังบ้านไม่ได้ — ตรวจสอบ API_URL และการ Deploy');
+    toast(t('errConn'));
     return { success:false };
   }
 }
@@ -252,26 +332,32 @@ async function call(payload){
 document.getElementById('loginForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var box = document.getElementById('loginErr'); box.hidden = true;
-  if(!API_URL){ box.textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ admin.html'; box.hidden = false; return; }
+  if(!API_URL){ box.textContent = t('errApi'); box.hidden = false; return; }
   try{
     var r = await api({ action:'staffLogin', email:document.getElementById('email').value.trim(),
                         password:document.getElementById('pass').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
-    if(r.staff.role !== 'admin'){ box.textContent = 'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ'; box.hidden = false; return; }
+    if(r.staff.role !== 'admin'){ box.textContent = t('errRole'); box.hidden = false; return; }
     auth = r.auth; me = r.staff;
+    try{ sessionStorage.setItem('msu_staff', JSON.stringify({staff:r.staff,auth:r.auth})); }catch(_){}
     document.getElementById('gate').hidden = true;
     document.getElementById('app').hidden = false;
     document.getElementById('whoName').textContent = me.name;
     document.getElementById('whoRole').textContent = me.email;
     go('staff');
   }catch(err){
-    box.textContent = 'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy';
+    box.textContent = t('errConn');
     box.hidden = false;
   }
 });
 
+document.getElementById('lang').value=lang;
+document.getElementById('lang').addEventListener('change',function(e){lang=e.target.value;
+  try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang();});
+
 document.getElementById('logout').addEventListener('click', function(){
   auth = null; me = null;
+  try{ sessionStorage.removeItem('msu_staff'); sessionStorage.removeItem('msu_stu'); }catch(_){}
   document.getElementById('app').hidden = true;
   document.getElementById('gate').hidden = false;
 });
@@ -300,13 +386,13 @@ async function loadStaff(){
   tb.innerHTML = cache.staff.length ? cache.staff.map(function(s){
     return '<tr><td>'+esc(s.name)+'</td><td>'+esc(s.email)+'</td>'+
       '<td><span class="pill '+(s.role==='admin'?'adm':'ok')+'">'+
-        (s.role==='admin'?'ผู้ดูแลระบบ':'เจ้าหน้าที่')+'</span></td>'+
+        (s.role==='admin'?t('roleAdmin'):t('roleStaff'))+'</span></td>'+
       '<td><span class="pill '+(s.status==='inactive'?'off':'ok')+'">'+
-        (s.status==='inactive'?'ระงับ':'ใช้งาน')+'</span></td>'+
+        (s.status==='inactive'?t('stOff'):t('stActive'))+'</span></td>'+
       '<td style="text-align:right;white-space:nowrap">'+
-        '<button class="btn ghost sm" data-edit="'+esc(s.id)+'">แก้ไข</button> '+
-        '<button class="btn ghost sm" data-off="'+esc(s.id)+'">ระงับ</button></td></tr>';
-  }).join('') : '<tr><td colspan="5"><div class="empty">ยังไม่มีเจ้าหน้าที่</div></td></tr>';
+        '<button class="btn ghost sm" data-edit="'+esc(s.id)+'">'+t('btnEdit')+'</button> '+
+        '<button class="btn ghost sm" data-off="'+esc(s.id)+'">'+t('btnSuspend')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="5"><div class="empty">'+t('noStaff')+'</div></td></tr>';
 }
 
 document.querySelector('#staffTable tbody').addEventListener('click', async function(e){
@@ -320,17 +406,17 @@ document.querySelector('#staffTable tbody').addEventListener('click', async func
     document.getElementById('stRole').value = s.role;
     document.getElementById('stStatus').value = s.status || 'active';
     document.getElementById('stPass').value = '';
-    document.getElementById('stPass').placeholder = 'เว้นว่างเพื่อใช้รหัสเดิม';
-    document.getElementById('staffFormTitle').textContent = 'แก้ไข: ' + s.name;
+    document.getElementById('stPass').placeholder = t('phKeep');
+    document.getElementById('staffFormTitle').textContent = t('editPre') + s.name;
     document.getElementById('staffCancel').hidden = false;
     window.scrollTo({ top:0, behavior:'smooth' });
     return;
   }
   var off = e.target.closest('[data-off]');
   if(off){
-    if(off.dataset.armed !== '1'){ off.dataset.armed='1'; off.textContent='กดอีกครั้ง'; return; }
+    if(off.dataset.armed !== '1'){ off.dataset.armed='1'; off.textContent=t('again'); return; }
     await call({ action:'delStaff', staffIdEdit: off.dataset.off });
-    toast('ระงับบัญชีแล้ว');
+    toast(t('okSuspend'));
     loadStaff();
   }
 });
@@ -339,8 +425,8 @@ document.getElementById('staffCancel').addEventListener('click', resetStaffForm)
 function resetStaffForm(){
   document.getElementById('staffForm').reset();
   document.getElementById('staffIdEdit').value = '';
-  document.getElementById('stPass').placeholder = 'เว้นว่างเพื่อสุ่มให้';
-  document.getElementById('staffFormTitle').textContent = 'เพิ่มเจ้าหน้าที่';
+  document.getElementById('stPass').placeholder = t('phRandom');
+  document.getElementById('staffFormTitle').textContent = t('addStaff');
   document.getElementById('staffCancel').hidden = true;
 }
 
@@ -358,7 +444,7 @@ document.getElementById('staffForm').addEventListener('submit', async function(e
   if(id) payload.staffIdEdit = id;
   var r = await call(payload);
   if(r && r.success){
-    toast(r.password ? 'บันทึกแล้ว · รหัสผ่าน ' + r.password : 'บันทึกแล้ว');
+    toast(r.password ? t('okPass') + r.password : t('okSaved'));
     resetStaffForm();
     loadStaff();
   }
@@ -370,19 +456,19 @@ async function loadAnn(){
   cache.ann = (r && r.announcements) || [];
   var tb = document.querySelector('#annTable tbody');
   tb.innerHTML = cache.ann.length ? cache.ann.map(function(a){
-    var aud = a.audience==='student' ? 'นิสิต' : a.audience==='staff' ? 'เจ้าหน้าที่' : 'ทุกคน';
-    return '<tr><td>'+(a.pin?'<span class="pill adm">ปักหมุด</span> ':'')+esc(a.title.th||'')+
-      '<div class="muted" style="margin-top:2px">'+esc(String(a.body.th||'').slice(0,70))+'</div></td>'+
+    var aud = a.audience==='student' ? t('audStu') : a.audience==='staff' ? t('roleStaff') : t('audAll');
+    return '<tr><td>'+(a.pin?'<span class="pill adm">'+t('pinned')+'</span> ':'')+esc((a.title&&(a.title[lang]||a.title.th))||'')+
+      '<div class="muted" style="margin-top:2px">'+esc(String((a.body&&(a.body[lang]||a.body.th))||'').slice(0,70))+'</div></td>'+
       '<td>'+aud+'</td><td>'+esc(a.createdDate||'')+'</td>'+
-      '<td style="text-align:right"><button class="btn ghost sm" data-delann="'+esc(a.id)+'">ลบ</button></td></tr>';
-  }).join('') : '<tr><td colspan="4"><div class="empty">ยังไม่มีประกาศ</div></td></tr>';
+      '<td style="text-align:right"><button class="btn ghost sm" data-delann="'+esc(a.id)+'">'+t('btnDel')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="4"><div class="empty">'+t('noAnn')+'</div></td></tr>';
 }
 
 document.querySelector('#annTable tbody').addEventListener('click', async function(e){
   var b = e.target.closest('[data-delann]'); if(!b) return;
-  if(b.dataset.armed !== '1'){ b.dataset.armed='1'; b.textContent='กดอีกครั้ง'; return; }
+  if(b.dataset.armed !== '1'){ b.dataset.armed='1'; b.textContent=t('again'); return; }
   await call({ action:'delAnnouncement', annId:b.dataset.delann });
-  toast('ลบแล้ว'); loadAnn();
+  toast(t('okDel')); loadAnn();
 });
 
 document.getElementById('annForm').addEventListener('submit', async function(e){
@@ -398,7 +484,7 @@ document.getElementById('annForm').addEventListener('submit', async function(e){
     audience: document.getElementById('anAud').value,
     pin:      document.getElementById('anPin').value === 'true'
   });
-  if(r && r.success){ toast('เผยแพร่แล้ว'); e.target.reset(); loadAnn(); }
+  if(r && r.success){ toast(t('okPub')); e.target.reset(); loadAnn(); }
 });
 
 /* =========================== ตั้งค่า =========================== */
@@ -407,11 +493,11 @@ async function loadSettings(){
   cache.settings = (r && r.rows) || [];
   var box = document.getElementById('setList');
   box.innerHTML = cache.settings.length ? cache.settings.map(function(s){
-    return '<div class="setrow"><div><b>'+esc((s.label&&s.label.th)||s.key)+'</b>'+
+    return '<div class="setrow"><div><b>'+esc((s.label&&(s.label[lang]||s.label.th))||s.key)+'</b>'+
       '<div class="muted" style="font-size:12px">'+esc(s.key)+'</div></div>'+
       '<input value="'+esc(s.value)+'" data-key="'+esc(s.key)+'">'+
-      '<button class="btn sm" data-save="'+esc(s.key)+'">บันทึก</button></div>';
-  }).join('') : '<div class="empty">ยังไม่มีค่าตั้งค่า — รัน setupSheets() ใน Apps Script ก่อน</div>';
+      '<button class="btn sm" data-save="'+esc(s.key)+'">'+t('btnSave')+'</button></div>';
+  }).join('') : '<div class="empty">'+t('noSet')+'</div>';
 }
 
 document.getElementById('setList').addEventListener('click', async function(e){
@@ -419,7 +505,7 @@ document.getElementById('setList').addEventListener('click', async function(e){
   var key = b.dataset.save;
   var input = document.querySelector('[data-key="'+key+'"]');
   var r = await call({ action:'saveSetting', key:key, value:input.value });
-  if(r && r.success) toast('บันทึก ' + key + ' แล้ว');
+  if(r && r.success) toast(t('okSet') + key);
 });
 
 /* ============================ log ============================== */
@@ -430,7 +516,7 @@ async function loadLogs(){
     return '<tr><td style="white-space:nowrap">'+esc(l.timestamp)+'</td><td>'+esc(l.actor)+'</td>'+
       '<td>'+esc(l.role)+'</td><td>'+esc(l.action)+'</td><td>'+esc(l.target)+'</td>'+
       '<td><span class="pill '+(l.result==='success'?'ok':'off')+'">'+esc(l.result)+'</span></td></tr>';
-  }).join('') : '<tr><td colspan="6"><div class="empty">ยังไม่มีประวัติ</div></td></tr>';
+  }).join('') : '<tr><td colspan="6"><div class="empty">'+t('noLog')+'</div></td></tr>';
 }
 
 /* =========================== helpers =========================== */
@@ -444,6 +530,18 @@ function toast(m){
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* จำการล็อกอินข้ามหน้า (เฉพาะ admin) */
+try{ var _ss=sessionStorage.getItem('msu_staff');
+  if(_ss){ var _o=JSON.parse(_ss);
+    if(_o.staff && _o.staff.role==='admin'){ auth=_o.auth; me=_o.staff;
+      document.getElementById('gate').hidden=true;
+      document.getElementById('app').hidden=false;
+      document.getElementById('whoName').textContent=me.name;
+      document.getElementById('whoRole').textContent=me.email;
+      go('staff'); } } }catch(e){}
+
+applyLang();
 
 if('serviceWorker' in navigator && location.protocol === 'https:'){
   navigator.serviceWorker.register('sw.js').catch(function(){});

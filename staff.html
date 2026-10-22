@@ -190,6 +190,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
     <button class="navb" data-tab="acts"><span class="ic">◆</span><span data-i18n="tabActs">กิจกรรม</span></button>
     <button class="navb" data-tab="scans"><span class="ic">⊞</span><span data-i18n="tabScans">การสแกน</span></button>
     <button class="navb" data-tab="rank"><span class="ic">▲</span><span data-i18n="tabRank">อันดับคะแนน</span></button>
+    <a class="navb" href="scan.html" style="text-decoration:none"><span class="ic">▣</span><span data-i18n="goScan">สแกน QR</span></a>
     <div class="foot">
       <select id="lang" aria-label="Language" style="min-width:0;flex:1">
         <option value="th">ไทย</option><option value="en">English</option><option value="zh">中文</option>
@@ -310,7 +311,7 @@ var DEMO = false;
 var I18N = {
   th:{appName:'ระบบกิจการนิสิต',forStaff:'สำหรับเจ้าหน้าที่และผู้ดูแลระบบ',email:'อีเมล',password:'รหัสผ่าน',
     signIn:'เข้าสู่ระบบ',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
-    tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
+    goScan:'สแกน QR',tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
     kickScans:'บันทึกการเข้าร่วม',kickRank:'คะแนนสะสม',refresh:'รีเฟรช',byDept:'นิสิตแยกตามสาขา',
     byAct:'ผู้เข้าร่วมแยกตามกิจกรรม',searchStu:'ค้นหารหัส / ชื่อ',allDept:'ทุกสาขา',allAct:'ทุกกิจกรรม',
     exportCsv:'ส่งออก CSV',cId:'รหัสนิสิต',cName:'ชื่อ-สกุล',cDept:'สาขา',cYear:'ชั้นปี',cScore:'คะแนน',
@@ -324,7 +325,7 @@ var I18N = {
     saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน'},
   en:{appName:'Student Affairs',forStaff:'For staff and administrators',email:'Email',password:'Password',
     signIn:'Sign in',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
-    tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
+    goScan:'Scan QR',tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
     kickScans:'Attendance log',kickRank:'Accumulated points',refresh:'Refresh',byDept:'Students by department',
     byAct:'Attendance by activity',searchStu:'Search ID / name',allDept:'All departments',allAct:'All activities',
     exportCsv:'Export CSV',cId:'Student ID',cName:'Name',cDept:'Department',cYear:'Year',cScore:'Points',
@@ -338,7 +339,7 @@ var I18N = {
     saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm'},
   zh:{appName:'学生事务系统',forStaff:'供工作人员与管理员使用',email:'邮箱',password:'密码',
     signIn:'登录',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
-    tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
+    goScan:'扫码',tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
     kickScans:'参与记录',kickRank:'累计积分',refresh:'刷新',byDept:'各专业学生数',
     byAct:'各活动参与人数',searchStu:'搜索学号 / 姓名',allDept:'全部专业',allAct:'全部活动',
     exportCsv:'导出 CSV',cId:'学号',cName:'姓名',cDept:'专业',cYear:'年级',cScore:'积分',
@@ -429,6 +430,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     var r = await api({ action:'staffLogin', email:email, password:pass });
     if(!r.success){ errEl.textContent = r.error; errEl.hidden = false; return; }
     auth = r.auth; DEMO = false;
+    try{ sessionStorage.setItem('msu_staff', JSON.stringify({staff:r.staff,auth:r.auth})); }catch(_){}
     enterApp(r.staff);
   }catch(err){
     enterDemo({name:'เจ้าหน้าที่ (ตัวอย่าง)', role:'staff'});
@@ -449,6 +451,7 @@ function enterApp(staff){
 
 document.getElementById('logout').addEventListener('click', function(){
   auth = null;
+  try{ sessionStorage.removeItem('msu_staff'); sessionStorage.removeItem('msu_stu'); }catch(_){}
   document.getElementById('app').hidden = true;
   document.getElementById('gate').hidden = false;
 });
@@ -456,6 +459,9 @@ document.getElementById('logout').addEventListener('click', function(){
 document.getElementById('lang').addEventListener('change', function(e){ lang = e.target.value; try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang(); });
 document.getElementById('lang').value=lang;
 document.getElementById('refresh').addEventListener('click', function(){ load(state.tab); });
+/* จำการล็อกอินข้ามหน้า */
+try{ var _ss=sessionStorage.getItem('msu_staff');
+  if(_ss){ var _o=JSON.parse(_ss); auth=_o.auth; DEMO=false; enterApp(_o.staff); } }catch(e){}
 
 /* ========================== แท็บ =============================== */
 document.querySelectorAll('.navb').forEach(function(b){

@@ -103,33 +103,33 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 <div class="wrap">
   <div class="top">
     <div class="crest">MSU</div>
-    <div style="min-width:0"><h1>สแกน QR กิจกรรม</h1><p>ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div>
+    <div style="min-width:0"><h1 data-i18n="title">สแกน QR กิจกรรม</h1><p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div><select id="lang" aria-label="Language" style="width:auto;margin-left:auto;flex:none;padding:6px 10px;font-size:13px"><option value="th">ไทย</option><option value="en">EN</option><option value="zh">中文</option></select>
   </div>
 
   <!-- ===== เข้าสู่ระบบ ===== -->
   <div id="gate">
     <div class="seg">
-      <button type="button" id="modeStu" aria-pressed="true">นิสิต</button>
-      <button type="button" id="modeStaff" aria-pressed="false">เจ้าหน้าที่</button>
+      <button type="button" id="modeStu" aria-pressed="true" data-i18n="tabStu">นิสิต</button>
+      <button type="button" id="modeStaff" aria-pressed="false" data-i18n="tabStaff">เจ้าหน้าที่</button>
     </div>
 
     <form class="card" id="formStu">
       <div id="errStu" class="err-msg" hidden></div>
-      <div class="field"><label for="sid">อีเมลมหาวิทยาลัย</label>
+      <div class="field"><label for="sid" data-i18n="lbEmail">อีเมลมหาวิทยาลัย</label>
         <input id="sid" type="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
-      <div class="field"><label for="spw">รหัสผ่าน</label>
+      <div class="field"><label for="spw" data-i18n="lbPass">รหัสผ่าน</label>
         <input id="spw" type="password" autocomplete="current-password" required></div>
-      <button class="btn" type="submit">เข้าสู่ระบบ</button>
-      <p class="muted" style="margin:12px 0 0">รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ</p>
+      <button class="btn" type="submit" data-i18n="btnLogin">เข้าสู่ระบบ</button>
+      <p class="muted" style="margin:12px 0 0" data-i18n="hintPass">รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ</p>
     </form>
 
     <form class="card" id="formStaff" hidden>
       <div id="errStaff" class="err-msg" hidden></div>
-      <div class="field"><label for="semail">อีเมลเจ้าหน้าที่</label>
+      <div class="field"><label for="semail" data-i18n="lbStaffEmail">อีเมลเจ้าหน้าที่</label>
         <input id="semail" type="email" autocomplete="username" required></div>
-      <div class="field"><label for="spass">รหัสผ่าน</label>
+      <div class="field"><label for="spass" data-i18n="lbPass">รหัสผ่าน</label>
         <input id="spass" type="password" autocomplete="current-password" required></div>
-      <button class="btn" type="submit">เข้าสู่ระบบ</button>
+      <button class="btn" type="submit" data-i18n="btnLogin">เข้าสู่ระบบ</button>
     </form>
   </div>
 
@@ -141,28 +141,28 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
           <b class="dsp" id="whoName" style="font-size:15px"></b>
           <div class="muted" id="whoMeta"></div>
         </div>
-        <button class="btn ghost" id="logout" style="width:auto;padding:6px 14px;font-size:13px">ออก</button>
+        <button class="btn ghost" id="logout" style="width:auto;padding:6px 14px;font-size:13px" data-i18n="btnOut">ออก</button>
       </div>
     </div>
 
     <!-- เจ้าหน้าที่ต้องเลือกกิจกรรมก่อน -->
     <div class="card" id="pickAct" hidden>
       <div class="field" style="margin:0">
-        <label for="actSel">กิจกรรมที่กำลังรับสแกน</label>
-        <select id="actSel"><option value="">— เลือกกิจกรรม —</option></select>
+        <label for="actSel" data-i18n="lbAct">กิจกรรมที่กำลังรับสแกน</label>
+        <select id="actSel"><option value="" data-i18n="actPick">— เลือกกิจกรรม —</option></select>
       </div>
     </div>
 
     <div class="cam">
       <video id="video" playsinline muted></video>
       <div class="reticle" id="reticle"></div>
-      <div class="camoff" id="camoff">กดปุ่มด้านล่างเพื่อเปิดกล้อง</div>
+      <div class="camoff" id="camoff" data-i18n="camHint">กดปุ่มด้านล่างเพื่อเปิดกล้อง</div>
     </div>
     <canvas id="canvas" hidden></canvas>
 
     <div class="row" style="margin-bottom:14px">
-      <button class="btn" id="camBtn">เปิดกล้อง</button>
-      <button class="btn ghost" id="manualBtn" style="flex:none;width:auto;padding:11px 16px">พิมพ์เอง</button>
+      <button class="btn" id="camBtn" data-i18n="camOpen">เปิดกล้อง</button>
+      <button class="btn ghost" id="manualBtn" style="flex:none;width:auto;padding:11px 16px" data-i18n="manual">พิมพ์เอง</button>
     </div>
 
     <form class="card" id="manualBox" hidden>
@@ -170,7 +170,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
         <label for="manualIn" id="manualLab">รหัสกิจกรรม</label>
         <input id="manualIn" placeholder="ACT1760012345678" required>
       </div>
-      <button class="btn" type="submit">บันทึกการเข้าร่วม</button>
+      <button class="btn" type="submit" data-i18n="btnSave">บันทึกการเข้าร่วม</button>
     </form>
 
     <div id="result"></div>
@@ -180,7 +180,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
         <span class="muted" id="histLab">คะแนนสะสม</span>
         <span class="n" id="totalScore">0</span>
       </div>
-      <div class="hist" id="hist"><p class="muted" style="margin:0">ยังไม่มีรายการ</p></div>
+      <div class="hist" id="hist"><p class="muted" style="margin:0" data-i18n="noItem">ยังไม่มีรายการ</p></div>
     </div>
   </div>
 </div>
@@ -190,16 +190,75 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 /* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่
 
+
+var I18N={
+ th:{title:'สแกน QR กิจกรรม',sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
+  tabStu:'นิสิต',tabStaff:'เจ้าหน้าที่',lbEmail:'อีเมลมหาวิทยาลัย',lbPass:'รหัสผ่าน',
+  btnLogin:'เข้าสู่ระบบ',hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',lbStaffEmail:'อีเมลเจ้าหน้าที่',
+  btnOut:'ออก',lbAct:'กิจกรรมที่กำลังรับสแกน',actPick:'— เลือกกิจกรรม —',
+  camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
+  btnSave:'บันทึกการเข้าร่วม',noItem:'ยังไม่มีรายการ',noItemRound:'ยังไม่มีรายการในรอบนี้',
+  lbActCode:'รหัสกิจกรรม',lbStuId:'รหัสนิสิต',totalLab:'คะแนนสะสม',scanLab:'สแกนไปแล้ว (ครั้ง)',
+  roleAdmin:'ผู้ดูแลระบบ',roleStaff:'เจ้าหน้าที่',pts:'คะแนน',
+  errApi:'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html',
+  errConn:'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy',
+  camFail:'เปิดกล้องไม่ได้ — ต้องเปิดผ่าน https และอนุญาตให้ใช้กล้อง หรือกด "พิมพ์เอง"',
+  pickFirst:'เลือกกิจกรรมก่อน',pickFirstSub:'กดเลือกกิจกรรมที่ช่องด้านบน แล้วค่อยสแกน',
+  saved:'บันทึกแล้ว',dup:'สแกนซ้ำ',dupAt:'บันทึกไว้แล้วเมื่อ',fail:'ไม่สำเร็จ',
+  netTitle:'เชื่อมต่อไม่ได้',netSub:'ตรวจสอบสัญญาณอินเทอร์เน็ตและค่า API_URL'},
+ en:{title:'Scan activity QR',sub:'Student Affairs · Mahasarakham University',
+  tabStu:'Student',tabStaff:'Staff',lbEmail:'University email',lbPass:'Password',
+  btnLogin:'Sign in',hintPass:'Your default password is your student ID',lbStaffEmail:'Staff email',
+  btnOut:'Sign out',lbAct:'Activity being scanned',actPick:'— Select activity —',
+  camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
+  btnSave:'Record attendance',noItem:'No records yet',noItemRound:'No records in this session',
+  lbActCode:'Activity code',lbStuId:'Student ID',totalLab:'Total points',scanLab:'Scans so far',
+  roleAdmin:'Administrator',roleStaff:'Staff',pts:'pts',
+  errApi:'API_URL is not set in scan.html',
+  errConn:'Cannot reach the backend. Check API_URL and the deployment.',
+  camFail:'Camera unavailable — the page must be on https and camera access allowed, or use "Type it".',
+  pickFirst:'Select an activity first',pickFirstSub:'Choose an activity above, then scan.',
+  saved:'Recorded',dup:'Already scanned',dupAt:'recorded on',fail:'Failed',
+  netTitle:'Connection failed',netSub:'Check your internet connection and API_URL'},
+ zh:{title:'扫描活动二维码',sub:'玛哈沙拉堪大学 · 学生事务',
+  tabStu:'学生',tabStaff:'职员',lbEmail:'学校邮箱',lbPass:'密码',
+  btnLogin:'登录',hintPass:'初始密码为您的学号',lbStaffEmail:'职员邮箱',
+  btnOut:'退出',lbAct:'当前扫描的活动',actPick:'— 选择活动 —',
+  camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
+  btnSave:'记录参加',noItem:'暂无记录',noItemRound:'本次暂无记录',
+  lbActCode:'活动代码',lbStuId:'学号',totalLab:'累计积分',scanLab:'已扫描次数',
+  roleAdmin:'管理员',roleStaff:'职员',pts:'分',
+  errApi:'scan.html 中尚未设置 API_URL',
+  errConn:'无法连接后端，请检查 API_URL 与部署状态',
+  camFail:'无法开启摄像头 — 需通过 https 访问并允许使用摄像头，或点击"手动输入"',
+  pickFirst:'请先选择活动',pickFirstSub:'请在上方选择活动后再扫描',
+  saved:'已记录',dup:'重复扫描',dupAt:'已于',fail:'失败',
+  netTitle:'连接失败',netSub:'请检查网络连接与 API_URL'}
+};
+var lang='th';
+try{ var _sv=localStorage.getItem('msu_lang'); if(_sv&&I18N[_sv]) lang=_sv; }catch(e){}
+function t(k){ return (I18N[lang]&&I18N[lang][k]) || I18N.th[k] || k; }
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.title=t('title')+' — '+t('sub');
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  document.getElementById('camBtn').textContent = scanning? t('camClose') : t('camOpen');
+  var co=document.getElementById('camoff'); if(co && !scanning) co.textContent=t('camHint');
+  if(me) labelsFor();
+}
+
 var mode = 'student';      // student | staff
 var me = null;             // ข้อมูลผู้ใช้
 var auth = null;           // staff_id + staff_pass (เฉพาะเจ้าหน้าที่)
 var stream = null, scanning = false, lastCode = '', lastAt = 0;
+document.getElementById('lang').value=lang;
+document.getElementById('lang').addEventListener('change',function(e){lang=e.target.value;try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang();});
 
 async function api(payload){
   if(!API_URL) throw new Error('no-api');
   var res = await fetch(API_URL, {
     method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify(Object.assign({lang:'th'}, payload, auth||{})), redirect:'follow'
+    body: JSON.stringify(Object.assign({lang:lang}, payload, auth||{})), redirect:'follow'
   });
   return res.json();
 }
@@ -219,54 +278,61 @@ document.getElementById('modeStaff').addEventListener('click', function(){ setMo
 document.getElementById('formStu').addEventListener('submit', async function(e){
   e.preventDefault();
   var box = document.getElementById('errStu'); box.hidden = true;
-  if(!API_URL){ box.textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html'; box.hidden = false; return; }
+  if(!API_URL){ box.textContent = t('errApi'); box.hidden = false; return; }
   try{
     var r = await api({ action:'login', id:document.getElementById('sid').value.trim(),
                         password:document.getElementById('spw').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
     me = r.student; mode = 'student';
+    try{ sessionStorage.setItem('msu_stu', JSON.stringify(me)); }catch(_){}
     enter();
-  }catch(err){ box.textContent = 'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy'; box.hidden = false; }
+  }catch(err){ box.textContent = t('errConn'); box.hidden = false; }
 });
 
 document.getElementById('formStaff').addEventListener('submit', async function(e){
   e.preventDefault();
   var box = document.getElementById('errStaff'); box.hidden = true;
-  if(!API_URL){ box.textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html'; box.hidden = false; return; }
+  if(!API_URL){ box.textContent = t('errApi'); box.hidden = false; return; }
   try{
     var r = await api({ action:'staffLogin', email:document.getElementById('semail').value.trim(),
                         password:document.getElementById('spass').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
     me = r.staff; auth = r.auth; mode = 'staff';
+    try{ sessionStorage.setItem('msu_staff', JSON.stringify({staff:r.staff,auth:r.auth})); }catch(_){}
     enter();
-  }catch(err){ box.textContent = 'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy'; box.hidden = false; }
+  }catch(err){ box.textContent = t('errConn'); box.hidden = false; }
 });
+
+
+function labelsFor(){
+  if(!me) return;
+  document.getElementById('whoName').textContent = me.name;
+  if(mode === 'student'){
+    document.getElementById('whoMeta').textContent = me.id + ' · ' + (me.dept||'');
+    document.getElementById('manualLab').textContent = t('lbActCode');
+    document.getElementById('manualIn').placeholder = 'ACT1760012345678';
+    document.getElementById('histLab').textContent = t('totalLab');
+  }else{
+    document.getElementById('whoMeta').textContent = (me.role==='admin'?t('roleAdmin'):t('roleStaff')) + ' · ' + me.email;
+    document.getElementById('manualLab').textContent = t('lbStuId');
+    document.getElementById('manualIn').placeholder = '65010000001';
+    document.getElementById('histLab').textContent = t('scanLab');
+    if(!staffCount) document.getElementById('hist').innerHTML = '<p class="muted" style="margin:0">'+t('noItemRound')+'</p>';
+  }
+}
 
 async function enter(){
   document.getElementById('gate').hidden = true;
   document.getElementById('main').hidden = false;
 
-  if(mode === 'student'){
-    document.getElementById('whoName').textContent = me.name;
-    document.getElementById('whoMeta').textContent = me.id + ' · ' + (me.dept||'');
-    document.getElementById('manualLab').textContent = 'รหัสกิจกรรม';
-    document.getElementById('manualIn').placeholder = 'ACT1760012345678';
-    document.getElementById('histLab').textContent = 'คะแนนสะสม';
-    loadHistory();
-  }else{
-    document.getElementById('whoName').textContent = me.name;
-    document.getElementById('whoMeta').textContent = (me.role==='admin'?'ผู้ดูแลระบบ':'เจ้าหน้าที่') + ' · ' + me.email;
-    document.getElementById('pickAct').hidden = false;
-    document.getElementById('manualLab').textContent = 'รหัสนิสิต';
-    document.getElementById('manualIn').placeholder = '65010000001';
-    document.getElementById('histLab').textContent = 'สแกนไปแล้ว (ครั้ง)';
-    document.getElementById('hist').innerHTML = '<p class="muted" style="margin:0">ยังไม่มีรายการในรอบนี้</p>';
-    loadActivities();
-  }
+  labelsFor();
+  if(mode === 'student'){ loadHistory(); }
+  else { document.getElementById('pickAct').hidden = false; loadActivities(); }
 }
 
 document.getElementById('logout').addEventListener('click', function(){
   stopCam(); me = null; auth = null;
+  try{ sessionStorage.removeItem('msu_staff'); sessionStorage.removeItem('msu_stu'); }catch(_){}
   document.getElementById('main').hidden = true;
   document.getElementById('gate').hidden = false;
   document.getElementById('result').innerHTML = '';
@@ -280,7 +346,7 @@ async function loadActivities(){
     var sel = document.getElementById('actSel');
     (r.activities||[]).forEach(function(a){
       var o = document.createElement('option');
-      o.value = a.id; o.textContent = a.name + ' (' + a.score + ' คะแนน)';
+      o.value = a.id; o.textContent = a.name + ' (' + a.score + ' ' + t('pts') + ')';
       sel.appendChild(o);
     });
   }catch(e){}
@@ -298,7 +364,7 @@ async function loadHistory(){
                  '<br><span class="muted" style="font-size:12px">'+esc(x.date+' '+x.time)+'</span></span>'+
                  '<span class="sc">+'+x.score+'</span></div>';
         }).join('')
-      : '<p class="muted" style="margin:0">ยังไม่มีรายการ</p>';
+      : '<p class="muted" style="margin:0">'+t('noItem')+'</p>';
   }catch(e){}
 }
 
@@ -320,12 +386,12 @@ async function startCam(){
     video.srcObject = stream;
     await video.play();
     document.getElementById('camoff').hidden = true;
-    scanning = true; btn.textContent = 'ปิดกล้อง';
+    scanning = true; btn.textContent = t('camClose');
     requestAnimationFrame(tick);
   }catch(err){
     document.getElementById('camoff').hidden = false;
     document.getElementById('camoff').textContent =
-      'เปิดกล้องไม่ได้ — ต้องเปิดผ่าน https และอนุญาตให้ใช้กล้อง หรือกด "พิมพ์เอง"';
+      t('camFail');
   }
 }
 
@@ -334,8 +400,8 @@ function stopCam(){
   if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
   video.srcObject = null;
   document.getElementById('camoff').hidden = false;
-  document.getElementById('camoff').textContent = 'กดปุ่มด้านล่างเพื่อเปิดกล้อง';
-  document.getElementById('camBtn').textContent = 'เปิดกล้อง';
+  document.getElementById('camoff').textContent = t('camHint');
+  document.getElementById('camBtn').textContent = t('camOpen');
   document.getElementById('reticle').classList.remove('lock');
 }
 
@@ -403,7 +469,7 @@ async function submitScan(code){
     studentId = me.id; activityId = code;
   }else{
     activityId = document.getElementById('actSel').value;
-    if(!activityId){ show('err','เลือกกิจกรรมก่อน','กดเลือกกิจกรรมที่ช่องด้านบน แล้วค่อยสแกน'); return; }
+    if(!activityId){ show('err',t('pickFirst'),t('pickFirstSub')); return; }
     studentId = code;
   }
 
@@ -412,19 +478,19 @@ async function submitScan(code){
     var r = await api({ action:'scan', studentId:studentId, activityId:activityId,
                         scannedBy: mode==='staff' ? (auth && auth.staff_id) : studentId });
     if(r.success){
-      show('ok', (r.activity && r.activity.name) || 'บันทึกแล้ว',
+      show('ok', (r.activity && r.activity.name) || t('saved'),
            (mode==='staff' ? (r.studentName||studentId) + ' · ' : '') + r.date + ' ' + r.time,
            '+' + r.score);
       if(mode==='student'){ loadHistory(); }
       else { pushStaffRow(r.studentName||studentId, r.score); }
     }else if(r.duplicate){
-      show('dup','สแกนซ้ำ',
-           ((r.activity && r.activity.name) || '') + (r.date ? ' · บันทึกไว้แล้วเมื่อ '+r.date+' '+r.time : ''));
+      show('dup',t('dup'),
+           ((r.activity && r.activity.name) || '') + (r.date ? ' · '+t('dupAt')+' '+r.date+' '+r.time : ''));
     }else{
-      show('err','ไม่สำเร็จ', r.error || '');
+      show('err',t('fail'), r.error || '');
     }
   }catch(err){
-    show('err','เชื่อมต่อไม่ได้','ตรวจสอบสัญญาณอินเทอร์เน็ตและค่า API_URL');
+    show('err',t('netTitle'),t('netSub'));
   }
   sending = false;
 }
@@ -449,6 +515,13 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
 /* ===================== ลงทะเบียน PWA ========================== */
+/* จำการล็อกอินข้ามหน้า */
+try{ var _ss=sessionStorage.getItem('msu_staff'), _st=sessionStorage.getItem('msu_stu');
+  if(_ss){ var _o=JSON.parse(_ss); me=_o.staff; auth=_o.auth; mode='staff'; setMode('staff'); enter(); }
+  else if(_st){ me=JSON.parse(_st); mode='student'; enter(); } }catch(e){}
+
+applyLang();
+
 if('serviceWorker' in navigator && location.protocol === 'https:'){
   navigator.serviceWorker.register('sw.js').catch(function(){});
 }

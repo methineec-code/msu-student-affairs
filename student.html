@@ -159,6 +159,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
       <div class="sub" style="margin-top:7px" id="progText"></div>
     </div>
 
+    <a class="btn wide" href="scan.html" style="text-decoration:none;display:block;text-align:center;margin:0 0 14px" data-i18n="goScan">▣ สแกน QR กิจกรรม</a>
     <div class="tabs">
       <button type="button" data-tab="history" aria-pressed="true" data-i18n="tabHistory">ประวัติ</button>
       <button type="button" data-tab="port" aria-pressed="false" data-i18n="tabPort">ผลงาน</button>
@@ -222,9 +223,6 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
       </div>
     </section>
 
-    <p class="muted" style="text-align:center;margin-top:18px">
-      <a href="scan.html" style="color:var(--blue);font-weight:600" data-i18n="goScan">ไปหน้าสแกน QR →</a>
-    </p>
   </div>
 </div>
 
@@ -240,7 +238,7 @@ var I18N = {
    addPort:'เพิ่มผลงาน', myPort:'ผลงานของฉัน', pName:'ชื่อผลงาน', pType:'ประเภท', pDate:'วันที่',
    pDesc:'รายละเอียด', save:'บันทึก', myInfo:'ข้อมูลของฉัน', changePw:'เปลี่ยนรหัสผ่าน',
    oldPw:'รหัสผ่านเดิม', newPw:'รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)', loading:'กำลังโหลด…',
-   goScan:'ไปหน้าสแกน QR →', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
+   goScan:'▣ สแกน QR กิจกรรม', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
    tSport:'กีฬา', tOther:'อื่นๆ', noHist:'ยังไม่มีกิจกรรมที่เข้าร่วม', noPort:'ยังไม่มีผลงาน',
    saved:'บันทึกแล้ว', deleted:'ลบแล้ว', del:'ลบ', confirmDel:'กดอีกครั้ง',
    netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง', pwOk:'เปลี่ยนรหัสผ่านแล้ว',
@@ -253,7 +251,7 @@ var I18N = {
    addPort:'Add work', myPort:'My portfolio', pName:'Title', pType:'Type', pDate:'Date',
    pDesc:'Details', save:'Save', myInfo:'My information', changePw:'Change password',
    oldPw:'Current password', newPw:'New password (6+ characters)', loading:'Loading…',
-   goScan:'Go to QR scanner →', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
+   goScan:'▣ Scan activity QR', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
    tSport:'Sport', tOther:'Other', noHist:'No activities yet', noPort:'Nothing here yet',
    saved:'Saved', deleted:'Deleted', del:'Delete', confirmDel:'Click again',
    netErr:'Connection failed, please try again', pwOk:'Password changed',
@@ -266,7 +264,7 @@ var I18N = {
    addPort:'添加作品', myPort:'我的作品集', pName:'名称', pType:'类型', pDate:'日期',
    pDesc:'详情', save:'保存', myInfo:'我的信息', changePw:'修改密码',
    oldPw:'原密码', newPw:'新密码（至少6位）', loading:'加载中…',
-   goScan:'前往扫码页面 →', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
+   goScan:'▣ 扫描活动二维码', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
    tSport:'体育', tOther:'其他', noHist:'暂无活动记录', noPort:'暂无作品',
    saved:'已保存', deleted:'已删除', del:'删除', confirmDel:'再次点击',
    netErr:'连接失败，请重试', pwOk:'密码已修改',
@@ -317,7 +315,7 @@ function enter(){
 
 document.getElementById('logout').addEventListener('click', function(){
   me=null;
-  try{ sessionStorage.removeItem('msu_stu'); }catch(_){}
+  try{ sessionStorage.removeItem('msu_stu'); sessionStorage.removeItem('msu_staff'); }catch(_){}
   document.getElementById('app').hidden=true;
   document.getElementById('gate').hidden=false;
 });
