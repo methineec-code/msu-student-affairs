@@ -137,7 +137,7 @@ tbody tr:hover{background:var(--blue-soft)}
 <div id="app" hidden>
   <nav class="rail">
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
-    <select id="lang" aria-label="Language" style="width:100%;margin-bottom:8px;padding:7px 10px;font-size:13px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper)"><option value="th">ไทย</option><option value="en">English</option><option value="zh">中文</option></select>
+    
     
     <button class="navb" data-tab="staff" data-i18n="navStaff">เจ้าหน้าที่</button>
     <button class="navb" data-tab="ann" data-i18n="navAnn">ประกาศ</button>
@@ -351,9 +351,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   }
 });
 
-document.getElementById('lang').value=lang;
-document.getElementById('lang').addEventListener('change',function(e){lang=e.target.value;
-  try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang();});
+
 
 document.getElementById('logout').addEventListener('click', function(){
   auth = null; me = null;

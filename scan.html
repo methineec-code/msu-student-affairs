@@ -103,7 +103,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 <div class="wrap">
   <div class="top">
     <div class="crest">MSU</div>
-    <div style="min-width:0"><h1 data-i18n="title">สแกน QR กิจกรรม</h1><p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div><select id="lang" aria-label="Language" style="width:auto;margin-left:auto;flex:none;padding:6px 10px;font-size:13px"><option value="th">ไทย</option><option value="en">EN</option><option value="zh">中文</option></select>
+    <div style="min-width:0"><h1 data-i18n="title">สแกน QR กิจกรรม</h1><p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div>
   </div>
 
   <!-- ===== เข้าสู่ระบบ ===== -->
@@ -116,7 +116,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
     <form class="card" id="formStu">
       <div id="errStu" class="err-msg" hidden></div>
       <div class="field"><label for="sid" data-i18n="lbEmail">อีเมลมหาวิทยาลัย</label>
-        <input id="sid" type="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
+        <input id="sid" type="text" inputmode="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
       <div class="field"><label for="spw" data-i18n="lbPass">รหัสผ่าน</label>
         <input id="spw" type="password" autocomplete="current-password" required></div>
       <button class="btn" type="submit" data-i18n="btnLogin">เข้าสู่ระบบ</button>
@@ -251,8 +251,10 @@ var mode = 'student';      // student | staff
 var me = null;             // ข้อมูลผู้ใช้
 var auth = null;           // staff_id + staff_pass (เฉพาะเจ้าหน้าที่)
 var stream = null, scanning = false, lastCode = '', lastAt = 0;
-document.getElementById('lang').value=lang;
-document.getElementById('lang').addEventListener('change',function(e){lang=e.target.value;try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang();});
+
+
+/* หลังบ้านรับเฉพาะรหัสนิสิต — ตัด @msu.ac.th ออกให้ */
+function uid(v){ v=String(v||'').trim(); return v.indexOf('@')>-1 ? v.split('@')[0].trim() : v; }
 
 async function api(payload){
   if(!API_URL) throw new Error('no-api');
@@ -280,7 +282,7 @@ document.getElementById('formStu').addEventListener('submit', async function(e){
   var box = document.getElementById('errStu'); box.hidden = true;
   if(!API_URL){ box.textContent = t('errApi'); box.hidden = false; return; }
   try{
-    var r = await api({ action:'login', id:document.getElementById('sid').value.trim(),
+    var r = await api({ action:'login', id:uid(document.getElementById('sid').value),
                         password:document.getElementById('spw').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
     me = r.student; mode = 'student';

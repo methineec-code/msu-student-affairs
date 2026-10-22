@@ -99,6 +99,22 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
   padding:11px 20px;border-radius:var(--r-p);font-size:13.5px;z-index:40}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:420px){.row2{grid-template-columns:1fr}}
+
+/* กล่องเพิ่มผลงานแบบพับเก็บ */
+.disc{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;
+  background:none;border:none;padding:0;cursor:pointer;font-family:var(--display);
+  font-weight:700;font-size:15px;color:var(--ink)}
+.disc .chev{color:var(--blue);font-size:18px;line-height:1;transition:transform .18s}
+.disc[aria-expanded="true"] .chev{transform:rotate(45deg)}
+#portForm,#pwForm{margin-top:14px}
+#portForm .field,#pwForm .field{margin-bottom:10px}
+#portForm textarea{min-height:64px}
+
+.seg2{display:flex;gap:6px;background:var(--blue-soft);padding:4px;border-radius:var(--r-p);margin-bottom:14px}
+.seg2 button{flex:1;border:none;background:none;padding:8px;border-radius:var(--r-p);cursor:pointer;
+  font-weight:600;font-size:13.5px;color:var(--ink-2)}
+.seg2 button[aria-pressed="true"]{background:var(--card);color:var(--blue);box-shadow:0 2px 8px -4px rgba(14,26,46,.4)}
+#portForm input[type=file]{padding:8px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -122,7 +138,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
     <p class="sub" data-i18n="sub">ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ</p>
     <div id="loginErr" class="err" hidden></div>
     <div class="field"><label for="uid" data-i18n="lblUser">อีเมลมหาวิทยาลัย</label>
-      <input id="uid" type="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
+      <input id="uid" type="text" inputmode="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
     <div class="field"><label for="upw" data-i18n="lblPass">รหัสผ่าน</label>
       <input id="upw" type="password" autocomplete="current-password" required></div>
     <button class="btn wide" type="submit" data-i18n="signIn">เข้าสู่ระบบ</button>
@@ -142,9 +158,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
       </div>
       <div class="right">
         
-        <select id="lang" aria-label="Language">
-          <option value="th">ไทย</option><option value="en">EN</option><option value="zh">中文</option>
-        </select>
+        
         <button class="btn ghost sm" id="logout" data-i18n="signOut">ออก</button>
       </div>
     </div>
@@ -156,7 +170,6 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
       <div class="n" id="totalScore">0</div>
       <div class="sub"><span id="scanCount">0</span> <span data-i18n="timesWord">กิจกรรม</span></div>
       <div class="bar"><span id="progBar" style="width:0%"></span></div>
-      <div class="sub" style="margin-top:7px" id="progText"></div>
     </div>
 
     <a class="btn wide" href="scan.html" style="text-decoration:none;display:block;text-align:center;margin:0 0 14px" data-i18n="goScan">▣ สแกน QR กิจกรรม</a>
@@ -177,24 +190,27 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
     <!-- Portfolio -->
     <section data-pane="port" hidden>
       <div class="card">
-        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="addPort">เพิ่มผลงาน</h3>
-        <form id="portForm">
-          <div class="field"><label for="pName" data-i18n="pName">ชื่อผลงาน</label>
-            <input id="pName" required placeholder="รางวัลชนะเลิศการแข่งขันหุ่นยนต์"></div>
-          <div class="row2">
-            <div class="field"><label for="pType" data-i18n="pType">ประเภท</label>
-              <select id="pType">
-                <option value="award" data-i18n="tAward">รางวัล</option>
-                <option value="training" data-i18n="tTraining">อบรม/สัมมนา</option>
-                <option value="volunteer" data-i18n="tVolunteer">จิตอาสา</option>
-                <option value="sport" data-i18n="tSport">กีฬา</option>
-                <option value="other" data-i18n="tOther">อื่นๆ</option>
-              </select></div>
-            <div class="field"><label for="pDate" data-i18n="pDate">วันที่</label>
-              <input id="pDate" type="date"></div>
+        <button type="button" id="portToggle" class="disc" aria-expanded="false"><span data-i18n="addPort">เพิ่มผลงาน</span><span class="chev">＋</span></button>
+        <form id="portForm" hidden>
+          <div class="seg2">
+            <button type="button" id="mOnsite" aria-pressed="true" data-i18n="onsite">ออนไซต์</button>
+            <button type="button" id="mOnline" aria-pressed="false" data-i18n="online">ออนไลน์</button>
           </div>
-          <div class="field"><label for="pDesc" data-i18n="pDesc">รายละเอียด</label>
-            <textarea id="pDesc" placeholder="เล่าสั้นๆ ว่าทำอะไร ได้อะไรมา"></textarea></div>
+          <div class="field"><label for="pName" data-i18n="pName">ชื่อการอบรม / ผลงาน</label>
+            <input id="pName" required placeholder="อบรมเชิงปฏิบัติการระบบอัตโนมัติ"></div>
+          <div class="field"><label for="pOrg" data-i18n="pOrg">บริษัท / สังกัดที่จัด</label>
+            <input id="pOrg" required placeholder="บริษัท เอบีซี จำกัด"></div>
+          <div class="field" id="fPlace"><label for="pPlace" data-i18n="pPlace">สถานที่อบรม</label>
+            <input id="pPlace" placeholder="อาคารวิศวกรรมศาสตร์ มมส"></div>
+          <div class="field" id="fUrl" hidden><label for="pUrl" data-i18n="pUrl">เว็บไซต์ที่อบรม</label>
+            <input id="pUrl" type="url" placeholder="https://..."></div>
+          <div class="field"><label for="pDate" data-i18n="pDate">วันที่เข้าร่วม</label>
+            <input id="pDate" type="date" required></div>
+          <div class="field"><label for="pDesc" data-i18n="pDesc">รายละเอียดการอบรม</label>
+            <textarea id="pDesc" placeholder="อบรมเรื่องอะไร ได้ความรู้อะไรมา"></textarea></div>
+          <div class="field"><label for="pFile" data-i18n="pFile">ไฟล์หลักฐาน (รวมเป็นไฟล์เดียว)</label>
+            <input id="pFile" type="file" accept=".pdf,image/*">
+            <p class="muted" style="margin:6px 0 0;font-size:12px" data-i18n="pFileHint">เช่น ใบรับรองการอบรม · PDF หรือรูปภาพ ไม่เกิน 10 MB</p></div>
           <button class="btn wide" type="submit" data-i18n="save">บันทึก</button>
         </form>
       </div>
@@ -211,8 +227,8 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
         <div id="infoList"></div>
       </div>
       <div class="card">
-        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="changePw">เปลี่ยนรหัสผ่าน</h3>
-        <form id="pwForm">
+        <button type="button" id="pwToggle" class="disc" aria-expanded="false"><span data-i18n="changePw">เปลี่ยนรหัสผ่าน</span><span class="chev">＋</span></button>
+        <form id="pwForm" hidden>
           <div id="pwErr" class="err" hidden></div>
           <div class="field"><label for="oldPw" data-i18n="oldPw">รหัสผ่านเดิม</label>
             <input id="oldPw" type="password" autocomplete="current-password" required></div>
@@ -235,8 +251,9 @@ var I18N = {
    lblUser:'อีเมลมหาวิทยาลัย', lblPass:'รหัสผ่าน', signIn:'เข้าสู่ระบบ', signOut:'ออก',
    hint:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ', totalLab:'คะแนนกิจกรรมสะสม', timesWord:'กิจกรรม',
    tabHistory:'ประวัติ', tabPort:'ผลงาน', tabMe:'บัญชี', histTitle:'กิจกรรมที่เข้าร่วม',
-   addPort:'เพิ่มผลงาน', myPort:'ผลงานของฉัน', pName:'ชื่อผลงาน', pType:'ประเภท', pDate:'วันที่',
-   pDesc:'รายละเอียด', save:'บันทึก', myInfo:'ข้อมูลของฉัน', changePw:'เปลี่ยนรหัสผ่าน',
+   onsite:'ออนไซต์', online:'ออนไลน์', pOrg:'บริษัท / สังกัดที่จัด', pPlace:'สถานที่อบรม', pUrl:'เว็บไซต์ที่อบรม', pFile:'ไฟล์หลักฐาน (รวมเป็นไฟล์เดียว)', pFileHint:'เช่น ใบรับรองการอบรม · PDF หรือรูปภาพ ไม่เกิน 10 MB', fileBig:'ไฟล์ใหญ่เกิน 10 MB', uploading:'กำลังอัปโหลด…', viewFile:'ดูหลักฐาน', 
+   addPort:'เพิ่มผลงาน', myPort:'ผลงานของฉัน', pName:'ชื่อการอบรม / ผลงาน', pType:'ประเภท', pDate:'วันที่เข้าร่วม',
+   pDesc:'รายละเอียดการอบรม', save:'บันทึก', myInfo:'ข้อมูลของฉัน', changePw:'เปลี่ยนรหัสผ่าน',
    oldPw:'รหัสผ่านเดิม', newPw:'รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)', loading:'กำลังโหลด…',
    goScan:'▣ สแกน QR กิจกรรม', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
    tSport:'กีฬา', tOther:'อื่นๆ', noHist:'ยังไม่มีกิจกรรมที่เข้าร่วม', noPort:'ยังไม่มีผลงาน',
@@ -248,8 +265,9 @@ var I18N = {
    lblUser:'University email', lblPass:'Password', signIn:'Sign in', signOut:'Out',
    hint:'Your default password is your student ID.', totalLab:'Total activity points', timesWord:'activities',
    tabHistory:'History', tabPort:'Portfolio', tabMe:'Account', histTitle:'Activities attended',
-   addPort:'Add work', myPort:'My portfolio', pName:'Title', pType:'Type', pDate:'Date',
-   pDesc:'Details', save:'Save', myInfo:'My information', changePw:'Change password',
+   onsite:'On-site', online:'Online', pOrg:'Organizer / company', pPlace:'Venue', pUrl:'Training website', pFile:'Evidence file (one file)', pFileHint:'e.g. certificate · PDF or image, max 10 MB', fileBig:'File is larger than 10 MB', uploading:'Uploading…', viewFile:'View evidence', 
+   addPort:'Add work', myPort:'My portfolio', pName:'Training / work title', pType:'Type', pDate:'Date attended',
+   pDesc:'Training details', save:'Save', myInfo:'My information', changePw:'Change password',
    oldPw:'Current password', newPw:'New password (6+ characters)', loading:'Loading…',
    goScan:'▣ Scan activity QR', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
    tSport:'Sport', tOther:'Other', noHist:'No activities yet', noPort:'Nothing here yet',
@@ -261,8 +279,9 @@ var I18N = {
    lblUser:'校园邮箱', lblPass:'密码', signIn:'登录', signOut:'退出',
    hint:'初始密码为您的学号。', totalLab:'累计活动积分', timesWord:'项活动',
    tabHistory:'记录', tabPort:'作品集', tabMe:'账号', histTitle:'已参加的活动',
-   addPort:'添加作品', myPort:'我的作品集', pName:'名称', pType:'类型', pDate:'日期',
-   pDesc:'详情', save:'保存', myInfo:'我的信息', changePw:'修改密码',
+   onsite:'线下', online:'线上', pOrg:'主办单位 / 公司', pPlace:'培训地点', pUrl:'培训网址', pFile:'证明文件（合并为一个文件）', pFileHint:'如培训证书 · PDF 或图片，不超过 10 MB', fileBig:'文件超过 10 MB', uploading:'上传中…', viewFile:'查看证明', 
+   addPort:'添加作品', myPort:'我的作品集', pName:'培训 / 作品名称', pType:'类型', pDate:'参加日期',
+   pDesc:'培训详情', save:'保存', myInfo:'我的信息', changePw:'修改密码',
    oldPw:'原密码', newPw:'新密码（至少6位）', loading:'加载中…',
    goScan:'▣ 扫描活动二维码', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
    tSport:'体育', tOther:'其他', noHist:'暂无活动记录', noPort:'暂无作品',
@@ -282,6 +301,9 @@ function applyLang(){
 
 var me=null, D={history:[],portfolio:[],total:0,count:0}, minScore=30, tab='history';
 
+/* หลังบ้านรับเฉพาะรหัสนิสิต — ตัด @msu.ac.th ออกให้ */
+function uid(v){ v=String(v||'').trim(); return v.indexOf('@')>-1 ? v.split('@')[0].trim() : v; }
+
 async function api(payload){
   var res = await fetch(API_URL,{method:'POST',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -295,7 +317,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   var box=document.getElementById('loginErr'); box.hidden=true;
   var btn=e.target.querySelector('button'); btn.disabled=true;
   try{
-    var r = await api({action:'login', id:document.getElementById('uid').value.trim(),
+    var r = await api({action:'login', id:uid(document.getElementById('uid').value),
                        password:document.getElementById('upw').value});
     if(!r.success){ box.textContent=r.error; box.hidden=false; btn.disabled=false; return; }
     me = r.student;
@@ -320,8 +342,7 @@ document.getElementById('logout').addEventListener('click', function(){
   document.getElementById('gate').hidden=false;
 });
 
-document.getElementById('lang').addEventListener('change', function(e){ lang=e.target.value; try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang(); });
-document.getElementById('lang').value=lang; applyLang();
+ applyLang();
 
 /* -------- แท็บ -------- */
 document.querySelectorAll('.tabs button').forEach(function(b){
@@ -359,8 +380,6 @@ function render(){
   document.getElementById('scanCount').textContent = D.count;
   var pct = Math.min(100, Math.round(D.total/minScore*100));
   document.getElementById('progBar').style.width = pct+'%';
-  document.getElementById('progText').textContent =
-    D.total >= minScore ? t('passed') : (fmt(D.total)+' / '+fmt(minScore)+' '+t('goal'));
 
   var hl=document.getElementById('histList');
   hl.innerHTML = D.history.length ? D.history.map(function(x){
@@ -371,10 +390,18 @@ function render(){
 
   var pl=document.getElementById('portList');
   pl.innerHTML = D.portfolio.length ? D.portfolio.map(function(x){
+    var d={}; try{ d=JSON.parse(x.description||'{}'); }catch(e){ d={note:x.description||''}; }
+    var mode = x.type==='online' ? t('online') : x.type==='onsite' ? t('onsite') : '';
+    var lines=[];
+    if(d.org)    lines.push(esc(d.org));
+    if(d.place)  lines.push(esc(d.place));
+    if(d.url)    lines.push('<a href="'+esc(d.url)+'" target="_blank" rel="noopener" style="color:var(--blue)">'+esc(d.url)+'</a>');
+    if(d.joined) lines.push(esc(d.joined));
+    if(d.note)   lines.push(esc(d.note));
+    if(d.fileUrl)lines.push('<a href="'+esc(d.fileUrl)+'" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600">'+t('viewFile')+'</a>');
     return '<div class="it"><span class="nm"><b>'+esc(x.name)+'</b>'+
-      '<span class="pill">'+t('t'+cap(x.type||'other'))+'</span> '+
-      '<span class="muted">'+esc(x.date||'')+'</span>'+
-      (x.description?'<div class="muted" style="margin-top:3px">'+esc(x.description)+'</div>':'')+
+      (mode?' <span class="pill">'+mode+'</span>':'')+
+      (lines.length?'<div class="muted" style="margin-top:3px;line-height:1.5">'+lines.join(' · ')+'</div>':'')+
       '</span><button class="btn ghost sm" data-delport="'+esc(x.portId)+'">'+t('del')+'</button></div>';
   }).join('') : '<div class="empty">'+t('noPort')+'</div>';
 
@@ -394,22 +421,75 @@ function renderAnn(list){
 }
 
 /* -------- Portfolio -------- */
+
+/* พับ/กางกล่องเพิ่มผลงาน */
+document.getElementById('portToggle').addEventListener('click', function(){
+  var f=document.getElementById('portForm');
+  f.hidden=!f.hidden;
+  this.setAttribute('aria-expanded', String(!f.hidden));
+  if(!f.hidden) document.getElementById('pName').focus();
+});
+
+
+document.getElementById('pwToggle').addEventListener('click', function(){
+  var f=document.getElementById('pwForm');
+  f.hidden=!f.hidden;
+  this.setAttribute('aria-expanded', String(!f.hidden));
+  if(!f.hidden) document.getElementById('oldPw').focus();
+});
+
+var portMode='onsite';
+function setPortMode(m){
+  portMode=m;
+  document.getElementById('mOnsite').setAttribute('aria-pressed', String(m==='onsite'));
+  document.getElementById('mOnline').setAttribute('aria-pressed', String(m==='online'));
+  document.getElementById('fPlace').hidden = m!=='onsite';
+  document.getElementById('fUrl').hidden   = m!=='online';
+}
+document.getElementById('mOnsite').addEventListener('click', function(){ setPortMode('onsite'); });
+document.getElementById('mOnline').addEventListener('click', function(){ setPortMode('online'); });
+
+function readFileB64(f){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){ res(String(r.result).split(',')[1]); };
+    r.onerror=rej; r.readAsDataURL(f);
+  });
+}
+
 document.getElementById('portForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  var btn=e.target.querySelector('button'); btn.disabled=true;
+  var btn=e.target.querySelector('button[type=submit]'); btn.disabled=true;
+  var label=btn.textContent;
   try{
+    var f=document.getElementById('pFile').files[0];
+    var fileData=null, fileName=null, fileType=null;
+    if(f){
+      if(f.size > 10*1024*1024){ toast(t('fileBig')); btn.disabled=false; return; }
+      btn.textContent=t('uploading');
+      fileData=await readFileB64(f); fileName=f.name; fileType=f.type||'application/octet-stream';
+    }
+    var detail={
+      org: document.getElementById('pOrg').value.trim(),
+      place: portMode==='onsite' ? document.getElementById('pPlace').value.trim() : '',
+      url:   portMode==='online' ? document.getElementById('pUrl').value.trim()   : '',
+      joined: document.getElementById('pDate').value,
+      note: document.getElementById('pDesc').value.trim()
+    };
     var r = await api({action:'addPortfolio', studentId:me.id,
-      name:document.getElementById('pName').value.trim(),
-      type:document.getElementById('pType').value,
-      description:(document.getElementById('pDate').value?document.getElementById('pDate').value+' · ':'')+
-                  document.getElementById('pDesc').value.trim()});
+      name: document.getElementById('pName').value.trim(),
+      type: portMode,
+      description: JSON.stringify(detail),
+      fileData: fileData, fileName: fileName, fileType: fileType});
     if(r.success){
-      toast(t('saved')); e.target.reset();
+      toast(t('saved')); e.target.reset(); setPortMode('onsite');
+      document.getElementById('portForm').hidden = true;
+      document.getElementById('portToggle').setAttribute('aria-expanded','false');
       var p = await api({action:'getPortfolio', studentId:me.id});
       if(p.success){ D.portfolio=p.portfolio||[]; render(); }
     } else toast(r.error||t('netErr'));
   }catch(err){ toast(t('netErr')); }
-  btn.disabled=false;
+  btn.textContent=label; btn.disabled=false;
 });
 
 document.getElementById('portList').addEventListener('click', async function(e){

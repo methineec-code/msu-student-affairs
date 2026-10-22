@@ -192,9 +192,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
     <button class="navb" data-tab="rank"><span class="ic">▲</span><span data-i18n="tabRank">อันดับคะแนน</span></button>
     <a class="navb" href="scan.html" style="text-decoration:none"><span class="ic">▣</span><span data-i18n="goScan">สแกน QR</span></a>
     <div class="foot">
-      <select id="lang" aria-label="Language" style="min-width:0;flex:1">
-        <option value="th">ไทย</option><option value="en">English</option><option value="zh">中文</option>
-      </select>
+      
       <button class="btn ghost sm" id="logout" data-i18n="signOut">ออก</button>
     </div>
   </nav>
@@ -228,7 +226,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
       <div class="tbl-wrap"><table id="stuTable"><thead><tr>
         <th data-i18n="cId">รหัสนิสิต</th><th data-i18n="cName">ชื่อ-สกุล</th><th data-i18n="cDept">สาขา</th>
         <th data-i18n="cYear">ชั้นปี</th><th style="text-align:right" data-i18n="cScore">คะแนน</th>
-        <th style="text-align:right" data-i18n="cScans">ครั้ง</th><th data-i18n="cStatus">สถานะ</th><th></th>
+        <th style="text-align:right" data-i18n="cScans">ครั้ง</th><th data-i18n="cPass">รหัสผ่าน</th>
       </tr></thead><tbody></tbody></table></div>
       <div class="pager" id="stuPager"></div>
     </section>
@@ -318,6 +316,7 @@ var I18N = {
     cScans:'ครั้ง',cStatus:'สถานะ',cAct:'กิจกรรม',cJoin:'ผู้เข้าร่วม',cWhen:'วันเวลา',newAct:'สร้างกิจกรรมใหม่',
     actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
     tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
+    cPass:'รหัสผ่าน',setPw:'เปลี่ยนรหัส',pwPh:'เว้นว่าง = รหัสนิสิต',pwOk:'เปลี่ยนรหัสแล้ว · ',
     active:'ใช้งาน',inactive:'ระงับ',reset:'รีเซ็ตรหัส',close:'ปิด',open:'เปิด',del:'ลบ',
     of:'จาก',prev:'ก่อนหน้า',next:'ถัดไป',noData:'ยังไม่มีข้อมูล',
     demoMsg:'โหมดตัวอย่าง — ยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อหลังบ้านไม่ได้ ตัวเลขที่เห็นเป็นข้อมูลสมมติ',
@@ -332,6 +331,7 @@ var I18N = {
     cScans:'Scans',cStatus:'Status',cAct:'Activity',cJoin:'Attended',cWhen:'Date & time',newAct:'New activity',
     actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
     tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
+    cPass:'Password',setPw:'Change',pwPh:'blank = student ID',pwOk:'Password changed · ',
     active:'Active',inactive:'Disabled',reset:'Reset password',close:'Close',open:'Open',del:'Delete',
     of:'of',prev:'Previous',next:'Next',noData:'Nothing here yet',
     demoMsg:'Demo mode — API_URL is not set or the backend is unreachable. These figures are sample data.',
@@ -346,6 +346,7 @@ var I18N = {
     cScans:'次数',cStatus:'状态',cAct:'活动',cJoin:'参与人数',cWhen:'日期时间',newAct:'新建活动',
     actName:'活动名称',actScore:'积分',actDate:'举办日期',actDesc:'详情',createQr:'创建并生成二维码',
     tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
+    cPass:'密码',setPw:'修改',pwPh:'留空 = 学号',pwOk:'密码已修改 · ',
     active:'正常',inactive:'停用',reset:'重置密码',close:'关闭',open:'开放',del:'删除',
     of:'/',prev:'上一页',next:'下一页',noData:'暂无数据',
     demoMsg:'演示模式 — 未设置 API_URL 或无法连接后端，以下为示例数据。',
@@ -456,8 +457,7 @@ document.getElementById('logout').addEventListener('click', function(){
   document.getElementById('gate').hidden = false;
 });
 
-document.getElementById('lang').addEventListener('change', function(e){ lang = e.target.value; try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang(); });
-document.getElementById('lang').value=lang;
+
 document.getElementById('refresh').addEventListener('click', function(){ load(state.tab); });
 /* จำการล็อกอินข้ามหน้า */
 try{ var _ss=sessionStorage.getItem('msu_staff');
@@ -649,10 +649,9 @@ function renderStudents(){
   tb.innerHTML = page.length ? page.map(function(r){
     return '<tr><td>'+esc(r.id)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.dept)+'</td><td>'+r.year+'</td>'+
       '<td class="num">'+fmt(r.totalScore)+'</td><td class="num">'+r.scanCount+'</td>'+
-      '<td><span class="pill '+(r.status==='active'?'ok':'off')+'">'+
-        t(r.status==='active'?'active':'inactive')+'</span></td>'+
-      '<td style="text-align:right"><button class="btn ghost sm" data-reset="'+esc(r.id)+'">'+t('reset')+'</button></td></tr>';
-  }).join('') : '<tr><td colspan="8"><div class="empty">'+t('noData')+'</div></td></tr>';
+      '<td class="pwcell" data-row="'+esc(r.id)+'">'+
+        '<button class="btn ghost sm" data-setpw="'+esc(r.id)+'">'+t('setPw')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="7"><div class="empty">'+t('noData')+'</div></td></tr>';
 
   document.getElementById('stuPager').innerHTML =
     '<button class="btn ghost sm" data-pg="-1"'+(state.stuPage<=1?' disabled':'')+'>'+t('prev')+'</button>'+
@@ -717,12 +716,27 @@ document.getElementById('stuPager').addEventListener('click', function(e){
 });
 
 document.querySelector('#stuTable tbody').addEventListener('click', async function(e){
-  var b = e.target.closest('[data-reset]'); if(!b) return;
-  var id = b.dataset.reset;
-  if(b.dataset.armed !== '1'){ b.dataset.armed='1'; b.textContent = t('confirmDel'); return; }
-  var r = await tryApi({ action:'resetStudentPass', id:id });
-  toast(t('saved') + ' · ' + (r ? r.password : id));
-  b.dataset.armed=''; b.textContent = t('reset');
+  var open = e.target.closest('[data-setpw]');
+  if(open){
+    var id = open.dataset.setpw;
+    open.parentNode.innerHTML =
+      '<div style="display:flex;gap:6px;align-items:center">'+
+      '<input class="pwin" data-pwfor="'+id+'" placeholder="'+t('pwPh')+'" style="padding:6px 10px;font-size:13px;min-width:0;flex:1">'+
+      '<button class="btn sm" data-savepw="'+id+'">\u2713</button></div>';
+    open.parentNode.querySelector('.pwin').focus();
+    return;
+  }
+  var save = e.target.closest('[data-savepw]');
+  if(save){
+    var sid = save.dataset.savepw;
+    var inp = document.querySelector('[data-pwfor="'+sid+'"]');
+    var val = inp ? inp.value.trim() : '';
+    save.disabled = true;
+    var r = await tryApi({ action:'resetStudentPass', id:sid, newPassword: val || sid });
+    toast(t('pwOk') + (r ? r.password : sid));
+    save.parentNode.parentNode.innerHTML =
+      '<button class="btn ghost sm" data-setpw="'+sid+'">'+t('setPw')+'</button>';
+  }
 });
 
 document.querySelector('#actTable tbody').addEventListener('click', async function(e){
