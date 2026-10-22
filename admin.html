@@ -107,6 +107,17 @@ tbody tr:hover{background:var(--blue-soft)}
 </style>
 </head>
 <body>
+<style>
+.backfab{position:fixed;top:14px;left:14px;z-index:999;width:40px;height:40px;border-radius:999px;
+ display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#e9edf1);
+ box-shadow:0 2px 8px rgba(11,15,20,.10);color:var(--ink,#0b0f14);text-decoration:none;
+ font-size:20px;line-height:1;transition:background .15s,transform .15s}
+.backfab:hover{background:var(--blue-soft,#e8f6fe);transform:translateX(-2px)}
+.backfab:active{transform:scale(.94)}
+@media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
+</style>
+<a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
+
 
 <div id="gate">
   <form class="gate-card" id="loginForm">
@@ -119,14 +130,14 @@ tbody tr:hover{background:var(--blue-soft)}
     <div class="field"><label for="pass">รหัสผ่าน</label>
       <input id="pass" type="password" autocomplete="current-password" required></div>
     <button class="btn wide" type="submit">เข้าสู่ระบบ</button>
-    <p style="text-align:center;margin:16px 0 0"><a href="index.html" style="color:var(--blue);font-size:13.5px;font-weight:600;text-decoration:none">‹ กลับหน้าแรก</a></p>
+    
   </form>
 </div>
 
 <div id="app" hidden>
   <nav class="rail">
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
-    <a class="navb" href="index.html" style="text-decoration:none">‹ หน้าแรก</a>
+    
     <button class="navb" data-tab="staff">เจ้าหน้าที่</button>
     <button class="navb" data-tab="ann">ประกาศ</button>
     <button class="navb" data-tab="settings">ตั้งค่าระบบ</button>

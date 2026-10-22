@@ -148,6 +148,17 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 
 </head>
 <body>
+<style>
+.backfab{position:fixed;top:14px;left:14px;z-index:999;width:40px;height:40px;border-radius:999px;
+ display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#e9edf1);
+ box-shadow:0 2px 8px rgba(11,15,20,.10);color:var(--ink,#0b0f14);text-decoration:none;
+ font-size:20px;line-height:1;transition:background .15s,transform .15s}
+.backfab:hover{background:var(--blue-soft,#e8f6fe);transform:translateX(-2px)}
+.backfab:active{transform:scale(.94)}
+@media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
+</style>
+<a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
+
 <!-- ======================= หน้าเข้าสู่ระบบ ======================= -->
 <div id="gate">
   <form class="gate-card" id="loginForm">
@@ -164,7 +175,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
       <input id="pass" type="password" autocomplete="current-password" required>
     </div>
     <button class="btn wide" type="submit" data-i18n="signIn">เข้าสู่ระบบ</button>
-    <p style="text-align:center;margin:16px 0 0"><a href="index.html" style="color:var(--blue);font-size:13.5px;font-weight:600;text-decoration:none">‹ กลับหน้าแรก</a></p>
+    
     <p class="note" id="gateNote"></p>
   </form>
 </div>
@@ -173,7 +184,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 <div id="app" hidden>
   <nav class="rail">
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
-    <a class="navb" href="index.html" style="text-decoration:none"><span class="ic">‹</span><span>หน้าแรก</span></a>
+    
     <button class="navb" data-tab="dash"><span class="ic">◧</span><span data-i18n="tabDash">ภาพรวม</span></button>
     <button class="navb" data-tab="students"><span class="ic">☗</span><span data-i18n="tabStudents">นิสิต</span></button>
     <button class="navb" data-tab="acts"><span class="ic">◆</span><span data-i18n="tabActs">กิจกรรม</span></button>
@@ -341,6 +352,7 @@ var I18N = {
     saved:'已保存',copied:'已复制',confirmDel:'再次点击确认'}
 };
 var lang = 'th';
+try{ var _sv=localStorage.getItem('msu_lang'); if(_sv) lang=_sv; }catch(e){}
 function t(k){ return (I18N[lang] && I18N[lang][k]) || I18N.th[k] || k; }
 
 function applyLang(){
@@ -441,7 +453,8 @@ document.getElementById('logout').addEventListener('click', function(){
   document.getElementById('gate').hidden = false;
 });
 
-document.getElementById('lang').addEventListener('change', function(e){ lang = e.target.value; applyLang(); });
+document.getElementById('lang').addEventListener('change', function(e){ lang = e.target.value; try{localStorage.setItem('msu_lang',lang);}catch(_){} applyLang(); });
+document.getElementById('lang').value=lang;
 document.getElementById('refresh').addEventListener('click', function(){ load(state.tab); });
 
 /* ========================== แท็บ =============================== */

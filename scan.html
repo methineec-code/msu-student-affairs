@@ -89,10 +89,21 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 </style>
 </head>
 <body>
+<style>
+.backfab{position:fixed;top:14px;left:14px;z-index:999;width:40px;height:40px;border-radius:999px;
+ display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#e9edf1);
+ box-shadow:0 2px 8px rgba(11,15,20,.10);color:var(--ink,#0b0f14);text-decoration:none;
+ font-size:20px;line-height:1;transition:background .15s,transform .15s}
+.backfab:hover{background:var(--blue-soft,#e8f6fe);transform:translateX(-2px)}
+.backfab:active{transform:scale(.94)}
+@media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
+</style>
+<a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
+
 <div class="wrap">
   <div class="top">
     <div class="crest">MSU</div>
-    <div style="min-width:0"><h1>สแกน QR กิจกรรม</h1><p>ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div><a class="btn ghost" href="index.html" style="margin-left:auto;flex:none;width:auto;padding:7px 15px;font-size:13px;text-decoration:none;white-space:nowrap">‹ หน้าแรก</a>
+    <div style="min-width:0"><h1>สแกน QR กิจกรรม</h1><p>ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p></div>
   </div>
 
   <!-- ===== เข้าสู่ระบบ ===== -->
