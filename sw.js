@@ -4,7 +4,7 @@
      - คำขอไป Apps Script (/exec)     -> network only ไม่แคชเด็ดขาด (ข้อมูลต้องสด)
    เปลี่ยน CACHE_VERSION ทุกครั้งที่อัปไฟล์ใหม่ขึ้น Netlify เพื่อล้างแคชเก่า
 */
-const CACHE_VERSION = 'msu-sa-v4';
+const CACHE_VERSION = 'msu-sa-v5';
 const SHELL = [
   './',
   './index.html',
@@ -15,6 +15,8 @@ const SHELL = [
   './scan.html',
   './manifest.json',
   './icon-192.png',
+  './icon-maskable.png',
+  './apple-touch-icon.png',
   './icon-512.png',
 ];
 

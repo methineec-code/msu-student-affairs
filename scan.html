@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="shortcut icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="กิจการนิสิต มมส">
 <title>สแกน QR — กิจการนิสิต มมส</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
 <style>
@@ -195,6 +205,20 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 /* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่
 
+/* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
+function msuSave(k, v){
+  try{ sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+}
+function msuLoad(k){
+  try{ var raw = sessionStorage.getItem(k); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+function msuClear(){
+  ['msu_stu','msu_staff'].forEach(function(k){
+    try{ sessionStorage.removeItem(k); localStorage.removeItem(k); }catch(e){}
+  });
+}
+
 
 var I18N={
  th:{title:'สแกน QR กิจกรรม',sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
@@ -291,7 +315,7 @@ document.getElementById('formStu').addEventListener('submit', async function(e){
                         password:document.getElementById('spw').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
     me = r.student; mode = 'student';
-    try{ sessionStorage.setItem('msu_stu', JSON.stringify(me)); }catch(_){}
+    msuSave('msu_stu', me);
     enter();
   }catch(err){ box.textContent = t('errConn'); box.hidden = false; }
 });
@@ -305,7 +329,7 @@ document.getElementById('formStaff').addEventListener('submit', async function(e
                         password:document.getElementById('spass').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
     me = r.staff; auth = r.auth; mode = 'staff';
-    try{ sessionStorage.setItem('msu_staff', JSON.stringify({staff:r.staff,auth:r.auth})); }catch(_){}
+    msuSave('msu_staff', {staff:r.staff, auth:r.auth});
     enter();
   }catch(err){ box.textContent = t('errConn'); box.hidden = false; }
 });
@@ -339,7 +363,7 @@ async function enter(){
 
 document.getElementById('logout').addEventListener('click', function(){
   stopCam(); me = null; auth = null;
-  try{ sessionStorage.removeItem('msu_staff'); sessionStorage.removeItem('msu_stu'); }catch(_){}
+  msuClear();
   document.getElementById('main').hidden = true;
   document.getElementById('gate').hidden = false;
   document.getElementById('result').innerHTML = '';
@@ -523,9 +547,9 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
 
 /* ===================== ลงทะเบียน PWA ========================== */
 /* จำการล็อกอินข้ามหน้า */
-try{ var _ss=sessionStorage.getItem('msu_staff'), _st=sessionStorage.getItem('msu_stu');
-  if(_ss){ var _o=JSON.parse(_ss); me=_o.staff; auth=_o.auth; mode='staff'; setMode('staff'); enter(); }
-  else if(_st){ me=JSON.parse(_st); mode='student'; enter(); } }catch(e){}
+try{ var _o=msuLoad('msu_staff'), _st=msuLoad('msu_stu');
+  if(_o){ me=_o.staff; auth=_o.auth; mode='staff'; setMode('staff'); enter(); }
+  else if(_st){ me=_st; mode='student'; enter(); } }catch(e){}
 
 applyLang();
 

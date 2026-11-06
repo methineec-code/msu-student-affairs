@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="shortcut icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="กิจการนิสิต มมส">
 <title>กิจกรรมที่เปิดรับ — กิจการนิสิต มมส</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
 <style>
@@ -146,6 +156,20 @@ input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:va
 <script>
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec';
 
+/* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
+function msuSave(k, v){
+  try{ sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+}
+function msuLoad(k){
+  try{ var raw = sessionStorage.getItem(k); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+function msuClear(){
+  ['msu_stu','msu_staff'].forEach(function(k){
+    try{ sessionStorage.removeItem(k); localStorage.removeItem(k); }catch(e){}
+  });
+}
+
 var I18N = {
  th:{title:'กิจกรรมที่เปิดรับ', sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
   loading:'กำลังโหลด…', none:'ตอนนี้ยังไม่มีกิจกรรมที่เปิดรับ',
@@ -232,7 +256,7 @@ document.getElementById('gate').addEventListener('submit', async function(e){
                        password:document.getElementById('upw').value});
     if(!r.success){ box.textContent=r.error; box.hidden=false; btn.disabled=false; return; }
     me = r.student;
-    try{ sessionStorage.setItem('msu_stu', JSON.stringify(me)); }catch(_){}
+    msuSave('msu_stu', me);
     document.getElementById('gate').hidden = true;
     e.target.reset();
     showMe();
@@ -244,7 +268,7 @@ document.getElementById('gate').addEventListener('submit', async function(e){
 
 document.getElementById('logout').addEventListener('click', function(){
   me=null;
-  try{ sessionStorage.removeItem('msu_stu'); sessionStorage.removeItem('msu_staff'); }catch(_){}
+  msuClear();
   showMe(); load();
 });
 
@@ -431,8 +455,8 @@ async function join(actId, btn){
 
 /* ---------- จำการล็อกอินข้ามหน้า ---------- */
 try{
-  var _st=sessionStorage.getItem('msu_stu');
-  if(_st){ me=JSON.parse(_st); }
+  var _st=msuLoad('msu_stu');
+  if(_st){ me=_st; }
 }catch(e){}
 
 applyLang();
