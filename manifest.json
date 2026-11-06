@@ -7,15 +7,43 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f9fbfe",
-  "theme_color": "#15458f",
+  "background_color": "#fbfaff",
+  "theme_color": "#5a62d6",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "สแกน QR", "short_name": "สแกน", "url": "./scan.html" },
-    { "name": "หน้าเจ้าหน้าที่", "short_name": "เจ้าหน้าที่", "url": "./staff.html" }
+    {
+      "name": "กิจกรรมที่เปิดรับ",
+      "short_name": "กิจกรรม",
+      "url": "./activities.html"
+    },
+    {
+      "name": "สแกน QR",
+      "short_name": "สแกน",
+      "url": "./scan.html"
+    },
+    {
+      "name": "หน้าเจ้าหน้าที่",
+      "short_name": "เจ้าหน้าที่",
+      "url": "./staff.html"
+    }
   ]
 }
