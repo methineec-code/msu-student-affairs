@@ -74,6 +74,7 @@ textarea{min-height:76px;resize:vertical;font-family:inherit}
 #app{display:grid;grid-template-columns:212px 1fr;min-height:100%;gap:12px;padding:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
 .rail{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 3px rgba(43,42,61,.05);display:flex;flex-direction:column;
   padding-block:16px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:12px;gap:3px}
+.rail .pagetag{display:inline-block;background:var(--blue-soft);color:var(--blue);font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em;padding:5px 12px;border-radius:var(--r-p);margin:2px 0 10px}
 .rail .who{padding:10px 14px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
 .rail .who b{display:block;font-family:var(--display);font-size:14px}
 .rail .who span{font-size:12px;color:var(--ink-3)}
@@ -119,6 +120,10 @@ tbody tr:hover{background:var(--blue-soft)}
 .setrow:last-child{border-bottom:none}
 .setrow input{padding:7px 12px}
 @media (max-width:560px){.setrow{grid-template-columns:1fr;gap:6px}}
+
+/* เว้นที่ให้ปุ่มย้อนกลับ ไม่ให้ทับตัวหนังสือ */
+.rail{padding-top:60px!important}
+@media(max-width:760px){.rail{padding-top:12px!important}}
 </style>
 </head>
 <body>
@@ -151,6 +156,7 @@ tbody tr:hover{background:var(--blue-soft)}
 
 <div id="app" hidden>
   <nav class="rail">
+    <div class="pagetag" data-i18n="pageTag">ผู้ดูแลระบบ</div>
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
     
     
@@ -257,11 +263,11 @@ function msuClear(){
 
 
 var I18N={
- th:{h1:'ผู้ดูแลระบบ',sub:'เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin',lbEmail:'อีเมล',lbPass:'รหัสผ่าน',
+ th:{pageTag:'ผู้ดูแลระบบ',h1:'ผู้ดูแลระบบ',sub:'เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin',lbEmail:'อีเมล',lbPass:'รหัสผ่าน',
   btnLogin:'เข้าสู่ระบบ',btnOut:'ออกจากระบบ',navStaff:'เจ้าหน้าที่',navAnn:'ประกาศ',
   navSet:'ตั้งค่าระบบ',navLog:'ประวัติการใช้งาน',kickStaff:'สิทธิ์การเข้าถึง',kickAnn:'ข่าวสารถึงผู้ใช้',
   kickSet:'ค่ากลางของระบบ',kickLog:'ตรวจสอบย้อนหลัง',lbName:'ชื่อ-สกุล',lbRole:'สิทธิ์',lbStatus:'สถานะ',
-  roleStaff:'เจ้าหน้าที่',roleAdmin:'ผู้ดูแลระบบ',stActive:'ใช้งาน',stOff:'ระงับ',
+  roleWord:'สิทธิ์',roleStaff:'เจ้าหน้าที่',roleAdmin:'ผู้ดูแลระบบ',stActive:'ใช้งาน',stOff:'ระงับ',
   btnSave:'บันทึก',btnCancel:'ยกเลิกการแก้ไข',btnPub:'เผยแพร่',btnEdit:'แก้ไข',btnSuspend:'ระงับ',
   btnDel:'ลบ',again:'กดอีกครั้ง',addStaff:'เพิ่มเจ้าหน้าที่',editPre:'แก้ไข: ',
   phRandom:'เว้นว่างเพื่อสุ่มให้',phKeep:'เว้นว่างเพื่อใช้รหัสเดิม',
@@ -278,11 +284,11 @@ var I18N={
   errRole:'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ',
   okSaved:'บันทึกแล้ว',okPass:'บันทึกแล้ว · รหัสผ่าน ',okSuspend:'ระงับบัญชีแล้ว',
   okDel:'ลบแล้ว',okPub:'เผยแพร่แล้ว',okSet:'บันทึกแล้ว: '},
- en:{h1:'Administrator',sub:'Admin accounts only',lbEmail:'Email',lbPass:'Password',
+ en:{pageTag:'Admin console',h1:'Administrator',sub:'Admin accounts only',lbEmail:'Email',lbPass:'Password',
   btnLogin:'Sign in',btnOut:'Sign out',navStaff:'Staff',navAnn:'Announcements',
   navSet:'System settings',navLog:'Activity log',kickStaff:'Access control',kickAnn:'News for users',
   kickSet:'System-wide values',kickLog:'Audit trail',lbName:'Full name',lbRole:'Role',lbStatus:'Status',
-  roleStaff:'Staff',roleAdmin:'Administrator',stActive:'Active',stOff:'Suspended',
+  roleWord:'Role:',roleStaff:'Staff',roleAdmin:'Administrator',stActive:'Active',stOff:'Suspended',
   btnSave:'Save',btnCancel:'Cancel editing',btnPub:'Publish',btnEdit:'Edit',btnSuspend:'Suspend',
   btnDel:'Delete',again:'Tap again',addStaff:'Add staff member',editPre:'Editing: ',
   phRandom:'Leave blank to generate one',phKeep:'Leave blank to keep current',
@@ -299,11 +305,11 @@ var I18N={
   errRole:'This account does not have administrator rights',
   okSaved:'Saved',okPass:'Saved · password ',okSuspend:'Account suspended',
   okDel:'Deleted',okPub:'Published',okSet:'Saved: '},
- zh:{h1:'管理员',sub:'仅限具有管理员权限的账号',lbEmail:'邮箱',lbPass:'密码',
+ zh:{pageTag:'管理员',h1:'管理员',sub:'仅限具有管理员权限的账号',lbEmail:'邮箱',lbPass:'密码',
   btnLogin:'登录',btnOut:'退出登录',navStaff:'职员',navAnn:'公告',
   navSet:'系统设置',navLog:'操作记录',kickStaff:'权限管理',kickAnn:'用户通知',
   kickSet:'系统参数',kickLog:'审计记录',lbName:'姓名',lbRole:'权限',lbStatus:'状态',
-  roleStaff:'职员',roleAdmin:'管理员',stActive:'启用',stOff:'停用',
+  roleWord:'权限',roleStaff:'职员',roleAdmin:'管理员',stActive:'启用',stOff:'停用',
   btnSave:'保存',btnCancel:'取消编辑',btnPub:'发布',btnEdit:'编辑',btnSuspend:'停用',
   btnDel:'删除',again:'再按一次',addStaff:'添加职员',editPre:'编辑：',
   phRandom:'留空则自动生成',phKeep:'留空则保持原密码',
@@ -372,7 +378,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     document.getElementById('gate').hidden = true;
     document.getElementById('app').hidden = false;
     document.getElementById('whoName').textContent = me.name;
-    document.getElementById('whoRole').textContent = me.email;
+    document.getElementById('whoRole').textContent = t('roleWord')+' '+t('roleAdmin');
     go('staff');
   }catch(err){
     box.textContent = t('errConn');
@@ -565,7 +571,7 @@ try{ var _o=msuLoad('msu_staff');
       document.getElementById('gate').hidden=true;
       document.getElementById('app').hidden=false;
       document.getElementById('whoName').textContent=me.name;
-      document.getElementById('whoRole').textContent=me.email;
+      document.getElementById('whoRole').textContent=t('roleWord')+' '+t('roleAdmin');
       go('staff'); } } }catch(e){}
 
 applyLang();

@@ -101,6 +101,10 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
   font-size:13px;margin-bottom:12px}
 .row{display:flex;gap:9px}
 .row .btn{margin-top:0}
+
+/* เว้นที่ให้ปุ่มย้อนกลับ */
+.wrap{padding-top:64px!important}
+@media(max-width:480px){.wrap{padding-top:56px!important}}
 </style>
 </head>
 <body>
@@ -228,7 +232,7 @@ var I18N={
   camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
   btnSave:'บันทึกการเข้าร่วม',noItem:'ยังไม่มีรายการ',noItemRound:'ยังไม่มีรายการในรอบนี้',
   lbActCode:'รหัสกิจกรรม',lbStuId:'รหัสนิสิต',totalLab:'คะแนนสะสม',scanLab:'สแกนไปแล้ว (ครั้ง)',
-  roleAdmin:'ผู้ดูแลระบบ',roleStaff:'เจ้าหน้าที่',pts:'คะแนน',
+  roleWord:'สิทธิ์',roleAdmin:'ผู้ดูแลระบบ',roleStaff:'เจ้าหน้าที่',pts:'คะแนน',
   errApi:'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html',
   errConn:'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy',
   camFail:'เปิดกล้องไม่ได้ — ต้องเปิดผ่าน https และอนุญาตให้ใช้กล้อง หรือกด "พิมพ์เอง"',
@@ -242,7 +246,7 @@ var I18N={
   camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
   btnSave:'Record attendance',noItem:'No records yet',noItemRound:'No records in this session',
   lbActCode:'Activity code',lbStuId:'Student ID',totalLab:'Total points',scanLab:'Scans so far',
-  roleAdmin:'Administrator',roleStaff:'Staff',pts:'pts',
+  roleWord:'Role:',roleAdmin:'Administrator',roleStaff:'Staff',pts:'pts',
   errApi:'API_URL is not set in scan.html',
   errConn:'Cannot reach the backend. Check API_URL and the deployment.',
   camFail:'Camera unavailable — the page must be on https and camera access allowed, or use "Type it".',
@@ -256,7 +260,7 @@ var I18N={
   camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
   btnSave:'记录参加',noItem:'暂无记录',noItemRound:'本次暂无记录',
   lbActCode:'活动代码',lbStuId:'学号',totalLab:'累计积分',scanLab:'已扫描次数',
-  roleAdmin:'管理员',roleStaff:'职员',pts:'分',
+  roleWord:'权限',roleAdmin:'管理员',roleStaff:'职员',pts:'分',
   errApi:'scan.html 中尚未设置 API_URL',
   errConn:'无法连接后端，请检查 API_URL 与部署状态',
   camFail:'无法开启摄像头 — 需通过 https 访问并允许使用摄像头，或点击"手动输入"',
@@ -344,7 +348,7 @@ function labelsFor(){
     document.getElementById('manualIn').placeholder = 'ACT1760012345678';
     document.getElementById('histLab').textContent = t('totalLab');
   }else{
-    document.getElementById('whoMeta').textContent = (me.role==='admin'?t('roleAdmin'):t('roleStaff')) + ' · ' + me.email;
+    document.getElementById('whoMeta').textContent = t('roleWord')+' '+(me.role==='admin'?t('roleAdmin'):t('roleStaff')) + ' · ' + me.email;
     document.getElementById('manualLab').textContent = t('lbStuId');
     document.getElementById('manualIn').placeholder = '65010000001';
     document.getElementById('histLab').textContent = t('scanLab');

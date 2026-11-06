@@ -15,7 +15,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="กิจการนิสิต มมส">
-<title>MSU Staff Console</title>
+<title>หน้าเจ้าหน้าที่ — กิจการนิสิต มมส</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
 <style>
@@ -75,6 +75,9 @@ input:focus,select:focus{border-color:var(--plum)}
 #app{display:grid;grid-template-columns:212px 1fr;min-height:100%;gap:12px;padding:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
 .rail{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 3px rgba(43,42,61,.05);display:flex;flex-direction:column;
   padding-block:16px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:12px;gap:3px}
+.rail .pagetag{display:inline-block;background:var(--blue-soft);color:var(--blue);
+  font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em;
+  padding:5px 12px;border-radius:var(--r-p);margin:2px 0 10px}
 .rail .who{padding:10px 10px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
 .rail .who b{display:block;font-family:var(--display);font-size:14px}
 .rail .who span{font-size:12px;color:var(--ink-3)}
@@ -160,6 +163,10 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
   overflow:auto;padding:20px 22px;box-shadow:0 20px 60px rgba(43,42,61,.25)}
 .msheet h3{font-size:16px;margin:0 0 12px}
 .msheet .x{float:right;border:none;background:none;font-size:20px;cursor:pointer;color:var(--ink-3);line-height:1}
+
+/* เว้นที่ให้ปุ่มย้อนกลับ ไม่ให้ทับตัวหนังสือ */
+.rail{padding-top:60px!important}
+@media(max-width:760px){.rail{padding-top:12px!important}}
 </style>
 
 </head>
@@ -199,6 +206,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 <!-- ========================= หน้าทำงาน ========================== -->
 <div id="app" hidden>
   <nav class="rail">
+    <div class="pagetag" data-i18n="pageTag">หน้าเจ้าหน้าที่</div>
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
     
     <button class="navb" data-tab="dash"><span class="ic">◧</span><span data-i18n="tabDash">ภาพรวม</span></button>
@@ -349,7 +357,7 @@ var DEMO = false;
 
 /* ============================ ภาษา ============================= */
 var I18N = {
-  th:{appName:'ระบบกิจการนิสิต',forStaff:'สำหรับเจ้าหน้าที่และผู้ดูแลระบบ',email:'อีเมล',password:'รหัสผ่าน',
+  th:{appName:'ระบบกิจการนิสิต',forStaff:'เข้าสู่ระบบสำหรับเจ้าหน้าที่',email:'อีเมล',password:'รหัสผ่าน',
     signIn:'เข้าสู่ระบบ',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
     goScan:'สแกน QR',tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
     kickScans:'บันทึกการเข้าร่วม',kickRank:'คะแนนสะสม',refresh:'รีเฟรช',byDept:'นิสิตแยกตามสาขา',
@@ -358,6 +366,7 @@ var I18N = {
     cScans:'ครั้ง',cStatus:'สถานะ',cAct:'กิจกรรม',cJoin:'ผู้เข้าร่วม',cWhen:'วันเวลา',newAct:'สร้างกิจกรรมใหม่',
     actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
     tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
+    pageTag:'หน้าเจ้าหน้าที่',roleWord:'สิทธิ์',roleAdmin2:'ผู้ดูแลระบบ',roleStaff2:'เจ้าหน้าที่',
     actPlace:'สถานที่จัด',actCap:'จำนวนที่รับ',actOpen:'เปิดรับลงชื่อ',yesOpen:'เปิด',noOpen:'ไม่เปิด',
     actBanner:'รูปแบนเนอร์',bannerHint:'แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB',imgBig:'รูปใหญ่เกิน 5 MB',saving:'กำลังบันทึก…',
     regList:'ผู้ลงชื่อ',noReg:'ยังไม่มีผู้ลงชื่อ',
@@ -367,7 +376,7 @@ var I18N = {
     demoMsg:'โหมดตัวอย่าง — ยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อหลังบ้านไม่ได้ ตัวเลขที่เห็นเป็นข้อมูลสมมติ',
     hint:'ยังไม่ได้ตั้งค่า API_URL — กดเข้าสู่ระบบเพื่อดูโหมดตัวอย่าง',
     saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน'},
-  en:{appName:'Student Affairs',forStaff:'For staff and administrators',email:'Email',password:'Password',
+  en:{appName:'Student Affairs',forStaff:'Staff sign-in',email:'Email',password:'Password',
     signIn:'Sign in',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
     goScan:'Scan QR',tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
     kickScans:'Attendance log',kickRank:'Accumulated points',refresh:'Refresh',byDept:'Students by department',
@@ -376,6 +385,7 @@ var I18N = {
     cScans:'Scans',cStatus:'Status',cAct:'Activity',cJoin:'Attended',cWhen:'Date & time',newAct:'New activity',
     actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
     tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
+    pageTag:'Staff console',roleWord:'Role:',roleAdmin2:'Administrator',roleStaff2:'Staff',
     actPlace:'Venue',actCap:'Seats',actOpen:'Open for sign-up',yesOpen:'Open',noOpen:'Closed',
     actBanner:'Banner image',bannerHint:'Landscape 16:7 · max 5 MB',imgBig:'Image is larger than 5 MB',saving:'Saving…',
     regList:'Sign-ups',noReg:'No sign-ups yet',
@@ -385,7 +395,7 @@ var I18N = {
     demoMsg:'Demo mode — API_URL is not set or the backend is unreachable. These figures are sample data.',
     hint:'API_URL is not set — sign in to view the demo.',
     saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm'},
-  zh:{appName:'学生事务系统',forStaff:'供工作人员与管理员使用',email:'邮箱',password:'密码',
+  zh:{appName:'学生事务系统',forStaff:'职员登录',email:'邮箱',password:'密码',
     signIn:'登录',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
     goScan:'扫码',tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
     kickScans:'参与记录',kickRank:'累计积分',refresh:'刷新',byDept:'各专业学生数',
@@ -394,6 +404,7 @@ var I18N = {
     cScans:'次数',cStatus:'状态',cAct:'活动',cJoin:'参与人数',cWhen:'日期时间',newAct:'新建活动',
     actName:'活动名称',actScore:'积分',actDate:'举办日期',actDesc:'详情',createQr:'创建并生成二维码',
     tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
+    pageTag:'职员页面',roleWord:'权限',roleAdmin2:'管理员',roleStaff2:'职员',
     actPlace:'举办地点',actCap:'名额',actOpen:'开放报名',yesOpen:'开放',noOpen:'关闭',
     actBanner:'横幅图片',bannerHint:'建议横向 16:7 · 不超过 5 MB',imgBig:'图片超过 5 MB',saving:'保存中…',
     regList:'报名名单',noReg:'暂无报名',
@@ -495,7 +506,8 @@ function enterApp(staff){
   document.getElementById('gate').hidden = true;
   document.getElementById('app').hidden = false;
   document.getElementById('whoName').textContent = staff.name || '—';
-  document.getElementById('whoRole').textContent = staff.role === 'admin' ? 'ผู้ดูแลระบบ' : 'เจ้าหน้าที่';
+  document.getElementById('whoRole').textContent =
+    t('roleWord') + ' ' + (staff.role === 'admin' ? t('roleAdmin2') : t('roleStaff2'));
   var b = document.getElementById('demoBanner');
   b.hidden = !DEMO; if(DEMO) b.textContent = t('demoMsg');
   go('dash');
