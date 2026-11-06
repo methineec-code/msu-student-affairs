@@ -40,9 +40,7 @@ const SCHEMA = {
   // A..G  (เดิม)
   Activities:    ['activity_id','name','score','description','created_by','created_date','active',
                   'banner_url','detail','event_date','location','capacity','open_reg'],
-  Registrations: ['reg_id','activity_id','student_id','student_name','dept','reg_date','reg_time','status'],
-  Likes:         ['like_id','activity_id','student_id','created'],
-  Comments:      ['comment_id','activity_id','student_id','student_name','text','date','time','status'],
+  Engage:        ['id','type','activity_id','student_id','student_name','dept','text','date','time','status'],
   // A..G  (เดิม)
   Scan_Log:      ['log_id','student_id','activity_id','score','date','time','scanned_by'],
   // A..F  (เดิม)
@@ -1133,41 +1131,38 @@ function installFormTrigger() {
 }
 
 
-/* ================== กิจกรรมที่เปิดรับ + การลงชื่อ ================= */
+/* ========== กิจกรรม: ลงชื่อ / ไลก์ / คอมเมนต์ (รวมในชีต Engage) ==========
+ * ชีตเดียว แยกประเภทด้วยคอลัมน์ type: 'reg' | 'like' | 'comment'
+ * คอลัมน์: id | type | activity_id | student_id | student_name | dept | text | date | time | status
+ */
+const ENGAGE = 'Engage';
+const E_ID=0, E_TYPE=1, E_ACT=2, E_SID=3, E_NAME=4, E_DEPT=5, E_TEXT=6, E_DATE=7, E_TIME=8, E_STATUS=9;
+
+function engageSheet() {
+  let sh = SS.getSheetByName(ENGAGE);
+  if (!sh) {
+    sh = SS.insertSheet(ENGAGE);
+    sh.getRange(1, 1, 1, SCHEMA.Engage.length).setValues([SCHEMA.Engage]);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+function engageData() { return engageSheet().getDataRange().getValues(); }
+function isLive(row) { return String(row[E_STATUS]) !== 'cancelled' && String(row[E_STATUS]) !== 'deleted'; }
 
 function getOpenActivities(params) {
   const data = sheetData('Activities');
-  const regs = sheetData('Registrations');
-  const likes = sheetData('Likes');
-  const cmts  = sheetData('Comments');
+  const eng  = engageData();
 
-  const likeBy = {}, myLike = {};
-  for (let i = 1; i < likes.length; i++) {
-    const k = String(likes[i][1]);
-    likeBy[k] = (likeBy[k] || 0) + 1;
-    if (params.studentId && String(likes[i][2]) === String(params.studentId)) myLike[k] = true;
-  }
-  const cmtBy = {};
-  for (let i = 1; i < cmts.length; i++) {
-    if (String(cmts[i][7]) === 'deleted') continue;
-    const k = String(cmts[i][1]);
-    cmtBy[k] = (cmtBy[k] || 0) + 1;
-  }
-
-  const countBy = {};
-  for (let i = 1; i < regs.length; i++) {
-    if (String(regs[i][7]) === 'cancelled') continue;
-    const k = String(regs[i][1]);
-    countBy[k] = (countBy[k] || 0) + 1;
-  }
-
-  const mine = {};
-  if (params.studentId) {
-    for (let i = 1; i < regs.length; i++) {
-      if (String(regs[i][2]) === String(params.studentId) && String(regs[i][7]) !== 'cancelled') {
-        mine[String(regs[i][1])] = regs[i][0];
-      }
-    }
+  const regBy = {}, likeBy = {}, cmtBy = {}, myReg = {}, myLike = {};
+  for (let i = 1; i < eng.length; i++) {
+    const r = eng[i];
+    if (!r[E_ACT] || !isLive(r)) continue;
+    const k = String(r[E_ACT]), t = String(r[E_TYPE]);
+    const mine = params.studentId && String(r[E_SID]) === String(params.studentId);
+    if (t === 'reg')      { regBy[k]  = (regBy[k]||0)+1;  if (mine) myReg[k]  = r[E_ID]; }
+    else if (t === 'like'){ likeBy[k] = (likeBy[k]||0)+1; if (mine) myLike[k] = true; }
+    else if (t === 'comment') cmtBy[k] = (cmtBy[k]||0)+1;
   }
 
   const out = [];
@@ -1178,13 +1173,13 @@ function getOpenActivities(params) {
     if (!active || !openReg) continue;
     const id = String(data[i][0]);
     const cap = Number(data[i][11]) || 0;
-    const taken = countBy[id] || 0;
+    const taken = regBy[id] || 0;
     out.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], banner: data[i][7] || '', detail: data[i][8] || '',
       eventDate: data[i][9] || '', location: data[i][10] || '',
       capacity: cap, taken: taken, full: cap > 0 && taken >= cap,
-      myRegId: mine[id] || '',
+      myRegId: myReg[id] || '',
       likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0
     });
   }
@@ -1200,45 +1195,42 @@ function registerActivity(params) {
   const stu = findStudent(sid);
   if (!stu) return { success: false, error: msg('NOT_FOUND_STUDENT', lang) };
 
-  const sheet = SS.getSheetByName('Registrations');
-  const regs  = sheet.getDataRange().getValues();
+  const sheet = engageSheet();
+  const eng = sheet.getDataRange().getValues();
 
-  for (let i = 1; i < regs.length; i++) {
-    if (String(regs[i][1]) === String(actId) && String(regs[i][2]) === String(sid)
-        && String(regs[i][7]) !== 'cancelled') {
+  let taken = 0;
+  for (let i = 1; i < eng.length; i++) {
+    const r = eng[i];
+    if (String(r[E_TYPE]) !== 'reg' || String(r[E_ACT]) !== String(actId) || !isLive(r)) continue;
+    taken++;
+    if (String(r[E_SID]) === String(sid)) {
       return { success: false, duplicate: true, error: msg('DUPLICATE', lang) };
     }
   }
 
-  /* เช็กจำนวนรับ */
   const act = sheetData('Activities');
   let cap = 0, actName = '';
   for (let i = 1; i < act.length; i++) {
     if (String(act[i][0]) === String(actId)) { cap = Number(act[i][11]) || 0; actName = act[i][1]; break; }
   }
-  if (cap > 0) {
-    let taken = 0;
-    for (let i = 1; i < regs.length; i++) {
-      if (String(regs[i][1]) === String(actId) && String(regs[i][7]) !== 'cancelled') taken++;
-    }
-    if (taken >= cap) return { success: false, full: true, error: 'กิจกรรมนี้เต็มแล้ว' };
-  }
+  if (cap > 0 && taken >= cap) return { success: false, full: true, error: 'กิจกรรมนี้เต็มแล้ว' };
 
   const now = new Date();
   const regId = 'REG' + now.getTime();
-  sheet.appendRow([regId, actId, sid, stu.row[1], stu.row[2],
+  sheet.appendRow([regId, 'reg', actId, sid, stu.row[1], stu.row[2], '',
                    Utilities.formatDate(now, TZ, 'dd/MM/yyyy'),
-                   Utilities.formatDate(now, TZ, 'HH:mm'), 'registered']);
+                   Utilities.formatDate(now, TZ, 'HH:mm'), 'active']);
   writeLog(sid, 'student', 'register', actId, actName, 'success');
   return { success: true, regId: regId };
 }
 
 function cancelRegistration(params) {
-  const sheet = SS.getSheetByName('Registrations');
+  const sheet = engageSheet();
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(params.regId) && String(data[i][2]) === String(params.studentId)) {
-      sheet.getRange(i + 1, 8).setValue('cancelled');
+    if (String(data[i][E_ID]) === String(params.regId) &&
+        String(data[i][E_SID]) === String(params.studentId)) {
+      sheet.getRange(i + 1, E_STATUS + 1).setValue('cancelled');
       writeLog(params.studentId, 'student', 'cancelReg', params.regId, '', 'success');
       return { success: true };
     }
@@ -1247,49 +1239,49 @@ function cancelRegistration(params) {
 }
 
 function getRegistrations(params) {
-  const data = sheetData('Registrations');
+  const data = engageData();
   const rows = [];
   for (let i = 1; i < data.length; i++) {
-    if (params.activityId && String(data[i][1]) !== String(params.activityId)) continue;
-    if (String(data[i][7]) === 'cancelled') continue;
-    rows.push({
-      regId: data[i][0], activityId: data[i][1], studentId: data[i][2],
-      name: data[i][3], dept: data[i][4], date: data[i][5], time: data[i][6]
-    });
+    const r = data[i];
+    if (String(r[E_TYPE]) !== 'reg' || !isLive(r)) continue;
+    if (params.activityId && String(r[E_ACT]) !== String(params.activityId)) continue;
+    rows.push({ regId: r[E_ID], activityId: r[E_ACT], studentId: r[E_SID],
+                name: r[E_NAME], dept: r[E_DEPT], date: r[E_DATE], time: r[E_TIME] });
   }
   rows.reverse();
   return { success: true, registrations: rows, total: rows.length };
 }
 
-
-/* ========================= ไลก์ / คอมเมนต์ ======================= */
-
 function toggleLike(params) {
   const actId = params.activityId, sid = params.studentId;
   if (!actId || !sid) return { success: false, error: msg('MISSING', params.lang || 'th') };
 
-  const sheet = SS.getSheetByName('Likes');
+  const sheet = engageSheet();
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][1]) === String(actId) && String(data[i][2]) === String(sid)) {
+    const r = data[i];
+    if (String(r[E_TYPE]) === 'like' && String(r[E_ACT]) === String(actId)
+        && String(r[E_SID]) === String(sid) && isLive(r)) {
       sheet.deleteRow(i + 1);
       return { success: true, liked: false };
     }
   }
-  sheet.appendRow(['LIKE' + new Date().getTime(), actId, sid, nowStr()]);
+  const now = new Date();
+  sheet.appendRow(['LIKE' + now.getTime(), 'like', actId, sid, '', '', '',
+                   Utilities.formatDate(now, TZ, 'dd/MM/yyyy'),
+                   Utilities.formatDate(now, TZ, 'HH:mm'), 'active']);
   return { success: true, liked: true };
 }
 
 function getComments(params) {
-  const data = sheetData('Comments');
+  const data = engageData();
   const rows = [];
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][7]) === 'deleted') continue;
-    if (params.activityId && String(data[i][1]) !== String(params.activityId)) continue;
-    rows.push({
-      id: data[i][0], activityId: data[i][1], studentId: data[i][2],
-      name: data[i][3], text: data[i][4], date: data[i][5], time: data[i][6]
-    });
+    const r = data[i];
+    if (String(r[E_TYPE]) !== 'comment' || !isLive(r)) continue;
+    if (params.activityId && String(r[E_ACT]) !== String(params.activityId)) continue;
+    rows.push({ id: r[E_ID], activityId: r[E_ACT], studentId: r[E_SID],
+                name: r[E_NAME], text: r[E_TEXT], date: r[E_DATE], time: r[E_TIME] });
   }
   return { success: true, comments: rows, total: rows.length };
 }
@@ -1306,24 +1298,21 @@ function addComment(params) {
 
   const now = new Date();
   const cid = 'CMT' + now.getTime();
-  SS.getSheetByName('Comments').appendRow([
-    cid, actId, sid, stu.row[1], text,
-    Utilities.formatDate(now, TZ, 'dd/MM/yyyy'),
-    Utilities.formatDate(now, TZ, 'HH:mm'), 'active'
-  ]);
+  engageSheet().appendRow([cid, 'comment', actId, sid, stu.row[1], stu.row[2], text,
+                           Utilities.formatDate(now, TZ, 'dd/MM/yyyy'),
+                           Utilities.formatDate(now, TZ, 'HH:mm'), 'active']);
   return { success: true, commentId: cid };
 }
 
 function delComment(params) {
-  const sheet = SS.getSheetByName('Comments');
+  const sheet = engageSheet();
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(params.commentId)) {
-      /* ลบได้เฉพาะเจ้าของคอมเมนต์ หรือเจ้าหน้าที่ */
-      const owner = String(data[i][2]) === String(params.studentId);
+    if (String(data[i][E_ID]) === String(params.commentId)) {
+      const owner = String(data[i][E_SID]) === String(params.studentId);
       const staff = !!params.staff_id;
       if (!owner && !staff) return { success: false, error: 'ลบได้เฉพาะคอมเมนต์ของตัวเอง' };
-      sheet.getRange(i + 1, 8).setValue('deleted');
+      sheet.getRange(i + 1, E_STATUS + 1).setValue('deleted');
       return { success: true };
     }
   }
