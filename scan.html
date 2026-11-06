@@ -414,7 +414,9 @@ async function startCam(){
   var btn = document.getElementById('camBtn');
   try{
     stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 } }, audio:false
+      video:{ facingMode:{ ideal:'environment' },
+              width:{ ideal:1920 }, height:{ ideal:1080 },
+              focusMode:'continuous', advanced:[{focusMode:'continuous'}] }, audio:false
     });
     video.srcObject = stream;
     await video.play();
@@ -438,21 +440,50 @@ function stopCam(){
   document.getElementById('reticle').classList.remove('lock');
 }
 
+function scanFrame(sx, sy, sw, sh, outW){
+  /* ตัดเฉพาะบริเวณที่ต้องการแล้วขยาย ช่วยให้อ่าน QR จากหน้าจอได้ดีขึ้น */
+  var scale = outW / sw;
+  canvas.width  = Math.round(sw * scale);
+  canvas.height = Math.round(sh * scale);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return jsQR(img.data, img.width, img.height, { inversionAttempts:'attemptBoth' });
+}
+
+var frameNo = 0;
 function tick(){
   if(!scanning) return;
   if(video.readyState === video.HAVE_ENOUGH_DATA && window.jsQR){
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var code = jsQR(img.data, img.width, img.height, { inversionAttempts:'dontInvert' });
-    if(code && code.data){
-      var now = Date.now();
-      if(code.data !== lastCode || now - lastAt > 3000){
-        lastCode = code.data; lastAt = now;
-        document.getElementById('reticle').classList.add('lock');
-        beep();
-        handleCode(code.data);
-        setTimeout(function(){ document.getElementById('reticle').classList.remove('lock'); }, 700);
+    var vw = video.videoWidth, vh = video.videoHeight;
+    if(vw && vh){
+      var code = null;
+      frameNo++;
+
+      /* 1) กรอบกลางภาพ (ตรงกับกรอบขาวบนหน้าจอ) */
+      var side = Math.min(vw, vh) * 0.70;
+      code = scanFrame((vw - side)/2, (vh - side)/2, side, side, 640);
+
+      /* 2) ถ้ายังไม่เจอ ลองกรอบกลางที่กว้างขึ้น */
+      if(!code){
+        var s2 = Math.min(vw, vh) * 0.95;
+        code = scanFrame((vw - s2)/2, (vh - s2)/2, s2, s2, 720);
+      }
+
+      /* 3) ทุก ๆ 3 เฟรม ลองทั้งภาพ เผื่อ QR อยู่นอกกรอบ */
+      if(!code && frameNo % 3 === 0){
+        code = scanFrame(0, 0, vw, vh, Math.min(900, vw));
+      }
+
+      if(code && code.data){
+        var now = Date.now();
+        if(code.data !== lastCode || now - lastAt > 3000){
+          lastCode = code.data; lastAt = now;
+          document.getElementById('reticle').classList.add('lock');
+          beep();
+          handleCode(code.data);
+          setTimeout(function(){ document.getElementById('reticle').classList.remove('lock'); }, 700);
+        }
       }
     }
   }
