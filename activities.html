@@ -285,6 +285,14 @@ function fmtDate(v){
   }
   return str;
 }
+function fmtTime(v){
+  if(!v) return '';
+  var str = String(v).trim();
+  if(/^\d{1,2}:\d{2}$/.test(str)) return str;
+  var m = str.match(/T(\d{2}):(\d{2})/);
+  if(m) return m[1]+':'+m[2];
+  return '';
+}
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
@@ -514,7 +522,7 @@ function renderComments(actId){
     var mineCm = me && String(c.studentId)===String(me.id);
     return '<div class="cm"><div class="av">'+esc(String(c.name||'?').trim().charAt(0))+'</div>'+
       '<div class="bo"><div class="nm">'+esc(c.name)+
-      '<span class="tm">'+esc(c.date+' '+c.time)+'</span></div>'+
+      '<span class="tm">'+esc((fmtDate(c.date)+' '+fmtTime(c.time)).trim())+'</span></div>'+
       '<div class="tx">'+esc(c.text)+'</div></div>'+
       (mineCm?'<button class="rm" data-rm="'+esc(c.id)+'" data-act="'+esc(actId)+'">'+t('rmCm')+'</button>':'')+
       '</div>';

@@ -254,6 +254,7 @@ var I18N={
   errConn:'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy',
   camFail:'เปิดกล้องไม่ได้ — ต้องเปิดผ่าน https และอนุญาตให้ใช้กล้อง หรือกด "พิมพ์เอง"',
   pickFirst:'เลือกกิจกรรมก่อน',pickFirstSub:'กดเลือกกิจกรรมที่ช่องด้านบน แล้วค่อยสแกน',
+  gotPts:'ได้ {n} คะแนน', totalNow:'รวม {n} คะแนน',
   saved:'บันทึกแล้ว',dup:'สแกนซ้ำ',dupAt:'บันทึกไว้แล้วเมื่อ',fail:'ไม่สำเร็จ',
   netTitle:'เชื่อมต่อไม่ได้',netSub:'ตรวจสอบสัญญาณอินเทอร์เน็ตและค่า API_URL'},
  en:{title:'Scan activity QR',sub:'Student Affairs · Mahasarakham University',
@@ -268,6 +269,7 @@ var I18N={
   errConn:'Cannot reach the backend. Check API_URL and the deployment.',
   camFail:'Camera unavailable — the page must be on https and camera access allowed, or use "Type it".',
   pickFirst:'Select an activity first',pickFirstSub:'Choose an activity above, then scan.',
+  gotPts:'+{n} points', totalNow:'total {n}',
   saved:'Recorded',dup:'Already scanned',dupAt:'recorded on',fail:'Failed',
   netTitle:'Connection failed',netSub:'Check your internet connection and API_URL'},
  zh:{title:'扫描活动二维码',sub:'玛哈沙拉堪大学 · 学生事务',
@@ -282,6 +284,7 @@ var I18N={
   errConn:'无法连接后端，请检查 API_URL 与部署状态',
   camFail:'无法开启摄像头 — 需通过 https 访问并允许使用摄像头，或点击"手动输入"',
   pickFirst:'请先选择活动',pickFirstSub:'请在上方选择活动后再扫描',
+  gotPts:'获得 {n} 分', totalNow:'累计 {n} 分',
   saved:'已记录',dup:'重复扫描',dupAt:'已于',fail:'失败',
   netTitle:'连接失败',netSub:'请检查网络连接与 API_URL'}
 };
@@ -531,10 +534,14 @@ function beep(){
 /* ====================== ตีความ QR แล้วส่ง ===================== */
 function handleCode(raw){
   var val = String(raw).trim();
-  // QR ที่ระบบออกให้เป็น JSON {id,name,score} — ถ้าไม่ใช่ก็ถือว่าเป็นรหัสล้วน
+  /* QR กิจกรรม = {id,name,score} · QR นิสิต = {sid,name} · ไม่ใช่ JSON = รหัสล้วน */
   try{
     var o = JSON.parse(val);
-    if(o && o.id) val = o.id;
+    if(o){
+      if(mode === 'staff' && o.sid) val = String(o.sid);
+      else if(o.id) val = String(o.id);
+      else if(o.sid) val = String(o.sid);
+    }
   }catch(e){}
   submitScan(val);
 }
@@ -571,7 +578,9 @@ async function submitScan(code){
                         scannedBy: mode==='staff' ? (auth && auth.staff_id) : studentId });
     if(r.success){
       show('ok', (r.activity && r.activity.name) || t('saved'),
-           (mode==='staff' ? (r.studentName||studentId) + ' · ' : '') + r.date + ' ' + r.time,
+           (mode==='staff' ? (r.studentName||studentId) + ' · ' : '') +
+           t('gotPts').replace('{n}', r.score) +
+           (r.totalScore!==undefined ? ' · ' + t('totalNow').replace('{n}', r.totalScore) : ''),
            '+' + r.score);
       if(mode==='student'){ loadHistory(); }
       else { pushStaffRow(r.studentName||studentId, r.score); }
@@ -588,9 +597,12 @@ async function submitScan(code){
 }
 
 function show(kind, title, line, big){
-  document.getElementById('result').innerHTML =
+  var el = document.getElementById('result');
+  el.innerHTML =
     '<div class="res '+kind+'">'+(big?'<span class="big">'+esc(big)+'</span>':'')+
     '<b>'+esc(title)+'</b>'+(line?'<div class="line">'+esc(line)+'</div>':'')+'</div>';
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  try{ navigator.vibrate && navigator.vibrate(kind==='ok' ? 60 : [40,60,40]); }catch(e){}
 }
 
 var staffCount = 0;

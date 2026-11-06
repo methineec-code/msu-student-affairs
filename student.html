@@ -245,6 +245,13 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 
     <!-- บัญชี -->
     <section data-pane="me" hidden>
+      <div class="card" style="text-align:center">
+        <h3 style="font-size:15px;margin-bottom:4px" data-i18n="myQr">QR ประจำตัวนิสิต</h3>
+        <p class="muted" style="margin:0 0 14px" data-i18n="myQrHint">ให้เจ้าหน้าที่สแกนเพื่อบันทึกการเข้าร่วมกิจกรรม</p>
+        <img id="myQrImg" alt="QR" style="width:100%;max-width:260px;padding:14px;background:#fff;
+          border:1px solid var(--line);border-radius:var(--r)">
+        <div class="code" id="myQrId" style="display:inline-block;margin-top:10px"></div>
+      </div>
       <div class="card">
         <h3 style="font-size:15px;margin-bottom:12px" data-i18n="myInfo">ข้อมูลของฉัน</h3>
         <div id="infoList"></div>
@@ -305,6 +312,7 @@ var I18N = {
    addPort:'เพิ่มผลงาน', myPort:'ผลงานของฉัน', pName:'ชื่อการอบรม / ผลงาน', pType:'ประเภท', pDate:'วันที่เข้าร่วม',
    pDesc:'รายละเอียดการอบรม', save:'บันทึก', myInfo:'ข้อมูลของฉัน', changePw:'เปลี่ยนรหัสผ่าน',
    oldPw:'รหัสผ่านเดิม', newPw:'รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)', loading:'กำลังโหลด…',
+   myQr:'QR ประจำตัวนิสิต', myQrHint:'ให้เจ้าหน้าที่สแกนเพื่อบันทึกการเข้าร่วมกิจกรรม',
    goScan:'▣ สแกน QR กิจกรรม', goActs:'◆ กิจกรรมที่เปิดรับ', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
    tSport:'กีฬา', tOther:'อื่นๆ', noHist:'ยังไม่มีกิจกรรมที่เข้าร่วม', noPort:'ยังไม่มีผลงาน',
    saved:'บันทึกแล้ว', deleted:'ลบแล้ว', del:'ลบ', confirmDel:'กดอีกครั้ง',
@@ -319,6 +327,7 @@ var I18N = {
    addPort:'Add work', myPort:'My portfolio', pName:'Training / work title', pType:'Type', pDate:'Date attended',
    pDesc:'Training details', save:'Save', myInfo:'My information', changePw:'Change password',
    oldPw:'Current password', newPw:'New password (6+ characters)', loading:'Loading…',
+   myQr:'My student QR', myQrHint:'Show this to staff to record your attendance',
    goScan:'▣ Scan activity QR', goActs:'◆ Open activities', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
    tSport:'Sport', tOther:'Other', noHist:'No activities yet', noPort:'Nothing here yet',
    saved:'Saved', deleted:'Deleted', del:'Delete', confirmDel:'Click again',
@@ -333,6 +342,7 @@ var I18N = {
    addPort:'添加作品', myPort:'我的作品集', pName:'培训 / 作品名称', pType:'类型', pDate:'参加日期',
    pDesc:'培训详情', save:'保存', myInfo:'我的信息', changePw:'修改密码',
    oldPw:'原密码', newPw:'新密码（至少6位）', loading:'加载中…',
+   myQr:'我的学生二维码', myQrHint:'出示给工作人员以记录参加',
    goScan:'▣ 扫描活动二维码', goActs:'◆ 开放报名的活动', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
    tSport:'体育', tOther:'其他', noHist:'暂无活动记录', noPort:'暂无作品',
    saved:'已保存', deleted:'已删除', del:'删除', confirmDel:'再次点击',
@@ -462,6 +472,14 @@ function render(){
       (lines.length?'<div class="muted" style="margin-top:3px;line-height:1.5">'+lines.join(' · ')+'</div>':'')+
       '</span><button class="btn ghost sm" data-delport="'+esc(x.portId)+'">'+t('del')+'</button></div>';
   }).join('') : '<div class="empty">'+t('noPort')+'</div>';
+
+  var qi=document.getElementById('myQrImg');
+  if(qi && me){
+    var payload=JSON.stringify({sid:me.id, name:me.name});
+    var want='https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='+encodeURIComponent(payload);
+    if(qi.dataset.src!==want){ qi.dataset.src=want; qi.src=want; }
+    document.getElementById('myQrId').textContent=me.id;
+  }
 
   var rows=[['fId',me.id],['fDept',me.dept],['fYear',me.year],['fEmail',me.email],['fGpa',me.gpa]];
   document.getElementById('infoList').innerHTML = rows.map(function(r){
