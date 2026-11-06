@@ -267,6 +267,11 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
         <div class="panel">
           <h3 data-i18n="newAct">สร้างกิจกรรมใหม่</h3>
           <form id="actForm">
+            <div class="field"><label for="actKind" data-i18n="actKind">ประเภทโพสต์</label>
+              <select id="actKind">
+                <option value="activity" data-i18n="kActivity">กิจกรรม (เปิดให้ลงทะเบียน)</option>
+                <option value="news" data-i18n="kNews">ประกาศ / แจ้งข่าว (ไม่มีลงทะเบียน)</option>
+              </select></div>
             <div class="field"><label for="actName" data-i18n="actName">ชื่อกิจกรรม</label>
               <input id="actName" required placeholder="ปฐมนิเทศนิสิตใหม่"></div>
             <div class="row2">
@@ -378,7 +383,7 @@ var I18N = {
     cScans:'ครั้ง',cStatus:'สถานะ',cAct:'กิจกรรม',cJoin:'ผู้เข้าร่วม',cWhen:'วันเวลา',newAct:'สร้างกิจกรรมใหม่',
     actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
     tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
-    actClose:'ปิดรับลงทะเบียนวันที่',showPost:'แสดง',hidePost:'ซ่อน',okShow:'แสดงบนหน้ากิจกรรมแล้ว',okHide:'ซ่อนแล้ว เก็บไว้ในคลัง',archived:'คลังกิจกรรม',rFull:'คนเต็ม',rExpired:'หมดเขต',rManual:'ซ่อนเอง',qrOpen:'เปิดรูป QR',qrPrint:'พิมพ์',pageTag:'หน้าเจ้าหน้าที่',roleWord:'สิทธิ์',roleAdmin2:'ผู้ดูแลระบบ',roleStaff2:'เจ้าหน้าที่',
+    actKind:'ประเภทโพสต์',kActivity:'กิจกรรม (เปิดให้ลงทะเบียน)',kNews:'ประกาศ / แจ้งข่าว (ไม่มีลงทะเบียน)',createNews:'โพสต์ประกาศ',actClose:'ปิดรับลงทะเบียนวันที่',showPost:'แสดง',hidePost:'ซ่อน',okShow:'แสดงบนหน้ากิจกรรมแล้ว',okHide:'ซ่อนแล้ว เก็บไว้ในคลัง',archived:'คลังกิจกรรม',rFull:'คนเต็ม',rExpired:'หมดเขต',rManual:'ซ่อนเอง',qrOpen:'เปิดรูป QR',qrPrint:'พิมพ์',pageTag:'หน้าเจ้าหน้าที่',roleWord:'สิทธิ์',roleAdmin2:'ผู้ดูแลระบบ',roleStaff2:'เจ้าหน้าที่',
     actPlace:'สถานที่จัด',actCap:'จำนวนที่รับ',actOpen:'เปิดรับลงชื่อ',yesOpen:'เปิด',noOpen:'ไม่เปิด',
     actBanner:'รูปแบนเนอร์',bannerHint:'แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB',imgBig:'รูปใหญ่เกิน 5 MB',saving:'กำลังบันทึก…',
     regList:'ผู้ลงชื่อ',noReg:'ยังไม่มีผู้ลงชื่อ',
@@ -397,7 +402,7 @@ var I18N = {
     cScans:'Scans',cStatus:'Status',cAct:'Activity',cJoin:'Attended',cWhen:'Date & time',newAct:'New activity',
     actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
     tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
-    actClose:'Registration closes on',showPost:'Show',hidePost:'Hide',okShow:'Now visible on the activities page',okHide:'Hidden — kept in the archive',archived:'Archive',rFull:'Full',rExpired:'Closed',rManual:'Hidden manually',qrOpen:'Open QR image',qrPrint:'Print',pageTag:'Staff console',roleWord:'Role:',roleAdmin2:'Administrator',roleStaff2:'Staff',
+    actKind:'Post type',kActivity:'Activity (open for sign-up)',kNews:'News / announcement (no sign-up)',createNews:'Post announcement',actClose:'Registration closes on',showPost:'Show',hidePost:'Hide',okShow:'Now visible on the activities page',okHide:'Hidden — kept in the archive',archived:'Archive',rFull:'Full',rExpired:'Closed',rManual:'Hidden manually',qrOpen:'Open QR image',qrPrint:'Print',pageTag:'Staff console',roleWord:'Role:',roleAdmin2:'Administrator',roleStaff2:'Staff',
     actPlace:'Venue',actCap:'Seats',actOpen:'Open for sign-up',yesOpen:'Open',noOpen:'Closed',
     actBanner:'Banner image',bannerHint:'Landscape 16:7 · max 5 MB',imgBig:'Image is larger than 5 MB',saving:'Saving…',
     regList:'Sign-ups',noReg:'No sign-ups yet',
@@ -416,7 +421,7 @@ var I18N = {
     cScans:'次数',cStatus:'状态',cAct:'活动',cJoin:'参与人数',cWhen:'日期时间',newAct:'新建活动',
     actName:'活动名称',actScore:'积分',actDate:'举办日期',actDesc:'详情',createQr:'创建并生成二维码',
     tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
-    actClose:'报名截止日期',showPost:'显示',hidePost:'隐藏',okShow:'已显示在活动页',okHide:'已隐藏，收入归档',archived:'活动归档',rFull:'已满',rExpired:'已截止',rManual:'手动隐藏',qrOpen:'打开二维码',qrPrint:'打印',pageTag:'职员页面',roleWord:'权限',roleAdmin2:'管理员',roleStaff2:'职员',
+    actKind:'帖子类型',kActivity:'活动（开放报名）',kNews:'公告 / 通知（不开放报名）',createNews:'发布公告',actClose:'报名截止日期',showPost:'显示',hidePost:'隐藏',okShow:'已显示在活动页',okHide:'已隐藏，收入归档',archived:'活动归档',rFull:'已满',rExpired:'已截止',rManual:'手动隐藏',qrOpen:'打开二维码',qrPrint:'打印',pageTag:'职员页面',roleWord:'权限',roleAdmin2:'管理员',roleStaff2:'职员',
     actPlace:'举办地点',actCap:'名额',actOpen:'开放报名',yesOpen:'开放',noOpen:'关闭',
     actBanner:'横幅图片',bannerHint:'建议横向 16:7 · 不超过 5 MB',imgBig:'图片超过 5 MB',saving:'保存中…',
     regList:'报名名单',noReg:'暂无报名',
@@ -949,12 +954,26 @@ function readB64(f){
   });
 }
 
+function syncKindFields(){
+  var news = document.getElementById('actKind').value === 'news';
+  [['actScore',1],['actCap',1],['actOpen',1],['actClose',1]].forEach(function(p){
+    var el=document.getElementById(p[0]);
+    if(el && el.closest('.field')) el.closest('.field').hidden = news;
+  });
+  var sc=document.getElementById('actScore');
+  if(sc) sc.required = !news;
+  var btn=document.querySelector('#actForm button[type=submit]');
+  if(btn) btn.textContent = news ? t('createNews') : t('createQr');
+}
+document.getElementById('actKind').addEventListener('change', syncKindFields);
+
 document.getElementById('actForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var name = document.getElementById('actName').value.trim();
-  var score = Number(document.getElementById('actScore').value);
+  var isNews = document.getElementById('actKind').value === 'news';
+  var score = isNews ? 0 : Number(document.getElementById('actScore').value);
   var desc = document.getElementById('actDesc').value.trim();
-  if(!name || !score) return;
+  if(!name || (!isNews && !score)) return;
 
   var sb = e.target.querySelector('button[type=submit]');
   var sbLabel = sb.textContent; sb.disabled = true;
@@ -975,6 +994,7 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
                          capacity: Number(document.getElementById('actCap').value) || 0,
                          closeDate: document.getElementById('actClose').value,
                          openReg: document.getElementById('actOpen').value,
+                         kind: document.getElementById('actKind').value,
                          bannerData: bannerData, bannerName: bannerName, bannerType: bannerType,
                          createdBy: auth && auth.staff_id });
   sb.textContent = sbLabel; sb.disabled = false;
@@ -984,7 +1004,10 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
   e.target.reset();
   document.getElementById('actScore').value = 5;
   document.getElementById('actOpen').value = 'true';
-  renderActs(); showQR(act); toast(t('saved'));
+  renderActs();
+  if(!isNews) showQR(act);
+  syncKindFields();
+  toast(t('saved'));
 });
 
 function showQR(a){

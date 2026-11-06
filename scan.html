@@ -174,6 +174,16 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
         <label for="actSel" data-i18n="lbAct">กิจกรรมที่กำลังรับสแกน</label>
         <select id="actSel"><option value="" data-i18n="actPick">— เลือกกิจกรรม —</option></select>
       </div>
+      <button class="btn ghost" type="button" id="bonusBtn"
+        style="margin-top:11px" data-i18n="bonusNew">+ สร้างคะแนนพิเศษ</button>
+
+      <form id="bonusForm" hidden style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <div class="field"><label for="bName" data-i18n="bName">เรื่องที่ให้คะแนน</label>
+          <input id="bName" placeholder="ช่วยงานจัดสถานที่" required></div>
+        <div class="field"><label for="bScore" data-i18n="bScore">คะแนน</label>
+          <input id="bScore" type="number" min="1" value="5" required></div>
+        <button class="btn" type="submit" data-i18n="bCreate">สร้างแล้วเริ่มสแกน</button>
+      </form>
     </div>
 
     <div class="cam">
@@ -237,6 +247,8 @@ var I18N={
   btnLogin:'เข้าสู่ระบบ',hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',lbStaffEmail:'อีเมลเจ้าหน้าที่',
   btnOut:'ออก',lbAct:'กิจกรรมที่กำลังรับสแกน',actPick:'— เลือกกิจกรรม —',
   camTap:'แตะเพื่อเปิดกล้อง',tapToStart:'แตะหน้าจอเพื่อเปิดกล้อง',camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
+  bonusNew:'+ สร้างคะแนนพิเศษ', bName:'เรื่องที่ให้คะแนน', bScore:'คะแนน',
+  bCreate:'สร้างแล้วเริ่มสแกน', bonusReady:'พร้อมสแกนแล้ว · ให้คนละ {n} คะแนน',
   btnSave:'บันทึกการเข้าร่วม',noItem:'ยังไม่มีรายการ',noItemRound:'ยังไม่มีรายการในรอบนี้',
   lbActCode:'รหัสกิจกรรม',lbStuId:'รหัสนิสิต',totalLab:'ประวัติกิจกรรมที่เคยเข้าร่วม',scanLab:'สแกนไปแล้ว (ครั้ง)',
   roleWord:'สิทธิ์',roleAdmin:'ผู้ดูแลระบบ',roleStaff:'เจ้าหน้าที่',pts:'คะแนน',
@@ -252,6 +264,8 @@ var I18N={
   btnLogin:'Sign in',hintPass:'Your default password is your student ID',lbStaffEmail:'Staff email',
   btnOut:'Sign out',lbAct:'Activity being scanned',actPick:'— Select activity —',
   camTap:'Tap to start the camera',tapToStart:'Tap the screen to start the camera',camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
+  bonusNew:'+ New bonus points', bName:'What are the points for', bScore:'Points',
+  bCreate:'Create and start scanning', bonusReady:'Ready to scan · {n} points each',
   btnSave:'Record attendance',noItem:'No records yet',noItemRound:'No records in this session',
   lbActCode:'Activity code',lbStuId:'Student ID',totalLab:'Activities you have joined',scanLab:'Scans so far',
   roleWord:'Role:',roleAdmin:'Administrator',roleStaff:'Staff',pts:'pts',
@@ -267,6 +281,8 @@ var I18N={
   btnLogin:'登录',hintPass:'初始密码为您的学号',lbStaffEmail:'职员邮箱',
   btnOut:'退出',lbAct:'当前扫描的活动',actPick:'— 选择活动 —',
   camTap:'点击开启摄像头',tapToStart:'点击屏幕开启摄像头',camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
+  bonusNew:'+ 新增特别加分', bName:'加分事由', bScore:'分数',
+  bCreate:'创建并开始扫描', bonusReady:'可以扫描了 · 每人 {n} 分',
   btnSave:'记录参加',noItem:'暂无记录',noItemRound:'本次暂无记录',
   lbActCode:'活动代码',lbStuId:'学号',totalLab:'已参加的活动',scanLab:'已扫描次数',
   roleWord:'权限',roleAdmin:'管理员',roleStaff:'职员',pts:'分',
@@ -384,6 +400,38 @@ document.getElementById('logout').addEventListener('click', function(){
   document.getElementById('main').hidden = true;
   document.getElementById('gate').hidden = false;
   document.getElementById('result').innerHTML = '';
+});
+
+/* ---------- คะแนนพิเศษ ---------- */
+document.getElementById('bonusBtn').addEventListener('click', function(){
+  var f = document.getElementById('bonusForm');
+  f.hidden = !f.hidden;
+  if(!f.hidden) document.getElementById('bName').focus();
+});
+
+document.getElementById('bonusForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try{
+    var r = await api({ action:'createBonus',
+      name: document.getElementById('bName').value.trim(),
+      score: Number(document.getElementById('bScore').value),
+      createdBy: auth && auth.staff_id });
+    if(r.success){
+      var sel = document.getElementById('actSel');
+      var o = document.createElement('option');
+      o.value = r.activityId;
+      o.textContent = r.name + ' (' + r.score + ' ' + t('pts') + ')';
+      sel.appendChild(o);
+      sel.value = r.activityId;
+      e.target.reset();
+      document.getElementById('bScore').value = 5;
+      e.target.hidden = true;
+      show('ok', r.name, t('bonusReady').replace('{n}', r.score));
+    } else show('err', t('fail'), r.error || '');
+  }catch(err){ show('err', t('netTitle'), t('netSub')); }
+  btn.disabled = false;
 });
 
 /* ======================= โหลดข้อมูลประกอบ ===================== */
