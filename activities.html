@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5a62d6">
+<link rel="manifest" href="manifest.json">
+<title>กิจกรรมที่เปิดรับ — กิจการนิสิต มมส</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ink:#2b2a3d; --ink-2:#5e5b75; --ink-3:#9b98b0;
+  --paper:#fbfaff; --card:#ffffff; --line:#ebe8f7;
+  --blue:#5a62d6; --blue-soft:#eef0ff; --sky:#8a8fea;
+  --lilac:#7a5bd0; --lilac-bg:#f3edff;
+  --mint:#17715e;  --mint-bg:#e8fbf4;
+  --peach:#b85a40; --peach-bg:#fff1e8;
+  --rose:#c44b76;  --rose-bg:#fdebf2;
+  --sky2:#2f7fc4;  --sky2-bg:#e9f6ff;
+  --good:#17715e; --good-bg:#e8fbf4;
+  --bad:#c44b76;  --bad-bg:#fdebf2;
+  --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
+  --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
+  --r:24px; color-scheme:light; --r-s:14px; --r-p:999px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+h1,h2,h3,.dsp{font-family:var(--display);margin:0;text-wrap:balance}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.backfab{position:fixed;top:14px;left:14px;z-index:999;width:40px;height:40px;border-radius:999px;
+ display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);
+ box-shadow:0 2px 8px rgba(43,42,61,.10);color:var(--ink);text-decoration:none;
+ font-size:20px;line-height:1;transition:background .15s,transform .15s}
+.backfab:hover{background:var(--blue-soft);transform:translateX(-2px)}
+@media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
+
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+.top{text-align:center;margin:8px 0 22px}
+.crest{width:52px;height:52px;border-radius:var(--r-p);background:linear-gradient(135deg,#6b74e8,#a06fe0);color:#fff;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;margin:0 auto 10px}
+.top h1{font-size:22px;letter-spacing:-.3px}
+.top p{margin:4px 0 0;font-size:13px;color:var(--ink-3)}
+
+.me{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue-soft);
+  border-radius:var(--r);padding:11px 16px;margin-bottom:18px;font-size:13.5px}
+.me b{font-family:var(--display)}
+
+.ev{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  margin-bottom:16px;box-shadow:0 1px 3px rgba(43,42,61,.04)}
+.ev .ban{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;background:var(--blue-soft)}
+.ev .ban.ph{display:grid;place-items:center;color:#fff;font-size:40px;background:linear-gradient(135deg,#8a8fea,#b57bd8)}
+.ev .bd{padding:16px 18px 18px}
+.ev h3{font-size:17px;letter-spacing:-.2px}
+.ev .meta{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 10px}
+.tag{background:var(--blue-soft);color:var(--blue);border-radius:var(--r-p);
+  padding:3px 11px;font-size:12.5px;font-weight:600}
+.meta .tag:nth-child(2){background:var(--sky2-bg);color:var(--sky2)}
+.meta .tag:nth-child(3){background:var(--lilac-bg);color:var(--lilac)}
+.meta .tag:nth-child(4){background:var(--peach-bg);color:var(--peach)}
+.tag.full{background:var(--bad-bg);color:var(--bad)}
+.tag.got{background:var(--good-bg);color:var(--good)}
+.ev .txt{color:var(--ink-2);font-size:14px;white-space:pre-wrap}
+.btn{border:1px solid transparent;border-radius:var(--r-p);padding:11px 18px;font-weight:600;
+  cursor:pointer;background:var(--blue);color:#fff;width:100%;margin-top:14px}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--blue-soft);filter:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.acts{display:flex;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.act{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);
+  border-radius:var(--r-p);padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  transition:background .15s,color .15s,transform .12s}
+.act:hover{background:var(--blue-soft);color:var(--blue)}
+.act:active{transform:scale(.95)}
+.act.on{background:var(--rose-bg);border-color:var(--rose-bg);color:var(--rose)}
+.act .ic{font-size:15px;line-height:1}
+.cwrap{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.cm{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.cm:last-of-type{border-bottom:none}
+.cm .av{width:34px;height:34px;border-radius:var(--r-p);flex:none;display:grid;place-items:center;
+  font-family:var(--display);font-weight:700;font-size:13px;color:#fff;
+  background:linear-gradient(135deg,#8a8fea,#b57bd8)}
+.cm .bo{min-width:0;flex:1}
+.cm .nm{font-weight:600;font-size:13.5px}
+.cm .tm{color:var(--ink-3);font-size:12px;margin-left:6px;font-weight:400}
+.cm .tx{font-size:14px;color:var(--ink-2);white-space:pre-wrap;word-break:break-word}
+.cm .rm{border:none;background:none;color:var(--ink-3);cursor:pointer;font-size:12.5px;padding:0;align-self:flex-start}
+.cm .rm:hover{color:var(--bad)}
+.cform{display:flex;gap:8px;margin-top:10px}
+.cform input{flex:1;min-width:0;padding:9px 14px;border:1px solid var(--line);border-radius:var(--r-p);background:var(--paper)}
+.cform button{border:none;background:var(--blue);color:#fff;border-radius:var(--r-p);
+  padding:9px 18px;font-weight:600;cursor:pointer}
+.cform button:disabled{opacity:.5;cursor:not-allowed}
+.empty{text-align:center;color:var(--ink-3);padding:44px 16px;font-size:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;
+  background:var(--ink);color:#fff;padding:10px 18px;border-radius:var(--r-p);font-size:13.5px;z-index:40}
+
+/* เข้าสู่ระบบ */
+.gate{max-width:380px;margin:40px auto;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:26px 24px;box-shadow:0 1px 3px rgba(43,42,61,.04)}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700;margin-bottom:5px}
+input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper)}
+.field{margin-bottom:13px}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:var(--r-s);padding:9px 13px;
+  font-size:13px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
+
+<div class="wrap">
+  <div class="top">
+    <div class="crest">MSU</div>
+    <h1 data-i18n="title">กิจกรรมที่เปิดรับ</h1>
+    <p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p>
+  </div>
+
+  <!-- เข้าสู่ระบบ (เฉพาะตอนจะลงชื่อ) -->
+  <form class="gate" id="gate" hidden>
+    <h3 style="font-size:17px;margin-bottom:4px" data-i18n="signInTitle">เข้าสู่ระบบเพื่อลงชื่อ</h3>
+    <p style="margin:0 0 16px;font-size:13px;color:var(--ink-3)" data-i18n="signInSub">ใช้อีเมลมหาวิทยาลัยหรือรหัสนิสิต</p>
+    <div id="gErr" class="err" hidden></div>
+    <div class="field"><label for="uid" data-i18n="lbEmail">อีเมลมหาวิทยาลัย</label>
+      <input id="uid" type="text" inputmode="email" autocomplete="username" placeholder="67010310480@msu.ac.th" required></div>
+    <div class="field"><label for="upw" data-i18n="lbPass">รหัสผ่าน</label>
+      <input id="upw" type="password" autocomplete="current-password" required></div>
+    <button class="btn" type="submit" data-i18n="btnLogin">เข้าสู่ระบบ</button>
+    <p style="margin:12px 0 0;font-size:12.5px;color:var(--ink-3);text-align:center" data-i18n="hintPass">รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ</p>
+  </form>
+
+  <div id="meBar" class="me" hidden>
+    <span><b id="meName">—</b> <span class="muted" id="meId" style="color:var(--ink-3)"></span></span>
+    <button class="btn ghost" id="logout" style="width:auto;margin:0;padding:6px 14px;font-size:13px" data-i18n="btnOut">ออก</button>
+  </div>
+
+  <div id="list"><div class="empty" data-i18n="loading">กำลังโหลด…</div></div>
+</div>
+
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec';
+
+var I18N = {
+ th:{title:'กิจกรรมที่เปิดรับ', sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
+  loading:'กำลังโหลด…', none:'ตอนนี้ยังไม่มีกิจกรรมที่เปิดรับ',
+  join:'ลงชื่อเข้าร่วม', cancel:'ยกเลิกการลงชื่อ', joined:'ลงชื่อแล้ว', full:'เต็มแล้ว',
+  pts:'คะแนน', seats:'รับ', taken:'ลงชื่อแล้ว', people:'คน',
+  signInTitle:'เข้าสู่ระบบเพื่อลงชื่อ', signInSub:'ใช้อีเมลมหาวิทยาลัยหรือรหัสนิสิต',
+  lbEmail:'อีเมลมหาวิทยาลัย', lbPass:'รหัสผ่าน', btnLogin:'เข้าสู่ระบบ', btnOut:'ออก',
+  hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',
+  like:'ถูกใจ', comment:'ความเห็น', writeCm:'เขียนความเห็น…', send:'ส่ง',
+  noCm:'ยังไม่มีความเห็น เป็นคนแรกเลย', rmCm:'ลบ', okCm:'ส่งความเห็นแล้ว', okRm:'ลบแล้ว',
+  signInCm:'เข้าสู่ระบบก่อนจึงจะไลก์หรือแสดงความเห็นได้',
+  okJoin:'ลงชื่อเรียบร้อย', okCancel:'ยกเลิกแล้ว', dup:'คุณลงชื่อกิจกรรมนี้ไว้แล้ว',
+  netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'},
+ en:{title:'Open activities', sub:'Student Affairs · Mahasarakham University',
+  loading:'Loading…', none:'No activities are open right now',
+  join:'Sign up', cancel:'Cancel sign-up', joined:'Signed up', full:'Full',
+  pts:'pts', seats:'Seats', taken:'Signed up', people:'',
+  signInTitle:'Sign in to register', signInSub:'Use your university email or student ID',
+  lbEmail:'University email', lbPass:'Password', btnLogin:'Sign in', btnOut:'Sign out',
+  hintPass:'Your default password is your student ID',
+  like:'Like', comment:'Comments', writeCm:'Write a comment…', send:'Send',
+  noCm:'No comments yet — be the first', rmCm:'Delete', okCm:'Comment posted', okRm:'Deleted',
+  signInCm:'Sign in to like or comment',
+  okJoin:'You are signed up', okCancel:'Sign-up cancelled', dup:'You already signed up for this',
+  netErr:'Connection failed, please try again'},
+ zh:{title:'开放报名的活动', sub:'玛哈沙拉堪大学 · 学生事务',
+  loading:'加载中…', none:'目前没有开放报名的活动',
+  join:'报名参加', cancel:'取消报名', joined:'已报名', full:'已满',
+  pts:'分', seats:'名额', taken:'已报名', people:'人',
+  signInTitle:'登录后报名', signInSub:'使用学校邮箱或学号',
+  lbEmail:'学校邮箱', lbPass:'密码', btnLogin:'登录', btnOut:'退出',
+  hintPass:'初始密码为您的学号',
+  like:'点赞', comment:'评论', writeCm:'写下评论…', send:'发送',
+  noCm:'还没有评论，来做第一个吧', rmCm:'删除', okCm:'评论已发布', okRm:'已删除',
+  signInCm:'登录后才能点赞或评论',
+  okJoin:'报名成功', okCancel:'已取消报名', dup:'您已报名此活动',
+  netErr:'连接失败，请重试'}
+};
+var lang='th';
+try{ var _sv=localStorage.getItem('msu_lang'); if(_sv&&I18N[_sv]) lang=_sv; }catch(e){}
+function t(k){ return (I18N[lang]&&I18N[lang][k]) || I18N.th[k] || k; }
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.title=t('title')+' — '+t('sub');
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+}
+
+function uid(v){ v=String(v||'').trim(); return v.indexOf('@')>-1 ? v.split('@')[0].trim() : v; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+var toastTimer;
+function toast(m){
+  var o=document.querySelector('.toast'); if(o) o.remove();
+  var el=document.createElement('div'); el.className='toast'; el.textContent=m;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){ el.remove(); },2600);
+}
+
+async function api(payload){
+  var res = await fetch(API_URL,{method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(Object.assign({lang:lang},payload)), redirect:'follow'});
+  return res.json();
+}
+
+var me=null, pendingJoin=null;
+
+function showMe(){
+  document.getElementById('meBar').hidden = !me;
+  if(me){
+    document.getElementById('meName').textContent = me.name;
+    document.getElementById('meId').textContent = me.id;
+  }
+}
+
+/* ---------- เข้าสู่ระบบ ---------- */
+document.getElementById('gate').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var box=document.getElementById('gErr'); box.hidden=true;
+  var btn=e.target.querySelector('button'); btn.disabled=true;
+  try{
+    var r = await api({action:'login', id:uid(document.getElementById('uid').value),
+                       password:document.getElementById('upw').value});
+    if(!r.success){ box.textContent=r.error; box.hidden=false; btn.disabled=false; return; }
+    me = r.student;
+    try{ sessionStorage.setItem('msu_stu', JSON.stringify(me)); }catch(_){}
+    document.getElementById('gate').hidden = true;
+    e.target.reset();
+    showMe();
+    await load();
+    if(pendingJoin){ var a=pendingJoin; pendingJoin=null; join(a); }
+  }catch(err){ box.textContent=t('netErr'); box.hidden=false; }
+  btn.disabled=false;
+});
+
+document.getElementById('logout').addEventListener('click', function(){
+  me=null;
+  try{ sessionStorage.removeItem('msu_stu'); sessionStorage.removeItem('msu_staff'); }catch(_){}
+  showMe(); load();
+});
+
+/* ---------- รายการกิจกรรม ---------- */
+var D=[];
+async function load(){
+  var box=document.getElementById('list');
+  try{
+    var r = await api({action:'getOpenActivities', studentId: me ? me.id : ''});
+    if(!r.success){ box.innerHTML='<div class="empty">'+esc(r.error||'')+'</div>'; return; }
+    D = r.activities||[];
+    render();
+  }catch(e){ box.innerHTML='<div class="empty">'+t('netErr')+'</div>'; }
+}
+
+function render(){
+  var box=document.getElementById('list');
+  var openCm={};
+  document.querySelectorAll('.cwrap').forEach(function(w){ if(!w.hidden) openCm[w.id]=true; });
+  if(!D.length){ box.innerHTML='<div class="empty">'+t('none')+'</div>'; return; }
+  box.innerHTML = D.map(function(a){
+    var tags=[];
+    tags.push('<span class="tag">'+a.score+' '+t('pts')+'</span>');
+    if(a.eventDate) tags.push('<span class="tag">'+esc(a.eventDate)+'</span>');
+    if(a.location)  tags.push('<span class="tag">'+esc(a.location)+'</span>');
+    if(a.capacity)  tags.push('<span class="tag'+(a.full?' full':'')+'">'+
+                      t('taken')+' '+a.taken+'/'+a.capacity+'</span>');
+    else            tags.push('<span class="tag">'+t('taken')+' '+a.taken+'</span>');
+    if(a.myRegId)   tags.push('<span class="tag got">'+t('joined')+'</span>');
+
+    var btn;
+    if(a.myRegId) btn='<button class="btn ghost" data-cancel="'+esc(a.myRegId)+'">'+t('cancel')+'</button>';
+    else if(a.full) btn='<button class="btn" disabled>'+t('full')+'</button>';
+    else btn='<button class="btn" data-join="'+esc(a.id)+'">'+t('join')+'</button>';
+
+    return '<article class="ev">'+
+      (a.banner ? '<img class="ban" src="'+esc(a.banner)+'" alt="" loading="lazy">'
+                : '<div class="ban ph">▣</div>')+
+      '<div class="bd"><h3>'+esc(a.name)+'</h3>'+
+      '<div class="meta">'+tags.join('')+'</div>'+
+      (a.detail||a.description ? '<div class="txt">'+esc(a.detail||a.description)+'</div>' : '')+
+      btn+
+      '<div class="acts">'+
+        '<button class="act'+(a.liked?' on':'')+'" data-like="'+esc(a.id)+'">'+
+          '<span class="ic">'+(a.liked?'\u2665':'\u2661')+'</span>'+t('like')+
+          (a.likes?' '+a.likes:'')+'</button>'+
+        '<button class="act" data-cm="'+esc(a.id)+'">'+
+          '<span class="ic">\u25cb</span>'+t('comment')+(a.comments?' '+a.comments:'')+'</button>'+
+      '</div>'+
+      '<div class="cwrap" id="cw_'+esc(a.id)+'" hidden></div>'+
+      '</div></article>';
+  }).join('');
+  Object.keys(openCm).forEach(function(id){
+    var w=document.getElementById(id);
+    if(w){ w.hidden=false; renderComments(id.replace('cw_','')); }
+  });
+}
+
+document.getElementById('list').addEventListener('click', async function(e){
+  var j=e.target.closest('[data-join]');
+  if(j){
+    if(!me){ pendingJoin=j.dataset.join; document.getElementById('gate').hidden=false;
+             document.getElementById('uid').focus(); return; }
+    join(j.dataset.join, j);
+    return;
+  }
+  var lk=e.target.closest('[data-like]');
+  if(lk){
+    if(!me){ toast(t('signInCm')); document.getElementById('gate').hidden=false;
+             document.getElementById('uid').focus(); return; }
+    lk.disabled=true;
+    try{
+      var r=await api({action:'toggleLike', activityId:lk.dataset.like, studentId:me.id});
+      if(r.success){
+        var it=D.filter(function(x){ return x.id===lk.dataset.like; })[0];
+        if(it){ it.liked=r.liked; it.likes=Math.max(0,(it.likes||0)+(r.liked?1:-1)); }
+        render();
+      } else { toast(r.error||t('netErr')); lk.disabled=false; }
+    }catch(err){ toast(t('netErr')); lk.disabled=false; }
+    return;
+  }
+
+  var cmb=e.target.closest('[data-cm]');
+  if(cmb){ toggleComments(cmb.dataset.cm); return; }
+
+  var send=e.target.closest('[data-send]');
+  if(send){
+    var aid=send.dataset.send;
+    var inp=document.querySelector('[data-cin="'+aid+'"]');
+    var txt=inp? inp.value.trim() : '';
+    if(!txt) return;
+    send.disabled=true;
+    try{
+      var r=await api({action:'addComment', activityId:aid, studentId:me.id, text:txt});
+      if(r.success){ inp.value=''; toast(t('okCm'));
+        var it=D.filter(function(x){ return x.id===aid; })[0];
+        if(it) it.comments=(it.comments||0)+1;
+        await loadComments(aid, true);
+      } else toast(r.error||t('netErr'));
+    }catch(err){ toast(t('netErr')); }
+    send.disabled=false;
+    return;
+  }
+
+  var rm=e.target.closest('[data-rm]');
+  if(rm){
+    if(rm.dataset.armed!=='1'){ rm.dataset.armed='1'; rm.textContent='\u2713'; return; }
+    var ract=rm.dataset.act;
+    try{
+      var r=await api({action:'delComment', commentId:rm.dataset.rm, studentId:me.id});
+      if(r.success){ toast(t('okRm'));
+        var it=D.filter(function(x){ return x.id===ract; })[0];
+        if(it) it.comments=Math.max(0,(it.comments||0)-1);
+        await loadComments(ract, true);
+      } else toast(r.error||t('netErr'));
+    }catch(err){ toast(t('netErr')); }
+    return;
+  }
+
+  var c=e.target.closest('[data-cancel]');
+  if(c){
+    c.disabled=true;
+    try{
+      var r=await api({action:'cancelRegistration', regId:c.dataset.cancel, studentId:me.id});
+      if(r.success){ toast(t('okCancel')); await load(); }
+      else { toast(r.error||t('netErr')); c.disabled=false; }
+    }catch(err){ toast(t('netErr')); c.disabled=false; }
+  }
+});
+
+var CM={};
+
+function toggleComments(actId){
+  var w=document.getElementById('cw_'+actId);
+  if(!w) return;
+  if(!w.hidden){ w.hidden=true; return; }
+  loadComments(actId);
+}
+
+async function loadComments(actId, force){
+  var w=document.getElementById('cw_'+actId);
+  if(!w) return;
+  w.hidden=false;
+  if(!CM[actId] || force){
+    w.innerHTML='<div class="empty" style="padding:18px">'+t('loading')+'</div>';
+    try{
+      var r=await api({action:'getComments', activityId:actId});
+      CM[actId]=(r && r.comments) || [];
+    }catch(e){ CM[actId]=[]; }
+  }
+  renderComments(actId);
+}
+
+function renderComments(actId){
+  var w=document.getElementById('cw_'+actId);
+  if(!w) return;
+  var rows=CM[actId]||[];
+  var list = rows.length ? rows.map(function(c){
+    var mineCm = me && String(c.studentId)===String(me.id);
+    return '<div class="cm"><div class="av">'+esc(String(c.name||'?').trim().charAt(0))+'</div>'+
+      '<div class="bo"><div class="nm">'+esc(c.name)+
+      '<span class="tm">'+esc(c.date+' '+c.time)+'</span></div>'+
+      '<div class="tx">'+esc(c.text)+'</div></div>'+
+      (mineCm?'<button class="rm" data-rm="'+esc(c.id)+'" data-act="'+esc(actId)+'">'+t('rmCm')+'</button>':'')+
+      '</div>';
+  }).join('') : '<div class="empty" style="padding:18px">'+t('noCm')+'</div>';
+
+  var form = me
+    ? '<div class="cform"><input data-cin="'+esc(actId)+'" maxlength="500" placeholder="'+t('writeCm')+'">'+
+      '<button data-send="'+esc(actId)+'">'+t('send')+'</button></div>'
+    : '<div class="empty" style="padding:14px 0 2px">'+t('signInCm')+'</div>';
+
+  w.innerHTML = list + form;
+}
+
+async function join(actId, btn){
+  if(btn) btn.disabled=true;
+  try{
+    var r=await api({action:'registerActivity', activityId:actId, studentId:me.id});
+    if(r.success){ toast(t('okJoin')); await load(); }
+    else { toast(r.duplicate ? t('dup') : (r.error||t('netErr'))); if(btn) btn.disabled=false; }
+  }catch(err){ toast(t('netErr')); if(btn) btn.disabled=false; }
+}
+
+/* ---------- จำการล็อกอินข้ามหน้า ---------- */
+try{
+  var _st=sessionStorage.getItem('msu_stu');
+  if(_st){ me=JSON.parse(_st); }
+}catch(e){}
+
+applyLang();
+showMe();
+load();
+
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>

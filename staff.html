@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0ea5e9">
+<meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <title>MSU Staff Console</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -11,12 +11,12 @@
 <style>
 /* Layout: rail ซ้าย + พื้นที่ทำงานขวา, ยุบเป็นแถบบนเมื่อจอแคบ */
 :root{
-  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
-  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
-  --plum:#0ea5e9; --plum-soft:#e8f6fe; --gold:#38bdf8;
-  --good:#15785c; --good-bg:#e1f3ed;
-  --warn:#8f5f12; --warn-bg:#fbf0db;
-  --bad:#a32a3c;  --bad-bg:#fae7ea;
+  --ink:#2b2a3d; --ink-2:#5e5b75; --ink-3:#9b98b0;
+  --paper:#fbfaff; --card:#ffffff; --line:#ebe8f7;
+  --plum:#5a62d6; --plum-soft:#eef0ff; --gold:#b57bd8;
+  --good:#17715e; --good-bg:#e8fbf4;
+  --warn:#9c4a2f; --warn-bg:#fff1e8;
+  --bad:#c44b76;  --bad-bg:#fdebf2;
   --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
   --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
   --r:24px; color-scheme:light;        /* มุมการ์ด */
@@ -40,7 +40,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));}
 .gate-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);
-  border-radius:28px;padding:32px;box-shadow:0 20px 50px -34px rgba(14,26,46,.45)}
+  border-radius:28px;padding:32px;box-shadow:0 20px 50px -34px rgba(90,98,214,.45)}
 .crest{width:46px;height:46px;border-radius:var(--r-p);background:var(--plum);color:#fff;
   display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.5px}
 .gate-card h1{font-size:20px;margin-top:14px;letter-spacing:-.2px}
@@ -63,7 +63,7 @@ input:focus,select:focus{border-color:var(--plum)}
 
 /* ---------- โครงหลัก ---------- */
 #app{display:grid;grid-template-columns:212px 1fr;min-height:100%;gap:12px;padding:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
-.rail{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 3px rgba(11,15,20,.05);display:flex;flex-direction:column;
+.rail{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 3px rgba(43,42,61,.05);display:flex;flex-direction:column;
   padding-block:16px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:12px;gap:3px}
 .rail .who{padding:10px 10px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
 .rail .who b{display:block;font-family:var(--display);font-size:14px}
@@ -90,7 +90,7 @@ main{min-width:0;padding-block:12px 40px;padding-left:6px;padding-right:6px}
 
 /* ---------- การ์ดสถิติ ---------- */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(11,15,20,.04);box-shadow:0 1px 3px rgba(11,15,20,.04) 18px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(43,42,61,.04);box-shadow:0 1px 3px rgba(43,42,61,.04) 18px}
 .tile .lab{font-size:12px;color:var(--ink-3);font-weight:600}
 .tile .num{font-family:var(--display);font-size:27px;font-weight:700;line-height:1.1;margin-top:3px;
   font-variant-numeric:tabular-nums}
@@ -99,7 +99,7 @@ main{min-width:0;padding-block:12px 40px;padding-left:6px;padding-right:6px}
 .tile.hi .lab,.tile.hi .sub{color:rgba(255,255,255,.82)}
 
 .panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(11,15,20,.04);min-width:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(43,42,61,.04);min-width:0}
 .panel h3{font-size:14.5px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .panel h3 small{font-weight:400;color:var(--ink-3);font-size:12px}
 
@@ -144,16 +144,22 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
   z-index:40;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:460px){.row2{grid-template-columns:1fr}}
+
+.msheet{position:fixed;inset:0;background:rgba(43,42,61,.45);display:grid;place-items:center;z-index:60;padding:16px}
+.msheet .box{background:var(--card);border-radius:var(--r);max-width:720px;width:100%;max-height:82vh;
+  overflow:auto;padding:20px 22px;box-shadow:0 20px 60px rgba(43,42,61,.25)}
+.msheet h3{font-size:16px;margin:0 0 12px}
+.msheet .x{float:right;border:none;background:none;font-size:20px;cursor:pointer;color:var(--ink-3);line-height:1}
 </style>
 
 </head>
 <body>
 <style>
 .backfab{position:fixed;top:14px;left:14px;z-index:999;width:40px;height:40px;border-radius:999px;
- display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#e9edf1);
- box-shadow:0 2px 8px rgba(11,15,20,.10);color:var(--ink,#0b0f14);text-decoration:none;
+ display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#ebe8f7);
+ box-shadow:0 2px 8px rgba(43,42,61,.10);color:var(--ink,#2b2a3d);text-decoration:none;
  font-size:20px;line-height:1;transition:background .15s,transform .15s}
-.backfab:hover{background:var(--blue-soft,#e8f6fe);transform:translateX(-2px)}
+.backfab:hover{background:var(--blue-soft,#eef0ff);transform:translateX(-2px)}
 .backfab:active{transform:scale(.94)}
 @media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
 </style>
@@ -248,8 +254,20 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
               <div class="field"><label for="actDate" data-i18n="actDate">วันจัด</label>
                 <input id="actDate" type="date"></div>
             </div>
-            <div class="field"><label for="actDesc" data-i18n="actDesc">รายละเอียด</label>
-              <input id="actDesc" placeholder="หอประชุม มมส"></div>
+            <div class="field"><label for="actPlace" data-i18n="actPlace">สถานที่จัด</label>
+              <input id="actPlace" placeholder="หอประชุม มมส"></div>
+            <div class="field"><label for="actDesc" data-i18n="actDesc">รายละเอียดการอบรม</label>
+              <textarea id="actDesc" rows="3" placeholder="อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป"
+                style="width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper);font:inherit;resize:vertical"></textarea></div>
+            <div class="row2">
+              <div class="field"><label for="actCap" data-i18n="actCap">จำนวนที่รับ</label>
+                <input id="actCap" type="number" min="0" placeholder="0 = ไม่จำกัด"></div>
+              <div class="field"><label for="actOpen" data-i18n="actOpen">เปิดรับลงชื่อ</label>
+                <select id="actOpen"><option value="true" data-i18n="yesOpen">เปิด</option><option value="false" data-i18n="noOpen">ไม่เปิด</option></select></div>
+            </div>
+            <div class="field"><label for="actBanner" data-i18n="actBanner">รูปแบนเนอร์</label>
+              <input id="actBanner" type="file" accept="image/*" style="padding:8px 10px;font-size:13px">
+              <p style="margin:6px 0 0;font-size:12px;color:var(--ink-3)" data-i18n="bannerHint">แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB</p></div>
             <button class="btn wide" type="submit" data-i18n="createQr">สร้าง + ออก QR</button>
           </form>
           <div id="qrOut" hidden style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
@@ -316,6 +334,9 @@ var I18N = {
     cScans:'ครั้ง',cStatus:'สถานะ',cAct:'กิจกรรม',cJoin:'ผู้เข้าร่วม',cWhen:'วันเวลา',newAct:'สร้างกิจกรรมใหม่',
     actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
     tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
+    actPlace:'สถานที่จัด',actCap:'จำนวนที่รับ',actOpen:'เปิดรับลงชื่อ',yesOpen:'เปิด',noOpen:'ไม่เปิด',
+    actBanner:'รูปแบนเนอร์',bannerHint:'แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB',imgBig:'รูปใหญ่เกิน 5 MB',saving:'กำลังบันทึก…',
+    regList:'ผู้ลงชื่อ',noReg:'ยังไม่มีผู้ลงชื่อ',
     cPass:'รหัสผ่าน',setPw:'เปลี่ยนรหัส',pwPh:'เว้นว่าง = รหัสนิสิต',pwOk:'เปลี่ยนรหัสแล้ว · ',
     active:'ใช้งาน',inactive:'ระงับ',reset:'รีเซ็ตรหัส',close:'ปิด',open:'เปิด',del:'ลบ',
     of:'จาก',prev:'ก่อนหน้า',next:'ถัดไป',noData:'ยังไม่มีข้อมูล',
@@ -331,6 +352,9 @@ var I18N = {
     cScans:'Scans',cStatus:'Status',cAct:'Activity',cJoin:'Attended',cWhen:'Date & time',newAct:'New activity',
     actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
     tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
+    actPlace:'Venue',actCap:'Seats',actOpen:'Open for sign-up',yesOpen:'Open',noOpen:'Closed',
+    actBanner:'Banner image',bannerHint:'Landscape 16:7 · max 5 MB',imgBig:'Image is larger than 5 MB',saving:'Saving…',
+    regList:'Sign-ups',noReg:'No sign-ups yet',
     cPass:'Password',setPw:'Change',pwPh:'blank = student ID',pwOk:'Password changed · ',
     active:'Active',inactive:'Disabled',reset:'Reset password',close:'Close',open:'Open',del:'Delete',
     of:'of',prev:'Previous',next:'Next',noData:'Nothing here yet',
@@ -346,6 +370,9 @@ var I18N = {
     cScans:'次数',cStatus:'状态',cAct:'活动',cJoin:'参与人数',cWhen:'日期时间',newAct:'新建活动',
     actName:'活动名称',actScore:'积分',actDate:'举办日期',actDesc:'详情',createQr:'创建并生成二维码',
     tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
+    actPlace:'举办地点',actCap:'名额',actOpen:'开放报名',yesOpen:'开放',noOpen:'关闭',
+    actBanner:'横幅图片',bannerHint:'建议横向 16:7 · 不超过 5 MB',imgBig:'图片超过 5 MB',saving:'保存中…',
+    regList:'报名名单',noReg:'暂无报名',
     cPass:'密码',setPw:'修改',pwPh:'留空 = 学号',pwOk:'密码已修改 · ',
     active:'正常',inactive:'停用',reset:'重置密码',close:'关闭',open:'开放',del:'删除',
     of:'/',prev:'上一页',next:'下一页',noData:'暂无数据',
@@ -659,12 +686,24 @@ function renderStudents(){
     '<button class="btn ghost sm" data-pg="1"'+(state.stuPage>=pages?' disabled':'')+'>'+t('next')+'</button>';
 }
 
+function showSheet(title, html){
+  var old=document.querySelector('.msheet'); if(old) old.remove();
+  var d=document.createElement('div'); d.className='msheet';
+  d.innerHTML='<div class="box"><button class="x" aria-label="close">\u00d7</button>'+
+              '<h3>'+esc(title)+'</h3>'+html+'</div>';
+  d.addEventListener('click', function(ev){
+    if(ev.target===d || ev.target.classList.contains('x')) d.remove();
+  });
+  document.body.appendChild(d);
+}
+
 function renderActs(){
   var tb = document.querySelector('#actTable tbody');
   tb.innerHTML = D.acts.length ? D.acts.map(function(a){
     return '<tr><td>'+esc(a.name)+'</td><td class="num">'+a.score+'</td><td class="num">'+a.joined+'</td>'+
       '<td><span class="pill '+(a.active?'ok':'off')+'">'+t(a.active?'open':'close')+'</span></td>'+
       '<td style="text-align:right"><button class="btn ghost sm" data-qr="'+esc(a.id)+'">QR</button>'+
+      ' <button class="btn ghost sm" data-regs="'+esc(a.id)+'">'+t('regList')+'</button>'+
       ' <button class="btn ghost sm" data-toggleact="'+esc(a.id)+'">'+t(a.active?'close':'open')+'</button></td></tr>';
   }).join('') : '<tr><td colspan="5"><div class="empty">'+t('noData')+'</div></td></tr>';
 
@@ -740,6 +779,25 @@ document.querySelector('#stuTable tbody').addEventListener('click', async functi
 });
 
 document.querySelector('#actTable tbody').addEventListener('click', async function(e){
+  var rg = e.target.closest('[data-regs]');
+  if(rg){
+    var aid = rg.dataset.regs;
+    var a = D.acts.filter(function(x){ return x.id === aid; })[0];
+    rg.disabled = true;
+    var r = await tryApi({ action:'getRegistrations', activityId: aid });
+    rg.disabled = false;
+    var rows = (r && r.registrations) || [];
+    var html = rows.length
+      ? '<div class="tbl-wrap" style="margin-top:4px"><table><thead><tr>'+
+        '<th>'+t('cId')+'</th><th>'+t('cName')+'</th><th>'+t('cDept')+'</th><th>'+t('cWhen')+'</th>'+
+        '</tr></thead><tbody>'+ rows.map(function(x){
+          return '<tr><td>'+esc(x.studentId)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.dept)+'</td>'+
+                 '<td style="white-space:nowrap">'+esc(x.date+' '+x.time)+'</td></tr>'; }).join('')+
+        '</tbody></table></div>'
+      : '<div class="empty">'+t('noReg')+'</div>';
+    showSheet((a?a.name:'') + ' · ' + t('regList') + ' (' + rows.length + ')', html);
+    return;
+  }
   var qr = e.target.closest('[data-qr]');
   if(qr){
     var a = D.acts.filter(function(x){ return x.id === qr.dataset.qr; })[0];
@@ -767,6 +825,14 @@ document.querySelector('#scanTable tbody').addEventListener('click', async funct
   renderScans(); toast(t('saved'));
 });
 
+function readB64(f){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){ res(String(r.result).split(',')[1]); };
+    r.onerror=rej; r.readAsDataURL(f);
+  });
+}
+
 document.getElementById('actForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var name = document.getElementById('actName').value.trim();
@@ -774,14 +840,33 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
   var desc = document.getElementById('actDesc').value.trim();
   if(!name || !score) return;
 
+  var sb = e.target.querySelector('button[type=submit]');
+  var sbLabel = sb.textContent; sb.disabled = true;
+
+  var bf = document.getElementById('actBanner').files[0];
+  var bannerData=null, bannerName=null, bannerType=null;
+  if(bf){
+    if(bf.size > 5*1024*1024){ toast(t('imgBig')); sb.disabled=false; return; }
+    sb.textContent = t('saving');
+    bannerData = await readB64(bf); bannerName = bf.name; bannerType = bf.type||'image/jpeg';
+  }
+
   var act = { id:'ACT'+Date.now(), name:name, score:score, description:desc, active:true, joined:0 };
   var r = await tryApi({ action:'addActivity', name:name, score:score, description:desc,
+                         detail: desc,
+                         eventDate: document.getElementById('actDate').value,
+                         location: document.getElementById('actPlace').value.trim(),
+                         capacity: Number(document.getElementById('actCap').value) || 0,
+                         openReg: document.getElementById('actOpen').value,
+                         bannerData: bannerData, bannerName: bannerName, bannerType: bannerType,
                          createdBy: auth && auth.staff_id });
+  sb.textContent = sbLabel; sb.disabled = false;
   if(r && r.activityId) act.id = r.activityId;
   D.acts.unshift(act);
   if(DEMO) demo.acts.unshift(act);
   e.target.reset();
   document.getElementById('actScore').value = 5;
+  document.getElementById('actOpen').value = 'true';
   renderActs(); showQR(act); toast(t('saved'));
 });
 

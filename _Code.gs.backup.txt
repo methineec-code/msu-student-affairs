@@ -38,7 +38,11 @@ const SCHEMA = {
   // A..F  (เดิม)
   Staff:         ['staff_id','name','email','password','role','status'],
   // A..G  (เดิม)
-  Activities:    ['activity_id','name','score','description','created_by','created_date','active'],
+  Activities:    ['activity_id','name','score','description','created_by','created_date','active',
+                  'banner_url','detail','event_date','location','capacity','open_reg'],
+  Registrations: ['reg_id','activity_id','student_id','student_name','dept','reg_date','reg_time','status'],
+  Likes:         ['like_id','activity_id','student_id','created'],
+  Comments:      ['comment_id','activity_id','student_id','student_name','text','date','time','status'],
   // A..G  (เดิม)
   Scan_Log:      ['log_id','student_id','activity_id','score','date','time','scanned_by'],
   // A..F  (เดิม)
@@ -53,7 +57,7 @@ const SCHEMA = {
 const STAFF_ACTIONS = [
   'getDashboard','getStudents','saveStudent','resetStudentPass','toggleStudent',
   'updateActivity','getAllScans','deleteScan','exportCSV','getScanReport',
-  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard'
+  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard','getRegistrations'
 ];
 const ADMIN_ACTIONS = [
   'getStaff','saveStaff','delStaff','saveSetting','initStudents','setupSheets'
@@ -140,6 +144,15 @@ function handleRequest(e) {
       case 'saveStaff':       result = saveStaff(params); break;
       case 'delStaff':        result = delStaff(params); break;
       case 'staffChangePass': result = staffChangePass(params); break;
+      case 'getOpenActivities': result = getOpenActivities(params); break;
+      case 'toggleLike':        result = toggleLike(params); break;
+      case 'getComments':       result = getComments(params); break;
+      case 'addComment':        result = addComment(params); break;
+      case 'delComment':        result = delComment(params); break;
+      case 'registerActivity':  result = registerActivity(params); break;
+      case 'cancelRegistration':result = cancelRegistration(params); break;
+      case 'getRegistrations':  result = getRegistrations(params); break;
+      case 'syncFromForm':    result = syncFromForm(); break;
       case 'setupSheets':     result = { success: true, message: setupSheets() }; break;
 
       default:                result = { success: false, error: msg('UNKNOWN_ACTION', lang) };
@@ -340,14 +353,50 @@ function getScanHistory(params) {
 
 /* ========================= Portfolio (เดิม) ===================== */
 
+/* โฟลเดอร์เก็บไฟล์หลักฐานใน Google Drive (สร้างอัตโนมัติครั้งแรก) */
+const PORT_FOLDER = 'MSU Portfolio Files';
+
+function portfolioFolder() {
+  const it = DriveApp.getFoldersByName(PORT_FOLDER);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(PORT_FOLDER);
+}
+
 function addPortfolio(params) {
   const studentId = params.studentId, name = params.name;
   if (!studentId || !name) return { success: false, error: msg('MISSING', params.lang || 'th') };
+
+  let fileUrl = '';
+  if (params.fileData) {
+    try {
+      const bytes = Utilities.base64Decode(params.fileData);
+      const safe  = String(params.fileName || 'evidence').replace(/[\\/:*?"<>|]/g, '_');
+      const blob  = Utilities.newBlob(bytes, params.fileType || 'application/octet-stream',
+                                      studentId + '_' + new Date().getTime() + '_' + safe);
+      const file  = portfolioFolder().createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      fileUrl = file.getUrl();
+    } catch (err) {
+      return { success: false, error: 'อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message };
+    }
+  }
+
+  /* description ส่งมาเป็น JSON — แนบลิงก์ไฟล์เข้าไปด้วย */
+  let desc = params.description || '';
+  if (fileUrl) {
+    try {
+      const o = JSON.parse(desc);
+      o.fileUrl = fileUrl;
+      desc = JSON.stringify(o);
+    } catch (e) {
+      desc = desc + ' | ไฟล์: ' + fileUrl;
+    }
+  }
+
   const sheet = SS.getSheetByName('Portfolio');
   const portId = 'PORT' + new Date().getTime();
   const dateStr = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
-  sheet.appendRow([portId, studentId, name, params.type || 'other', params.description || '', dateStr]);
-  return { success: true, portId: portId };
+  sheet.appendRow([portId, studentId, name, params.type || 'other', desc, dateStr]);
+  return { success: true, portId: portId, fileUrl: fileUrl };
 }
 
 function getPortfolio(params) {
@@ -429,7 +478,11 @@ function getActivities(params) {
     activities.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], createdBy: data[i][4],
-      createdDate: data[i][5], active: active
+      createdDate: data[i][5], active: active,
+      banner: data[i][7] || '', detail: data[i][8] || '',
+      eventDate: data[i][9] || '', location: data[i][10] || '',
+      capacity: Number(data[i][11]) || 0,
+      openReg: !(data[i][12] === false || data[i][12] === 'false')
     });
   }
   activities.reverse();
@@ -444,12 +497,25 @@ function addActivity(params) {
   const sheet = SS.getSheetByName('Activities');
   const actId = 'ACT' + new Date().getTime();
   const dateStr = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
-  sheet.appendRow([actId, name, Number(score), params.description || '', params.createdBy || '', dateStr, true]);
+  let bannerUrl = params.bannerUrl || '';
+  if (params.bannerData) {
+    try {
+      const bytes = Utilities.base64Decode(params.bannerData);
+      const safe  = String(params.bannerName || 'banner').replace(/[\\/:*?"<>|]/g, '_');
+      const blob  = Utilities.newBlob(bytes, params.bannerType || 'image/jpeg', actId + '_' + safe);
+      const file  = portfolioFolder().createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      bannerUrl = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200';
+    } catch (err) { bannerUrl = ''; }
+  }
+  sheet.appendRow([actId, name, Number(score), params.description || '', params.createdBy || '', dateStr, true,
+                   bannerUrl, params.detail || '', params.eventDate || '', params.location || '',
+                   Number(params.capacity) || 0, String(params.openReg) !== 'false']);
   writeLog(params.createdBy || '', 'staff', 'addActivity', actId, name, 'success');
 
   const qrData = JSON.stringify({ id: actId, name: name, score: Number(score) });
   return {
-    success: true, activityId: actId, qrData: qrData,
+    success: true, activityId: actId, qrData: qrData, bannerUrl: bannerUrl,
     qrUrl: qrImageUrl(qrData)
   };
 }
@@ -1006,6 +1072,263 @@ function initStudents() {
 }
 
 /* =========================== HELPERS ============================ */
+
+
+/* ============ ซิงค์นิสิตจากชีต Form Responses 1 → Students ============ */
+/*
+ * คอลัมน์ในชีต Form Responses 1 (ปรับตรงนี้ถ้าฟอร์มเปลี่ยน)
+ *   A ประทับเวลา | B อีเมล | C ชื่อ-สกุล | D รหัสนิสิต | E สาขา | F ชั้นปี | G เกรดเฉลี่ย
+ */
+const FORM_SHEET = 'Form Responses 1';
+const FORM_COL = { email:1, name:2, id:3, dept:4, year:5, gpa:6 };   // เริ่มนับจาก 0
+
+function syncFromForm() {
+  const src = SS.getSheetByName(FORM_SHEET);
+  if (!src) return { success: false, error: 'ไม่พบแท็บ "' + FORM_SHEET + '"' };
+
+  const rows = src.getDataRange().getValues();
+  const stuSheet = SS.getSheetByName('Students');
+  const stuData  = stuSheet.getDataRange().getValues();
+
+  // รหัสนิสิตที่มีอยู่แล้ว
+  const have = {};
+  for (let i = 1; i < stuData.length; i++) have[String(stuData[i][0]).trim()] = true;
+
+  const add = [];
+  const seen = {};
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const sid = String(r[FORM_COL.id] || '').trim();
+    if (!sid || have[sid] || seen[sid]) continue;   // ข้ามคนที่มีแล้วและรหัสซ้ำในฟอร์ม
+    seen[sid] = true;
+    add.push([
+      sid,                                        // student_id
+      String(r[FORM_COL.name] || '').trim(),      // name
+      String(r[FORM_COL.dept] || '').trim(),      // dept
+      String(r[FORM_COL.year] || '').trim(),      // year
+      String(r[FORM_COL.email] || '').trim(),     // email
+      r[FORM_COL.gpa] || '',                      // gpa
+      '',                                         // password (ว่าง = ใช้รหัสนิสิต)
+      'active',                                   // status
+      ''                                          // nationality
+    ]);
+  }
+
+  if (add.length) {
+    stuSheet.getRange(stuSheet.getLastRow() + 1, 1, add.length, 9).setValues(add);
+    writeLog('system', 'admin', 'syncFromForm', FORM_SHEET, 'เพิ่ม ' + add.length + ' คน', 'success');
+  }
+  return { success: true, added: add.length, total: stuData.length - 1 + add.length };
+}
+
+/* เรียกอัตโนมัติเมื่อมีคนส่งฟอร์ม — ติดตั้งครั้งเดียวด้วย installFormTrigger() */
+function onFormSubmitSync() { syncFromForm(); }
+
+function installFormTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'onFormSubmitSync') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('onFormSubmitSync').forSpreadsheet(SS).onFormSubmit().create();
+  return 'ติดตั้งทริกเกอร์เรียบร้อย — ต่อไปคนที่กรอกฟอร์มจะถูกเพิ่มเข้า Students อัตโนมัติ';
+}
+
+
+/* ================== กิจกรรมที่เปิดรับ + การลงชื่อ ================= */
+
+function getOpenActivities(params) {
+  const data = sheetData('Activities');
+  const regs = sheetData('Registrations');
+  const likes = sheetData('Likes');
+  const cmts  = sheetData('Comments');
+
+  const likeBy = {}, myLike = {};
+  for (let i = 1; i < likes.length; i++) {
+    const k = String(likes[i][1]);
+    likeBy[k] = (likeBy[k] || 0) + 1;
+    if (params.studentId && String(likes[i][2]) === String(params.studentId)) myLike[k] = true;
+  }
+  const cmtBy = {};
+  for (let i = 1; i < cmts.length; i++) {
+    if (String(cmts[i][7]) === 'deleted') continue;
+    const k = String(cmts[i][1]);
+    cmtBy[k] = (cmtBy[k] || 0) + 1;
+  }
+
+  const countBy = {};
+  for (let i = 1; i < regs.length; i++) {
+    if (String(regs[i][7]) === 'cancelled') continue;
+    const k = String(regs[i][1]);
+    countBy[k] = (countBy[k] || 0) + 1;
+  }
+
+  const mine = {};
+  if (params.studentId) {
+    for (let i = 1; i < regs.length; i++) {
+      if (String(regs[i][2]) === String(params.studentId) && String(regs[i][7]) !== 'cancelled') {
+        mine[String(regs[i][1])] = regs[i][0];
+      }
+    }
+  }
+
+  const out = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const active  = !(data[i][6] === false || data[i][6] === 'false');
+    const openReg = !(data[i][12] === false || data[i][12] === 'false');
+    if (!active || !openReg) continue;
+    const id = String(data[i][0]);
+    const cap = Number(data[i][11]) || 0;
+    const taken = countBy[id] || 0;
+    out.push({
+      id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
+      description: data[i][3], banner: data[i][7] || '', detail: data[i][8] || '',
+      eventDate: data[i][9] || '', location: data[i][10] || '',
+      capacity: cap, taken: taken, full: cap > 0 && taken >= cap,
+      myRegId: mine[id] || '',
+      likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0
+    });
+  }
+  out.reverse();
+  return { success: true, activities: out, total: out.length };
+}
+
+function registerActivity(params) {
+  const lang = params.lang || 'th';
+  const actId = params.activityId, sid = params.studentId;
+  if (!actId || !sid) return { success: false, error: msg('MISSING', lang) };
+
+  const stu = findStudent(sid);
+  if (!stu) return { success: false, error: msg('NOT_FOUND_STUDENT', lang) };
+
+  const sheet = SS.getSheetByName('Registrations');
+  const regs  = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < regs.length; i++) {
+    if (String(regs[i][1]) === String(actId) && String(regs[i][2]) === String(sid)
+        && String(regs[i][7]) !== 'cancelled') {
+      return { success: false, duplicate: true, error: msg('DUPLICATE', lang) };
+    }
+  }
+
+  /* เช็กจำนวนรับ */
+  const act = sheetData('Activities');
+  let cap = 0, actName = '';
+  for (let i = 1; i < act.length; i++) {
+    if (String(act[i][0]) === String(actId)) { cap = Number(act[i][11]) || 0; actName = act[i][1]; break; }
+  }
+  if (cap > 0) {
+    let taken = 0;
+    for (let i = 1; i < regs.length; i++) {
+      if (String(regs[i][1]) === String(actId) && String(regs[i][7]) !== 'cancelled') taken++;
+    }
+    if (taken >= cap) return { success: false, full: true, error: 'กิจกรรมนี้เต็มแล้ว' };
+  }
+
+  const now = new Date();
+  const regId = 'REG' + now.getTime();
+  sheet.appendRow([regId, actId, sid, stu.row[1], stu.row[2],
+                   Utilities.formatDate(now, TZ, 'dd/MM/yyyy'),
+                   Utilities.formatDate(now, TZ, 'HH:mm'), 'registered']);
+  writeLog(sid, 'student', 'register', actId, actName, 'success');
+  return { success: true, regId: regId };
+}
+
+function cancelRegistration(params) {
+  const sheet = SS.getSheetByName('Registrations');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.regId) && String(data[i][2]) === String(params.studentId)) {
+      sheet.getRange(i + 1, 8).setValue('cancelled');
+      writeLog(params.studentId, 'student', 'cancelReg', params.regId, '', 'success');
+      return { success: true };
+    }
+  }
+  return { success: false, error: 'ไม่พบรายการลงชื่อ' };
+}
+
+function getRegistrations(params) {
+  const data = sheetData('Registrations');
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (params.activityId && String(data[i][1]) !== String(params.activityId)) continue;
+    if (String(data[i][7]) === 'cancelled') continue;
+    rows.push({
+      regId: data[i][0], activityId: data[i][1], studentId: data[i][2],
+      name: data[i][3], dept: data[i][4], date: data[i][5], time: data[i][6]
+    });
+  }
+  rows.reverse();
+  return { success: true, registrations: rows, total: rows.length };
+}
+
+
+/* ========================= ไลก์ / คอมเมนต์ ======================= */
+
+function toggleLike(params) {
+  const actId = params.activityId, sid = params.studentId;
+  if (!actId || !sid) return { success: false, error: msg('MISSING', params.lang || 'th') };
+
+  const sheet = SS.getSheetByName('Likes');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][1]) === String(actId) && String(data[i][2]) === String(sid)) {
+      sheet.deleteRow(i + 1);
+      return { success: true, liked: false };
+    }
+  }
+  sheet.appendRow(['LIKE' + new Date().getTime(), actId, sid, nowStr()]);
+  return { success: true, liked: true };
+}
+
+function getComments(params) {
+  const data = sheetData('Comments');
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][7]) === 'deleted') continue;
+    if (params.activityId && String(data[i][1]) !== String(params.activityId)) continue;
+    rows.push({
+      id: data[i][0], activityId: data[i][1], studentId: data[i][2],
+      name: data[i][3], text: data[i][4], date: data[i][5], time: data[i][6]
+    });
+  }
+  return { success: true, comments: rows, total: rows.length };
+}
+
+function addComment(params) {
+  const lang = params.lang || 'th';
+  const actId = params.activityId, sid = params.studentId;
+  const text = String(params.text || '').trim();
+  if (!actId || !sid || !text) return { success: false, error: msg('MISSING', lang) };
+  if (text.length > 500) return { success: false, error: 'ข้อความยาวเกิน 500 ตัวอักษร' };
+
+  const stu = findStudent(sid);
+  if (!stu) return { success: false, error: msg('NOT_FOUND_STUDENT', lang) };
+
+  const now = new Date();
+  const cid = 'CMT' + now.getTime();
+  SS.getSheetByName('Comments').appendRow([
+    cid, actId, sid, stu.row[1], text,
+    Utilities.formatDate(now, TZ, 'dd/MM/yyyy'),
+    Utilities.formatDate(now, TZ, 'HH:mm'), 'active'
+  ]);
+  return { success: true, commentId: cid };
+}
+
+function delComment(params) {
+  const sheet = SS.getSheetByName('Comments');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.commentId)) {
+      /* ลบได้เฉพาะเจ้าของคอมเมนต์ หรือเจ้าหน้าที่ */
+      const owner = String(data[i][2]) === String(params.studentId);
+      const staff = !!params.staff_id;
+      if (!owner && !staff) return { success: false, error: 'ลบได้เฉพาะคอมเมนต์ของตัวเอง' };
+      sheet.getRange(i + 1, 8).setValue('deleted');
+      return { success: true };
+    }
+  }
+  return { success: false, error: 'ไม่พบคอมเมนต์' };
+}
 
 function sheetData(name) {
   const sh = SS.getSheetByName(name);

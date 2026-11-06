@@ -3,18 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0ea5e9">
+<meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <title>หน้านิสิต — กิจการนิสิต มมส</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
 <style>
 :root{
-  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
-  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
-  --blue:#0ea5e9; --blue-soft:#e8f6fe; --sky:#38bdf8;
-  --good:#15785c; --good-bg:#e1f3ed;
-  --warn:#8f5f12; --warn-bg:#fbf0db;
-  --bad:#a32a3c;  --bad-bg:#fae7ea;
+  --ink:#2b2a3d; --ink-2:#5e5b75; --ink-3:#9b98b0;
+  --paper:#fbfaff; --card:#ffffff; --line:#ebe8f7;
+  --blue:#5a62d6; --blue-soft:#eef0ff; --sky:#8a8fea;
+  --lilac:#7a5bd0; --lilac-bg:#f3edff;
+  --mint:#17715e;  --mint-bg:#e8fbf4;
+  --peach:#b85a40; --peach-bg:#fff1e8;
+  --rose:#c44b76;  --rose-bg:#fdebf2;
+  --sky2:#2f7fc4;  --sky2-bg:#e9f6ff;
+  --good:#17715e; --good-bg:#e8fbf4;
+  --warn:#9c4a2f; --warn-bg:#fff1e8;
+  --bad:#c44b76;  --bad-bg:#fdebf2;
   --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
   --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
   --r:24px; --r-s:14px; --r-p:999px; color-scheme:light;
@@ -31,7 +36,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .wrap{max-width:560px;margin:0 auto;padding-block:20px 48px;
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px))}
-.crest{width:46px;height:46px;border-radius:var(--r-p);background:var(--blue);color:#fff;
+.crest{width:46px;height:46px;border-radius:var(--r-p);background:linear-gradient(135deg,#6b74e8,#a06fe0);color:#fff;
   display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:16px;flex:none}
 label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
   color:var(--ink-3);font-weight:700;margin-bottom:5px}
@@ -47,7 +52,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 .btn.sm{padding:6px 14px;font-size:13px}
 .btn.wide{width:100%;padding:13px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(11,15,20,.04)}
+  padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(43,42,61,.04)}
 .err{background:var(--bad-bg);color:var(--bad);border-radius:var(--r-s);
   padding:10px 14px;font-size:13px;margin-bottom:12px}
 .muted{color:var(--ink-3);font-size:13px}
@@ -55,7 +60,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 /* ---- เข้าสู่ระบบ ---- */
 #gate{min-height:100%;display:grid;place-items:center}
 .gate-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
-  border-radius:28px;padding:32px;box-shadow:0 10px 40px -28px rgba(11,15,20,.4)}
+  border-radius:28px;padding:32px;box-shadow:0 10px 40px -28px rgba(43,42,61,.4)}
 .gate-card h1{font-size:21px;margin-top:16px;letter-spacing:-.2px}
 .gate-card p.sub{color:var(--ink-2);font-size:13.5px;margin:5px 0 22px}
 
@@ -67,7 +72,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 .top select{width:auto;padding:6px 10px;font-size:13px;border-radius:var(--r-p)}
 
 /* ---- การ์ดคะแนน ---- */
-.score{background:var(--blue);color:#fff;border-color:var(--blue);text-align:center;padding:26px 20px}
+.score{background:linear-gradient(135deg,#6b74e8 0%,#8a6fe0 55%,#b57bd8 100%);color:#fff;border-color:var(--blue);text-align:center;padding:26px 20px}
 .score .lab{font-size:13px;opacity:.9;font-weight:600}
 .score .n{font-family:var(--display);font-size:52px;font-weight:700;line-height:1.05;
   margin:4px 0;font-variant-numeric:tabular-nums}
@@ -79,7 +84,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 .tabs button{flex:1;border:none;background:none;padding:9px 6px;border-radius:var(--r-p);
   cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink-2);white-space:nowrap}
 .tabs button[aria-pressed="true"]{background:var(--card);color:var(--blue);
-  box-shadow:0 1px 4px rgba(11,15,20,.1)}
+  box-shadow:0 1px 4px rgba(43,42,61,.1)}
 
 .it{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
   padding:13px 0;border-bottom:1px solid var(--line)}
@@ -113,17 +118,17 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 .seg2{display:flex;gap:6px;background:var(--blue-soft);padding:4px;border-radius:var(--r-p);margin-bottom:14px}
 .seg2 button{flex:1;border:none;background:none;padding:8px;border-radius:var(--r-p);cursor:pointer;
   font-weight:600;font-size:13.5px;color:var(--ink-2)}
-.seg2 button[aria-pressed="true"]{background:var(--card);color:var(--blue);box-shadow:0 2px 8px -4px rgba(14,26,46,.4)}
+.seg2 button[aria-pressed="true"]{background:var(--card);color:var(--blue);box-shadow:0 2px 8px -4px rgba(90,98,214,.4)}
 #portForm input[type=file]{padding:8px 10px;font-size:13px}
 </style>
 </head>
 <body>
 <style>
 .backfab{position:fixed;top:14px;left:14px;z-index:999;width:40px;height:40px;border-radius:999px;
- display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#e9edf1);
- box-shadow:0 2px 8px rgba(11,15,20,.10);color:var(--ink,#0b0f14);text-decoration:none;
+ display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#ebe8f7);
+ box-shadow:0 2px 8px rgba(43,42,61,.10);color:var(--ink,#2b2a3d);text-decoration:none;
  font-size:20px;line-height:1;transition:background .15s,transform .15s}
-.backfab:hover{background:var(--blue-soft,#e8f6fe);transform:translateX(-2px)}
+.backfab:hover{background:var(--blue-soft,#eef0ff);transform:translateX(-2px)}
 .backfab:active{transform:scale(.94)}
 @media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
 </style>
@@ -173,6 +178,7 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
     </div>
 
     <a class="btn wide" href="scan.html" style="text-decoration:none;display:block;text-align:center;margin:0 0 14px" data-i18n="goScan">▣ สแกน QR กิจกรรม</a>
+    <a class="btn wide ghost" href="activities.html" style="text-decoration:none;display:block;text-align:center;margin:0 0 14px" data-i18n="goActs">◆ กิจกรรมที่เปิดรับ</a>
     <div class="tabs">
       <button type="button" data-tab="history" aria-pressed="true" data-i18n="tabHistory">ประวัติ</button>
       <button type="button" data-tab="port" aria-pressed="false" data-i18n="tabPort">ผลงาน</button>
@@ -255,7 +261,7 @@ var I18N = {
    addPort:'เพิ่มผลงาน', myPort:'ผลงานของฉัน', pName:'ชื่อการอบรม / ผลงาน', pType:'ประเภท', pDate:'วันที่เข้าร่วม',
    pDesc:'รายละเอียดการอบรม', save:'บันทึก', myInfo:'ข้อมูลของฉัน', changePw:'เปลี่ยนรหัสผ่าน',
    oldPw:'รหัสผ่านเดิม', newPw:'รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)', loading:'กำลังโหลด…',
-   goScan:'▣ สแกน QR กิจกรรม', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
+   goScan:'▣ สแกน QR กิจกรรม', goActs:'◆ กิจกรรมที่เปิดรับ', tAward:'รางวัล', tTraining:'อบรม/สัมมนา', tVolunteer:'จิตอาสา',
    tSport:'กีฬา', tOther:'อื่นๆ', noHist:'ยังไม่มีกิจกรรมที่เข้าร่วม', noPort:'ยังไม่มีผลงาน',
    saved:'บันทึกแล้ว', deleted:'ลบแล้ว', del:'ลบ', confirmDel:'กดอีกครั้ง',
    netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง', pwOk:'เปลี่ยนรหัสผ่านแล้ว',
@@ -269,7 +275,7 @@ var I18N = {
    addPort:'Add work', myPort:'My portfolio', pName:'Training / work title', pType:'Type', pDate:'Date attended',
    pDesc:'Training details', save:'Save', myInfo:'My information', changePw:'Change password',
    oldPw:'Current password', newPw:'New password (6+ characters)', loading:'Loading…',
-   goScan:'▣ Scan activity QR', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
+   goScan:'▣ Scan activity QR', goActs:'◆ Open activities', tAward:'Award', tTraining:'Training', tVolunteer:'Volunteer',
    tSport:'Sport', tOther:'Other', noHist:'No activities yet', noPort:'Nothing here yet',
    saved:'Saved', deleted:'Deleted', del:'Delete', confirmDel:'Click again',
    netErr:'Connection failed, please try again', pwOk:'Password changed',
@@ -283,7 +289,7 @@ var I18N = {
    addPort:'添加作品', myPort:'我的作品集', pName:'培训 / 作品名称', pType:'类型', pDate:'参加日期',
    pDesc:'培训详情', save:'保存', myInfo:'我的信息', changePw:'修改密码',
    oldPw:'原密码', newPw:'新密码（至少6位）', loading:'加载中…',
-   goScan:'▣ 扫描活动二维码', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
+   goScan:'▣ 扫描活动二维码', goActs:'◆ 开放报名的活动', tAward:'奖项', tTraining:'培训', tVolunteer:'志愿服务',
    tSport:'体育', tOther:'其他', noHist:'暂无活动记录', noPort:'暂无作品',
    saved:'已保存', deleted:'已删除', del:'删除', confirmDel:'再次点击',
    netErr:'连接失败，请重试', pwOk:'密码已修改',

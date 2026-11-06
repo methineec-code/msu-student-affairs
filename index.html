@@ -3,15 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0ea5e9">
+<meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <title>ระบบกิจการนิสิต มมส</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
 <style>
 :root{
-  --ink:#0b0f14; --ink-2:#4a5560; --ink-3:#98a2ad;
-  --paper:#ffffff; --card:#ffffff; --line:#e9edf1;
-  --blue:#0ea5e9; --blue-soft:#e8f6fe; --sky:#38bdf8;
+  --ink:#2b2a3d; --ink-2:#5e5b75; --ink-3:#9b98b0;
+  --paper:#fbfaff; --card:#ffffff; --line:#ebe8f7;
+  --blue:#5a62d6; --blue-soft:#eef0ff; --sky:#8a8fea;
+  --lilac:#7a5bd0; --lilac-bg:#f3edff;
+  --mint:#17715e;  --mint-bg:#e8fbf4;
+  --peach:#b85a40; --peach-bg:#fff1e8;
+  --rose:#c44b76;  --rose-bg:#fdebf2;
+  --sky2:#2f7fc4;  --sky2-bg:#e9f6ff;
   --display:'Bai Jamjuree','Noto Sans Thai',system-ui,sans-serif;
   --body:'Noto Sans Thai','Bai Jamjuree',system-ui,sans-serif;
   --r:24px; color-scheme:light; --r-p:999px;
@@ -31,7 +36,7 @@ a{color:inherit;text-decoration:none}
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px))}
 .head{text-align:center;margin-bottom:28px}
-.crest{width:64px;height:64px;border-radius:var(--r-p);background:var(--blue);color:#fff;
+.crest{width:64px;height:64px;border-radius:var(--r-p);background:linear-gradient(135deg,#6b74e8,#a06fe0);color:#fff;
   display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:20px;
   margin:0 auto 14px;letter-spacing:.5px}
 .head h1{font-size:23px;letter-spacing:-.3px}
@@ -44,7 +49,15 @@ a{color:inherit;text-decoration:none}
 .tile:hover{border-color:var(--blue);transform:translateY(-1px)}
 .tile .ic{width:46px;height:46px;border-radius:var(--r-p);background:var(--blue-soft);color:var(--blue);
   display:grid;place-items:center;font-size:20px;flex:none}
-.tile.primary .ic{background:var(--blue);color:#fff}
+.tile.primary .ic{background:linear-gradient(135deg,#6b74e8,#a06fe0);color:#fff}
+/* ไอคอนไล่สีพาสเทลทีละใบ */
+.tile:nth-of-type(1) .ic{background:var(--lilac-bg);color:var(--lilac)}
+.tile:nth-of-type(2) .ic{background:var(--sky2-bg);color:var(--sky2)}
+.tile:nth-of-type(3) .ic{background:var(--mint-bg);color:var(--mint)}
+.tile:nth-of-type(4) .ic{background:var(--peach-bg);color:var(--peach)}
+.tile:nth-of-type(5) .ic{background:var(--rose-bg);color:var(--rose)}
+.tile:hover .ic{transform:scale(1.06)}
+.tile .ic{transition:transform .18s}
 .tile b{display:block;font-family:var(--display);font-size:16px}
 .tile span{font-size:13px;color:var(--ink-2)}
 .tile .go{margin-left:auto;color:var(--ink-3);font-size:18px;flex:none}
@@ -69,7 +82,12 @@ a{color:inherit;text-decoration:none}
 
   <div class="grid">
 
-    <a class="tile" href="student.html">
+        <a class="tile primary" href="activities.html">
+      <span class="ic" aria-hidden="true">◆</span>
+      <span><b data-i18n="t0">กิจกรรมที่เปิดรับ</b><span data-i18n="d0">ดูการอบรมที่กำลังเปิดรับ และลงชื่อเข้าร่วม</span></span>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+<a class="tile" href="student.html">
       <span class="ic" aria-hidden="true">◉</span>
       <span><b data-i18n="t2">หน้านิสิต</b><span data-i18n="d2">ดูคะแนนสะสม ประวัติกิจกรรม และ Portfolio</span></span>
       <span class="go" aria-hidden="true">›</span>
@@ -104,18 +122,21 @@ a{color:inherit;text-decoration:none}
 var I18N = {
   th:{ title:'ระบบกิจการนิสิต', uni:'มหาวิทยาลัยมหาสารคาม',
     t1:'สแกน QR กิจกรรม', d1:'เก็บคะแนนกิจกรรม สำหรับนิสิตและเจ้าหน้าที่',
+    t0:'กิจกรรมที่เปิดรับ', d0:'ดูการอบรมที่กำลังเปิดรับ และลงชื่อเข้าร่วม',
     t2:'หน้านิสิต',       d2:'ดูคะแนนสะสม ประวัติกิจกรรม และ Portfolio',
     t3:'หน้าเจ้าหน้าที่',  d3:'จัดการกิจกรรม ทะเบียนนิสิต และรายงาน',
     t4:'ผู้ดูแลระบบ',     d4:'จัดการเจ้าหน้าที่ ประกาศ และตั้งค่าระบบ',
     help:'นิสิตเข้าระบบด้วยอีเมลมหาวิทยาลัย รหัสผ่านคือรหัสนิสิต', contact:'ติดต่อ' },
   en:{ title:'Student Affairs', uni:'Mahasarakham University',
     t1:'Scan activity QR',  d1:'Collect activity points — students and staff',
+    t0:'Open activities', d0:'Browse trainings now open and sign up',
     t2:'Student portal',    d2:'Points, activity history and portfolio',
     t3:'Staff console',     d3:'Activities, student registry and reports',
     t4:'Administrator',     d4:'Staff accounts, announcements and settings',
     help:'Students sign in with their university email; the password is the student ID.', contact:'Contact' },
   zh:{ title:'学生事务系统', uni:'玛哈沙拉堪大学',
     t1:'扫描活动二维码', d1:'积累活动分 — 学生与工作人员',
+    t0:'开放报名的活动', d0:'浏览开放报名的培训并报名',
     t2:'学生页面',      d2:'查看积分、活动记录与作品集',
     t3:'工作人员页面',   d3:'管理活动、学籍与报表',
     t4:'系统管理员',     d4:'管理工作人员、公告与系统设置',
