@@ -286,8 +286,6 @@ var auth = null;           // staff_id + staff_pass (เฉพาะเจ้า
 var stream = null, scanning = false, lastCode = '', lastAt = 0;
 
 
-/* หลังบ้านรับเฉพาะรหัสนิสิต — ตัด @msu.ac.th ออกให้ */
-function uid(v){ v=String(v||'').trim(); return v.indexOf('@')>-1 ? v.split('@')[0].trim() : v; }
 
 async function api(payload){
   if(!API_URL) throw new Error('no-api');
@@ -315,7 +313,7 @@ document.getElementById('formStu').addEventListener('submit', async function(e){
   var box = document.getElementById('errStu'); box.hidden = true;
   if(!API_URL){ box.textContent = t('errApi'); box.hidden = false; return; }
   try{
-    var r = await api({ action:'login', id:uid(document.getElementById('sid').value),
+    var r = await api({ action:'login', id:document.getElementById('sid').value.trim(),
                         password:document.getElementById('spw').value });
     if(!r.success){ box.textContent = r.error; box.hidden = false; return; }
     me = r.student; mode = 'student';

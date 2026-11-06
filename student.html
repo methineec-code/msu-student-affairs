@@ -335,8 +335,6 @@ function applyLang(){
 
 var me=null, D={history:[],portfolio:[],total:0,count:0}, minScore=30, tab='history';
 
-/* หลังบ้านรับเฉพาะรหัสนิสิต — ตัด @msu.ac.th ออกให้ */
-function uid(v){ v=String(v||'').trim(); return v.indexOf('@')>-1 ? v.split('@')[0].trim() : v; }
 
 async function api(payload){
   var res = await fetch(API_URL,{method:'POST',
@@ -351,7 +349,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   var box=document.getElementById('loginErr'); box.hidden=true;
   var btn=e.target.querySelector('button'); btn.disabled=true;
   try{
-    var r = await api({action:'login', id:uid(document.getElementById('uid').value),
+    var r = await api({action:'login', id:document.getElementById('uid').value.trim(),
                        password:document.getElementById('upw').value});
     if(!r.success){ box.textContent=r.error; box.hidden=false; btn.disabled=false; return; }
     me = r.student;

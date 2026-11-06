@@ -221,7 +221,6 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
 }
 
-function uid(v){ v=String(v||'').trim(); return v.indexOf('@')>-1 ? v.split('@')[0].trim() : v; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
@@ -256,7 +255,7 @@ document.getElementById('gate').addEventListener('submit', async function(e){
   var box=document.getElementById('gErr'); box.hidden=true;
   var btn=e.target.querySelector('button'); btn.disabled=true;
   try{
-    var r = await api({action:'login', id:uid(document.getElementById('uid').value),
+    var r = await api({action:'login', id:document.getElementById('uid').value.trim(),
                        password:document.getElementById('upw').value});
     if(!r.success){ box.textContent=r.error; box.hidden=false; btn.disabled=false; return; }
     me = r.student;
