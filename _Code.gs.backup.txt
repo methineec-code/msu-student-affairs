@@ -39,7 +39,8 @@ const SCHEMA = {
   Staff:         ['staff_id','name','email','password','role','status'],
   // A..G  (เดิม)
   Activities:    ['activity_id','name','score','description','created_by','created_date','active',
-                  'banner_url','detail','event_date','location','capacity','open_reg'],
+                  'banner_url','detail','event_date','location','capacity','open_reg',
+                  'close_date','archived'],
   Engage:        ['id','type','activity_id','student_id','student_name','dept','text','date','time','status'],
   // A..G  (เดิม)
   Scan_Log:      ['log_id','student_id','activity_id','score','date','time','scanned_by'],
@@ -55,11 +56,34 @@ const SCHEMA = {
 const STAFF_ACTIONS = [
   'getDashboard','getStudents','saveStudent','resetStudentPass','toggleStudent',
   'updateActivity','getAllScans','deleteScan','exportCSV','getScanReport',
-  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard','getRegistrations'
+  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard','getRegistrations','getArchivedActivities','setActivityVisible'
 ];
 const ADMIN_ACTIONS = [
   'getStaff','saveStaff','delStaff','saveSetting','initStudents','setupSheets'
 ];
+
+/* ---- แคชผลลัพธ์คำสั่งอ่านอย่างเดียว (วินาที) ---- */
+const CACHE_ACTIONS = {
+  getOpenActivities: 20, getActivities: 30, getDashboard: 30,
+  getLeaderboard: 60, getAnnouncements: 60, getSettings: 300,
+  getActivityCounts: 30, getHistory: 20, getPortfolio: 60, getComments: 15
+};
+/* คำสั่งเขียนเหล่านี้ทำให้แคชหมดอายุทันที */
+const CACHE_BUST = ['scan','addActivity','updateActivity','delActivity','deleteScan',
+  'registerActivity','cancelRegistration','toggleLike','addComment','delComment',
+  'saveAnnouncement','delAnnouncement','saveSetting','saveStudent','syncFromForm',
+  'addPortfolio','delPortfolio','changePass','setActivityVisible'];
+
+function cacheKeyFor(action, params) {
+  const keep = ['activeOnly','audience','studentId','activityId','limit','lang'];
+  let k = 'v1|' + action;
+  keep.forEach(function (x) { if (params[x] !== undefined) k += '|' + x + '=' + params[x]; });
+  return k.length > 240 ? k.substring(0, 240) : k;
+}
+
+function bumpCacheVersion() {
+  try { CacheService.getScriptCache().remove('__ver'); } catch (e) {}
+}
 
 /* ========================= ENTRY POINTS ========================= */
 
@@ -82,6 +106,26 @@ function handleRequest(e) {
   const action = params.action || '';
   const lang = params.lang || 'th';
   let result;
+
+  clearSheetCache();
+
+  /* ---- อ่านจากแคชถ้ามี ---- */
+  let cache = null, cacheKey = null;
+  const cacheTtl = CACHE_ACTIONS[action];
+  if (cacheTtl) {
+    try {
+      cache = CacheService.getScriptCache();
+      cacheKey = cacheKeyFor(action, params);
+      const hit = cache.get(cacheKey);
+      if (hit) return jsonOut(JSON.parse(hit), e);
+    } catch (err) { cache = null; }
+  }
+
+  /* ---- คำสั่งเขียน: ล้างแคชทั้งหมด ---- */
+  if (CACHE_BUST.indexOf(action) >= 0) {
+    try { CacheService.getScriptCache().removeAll(Object.keys(CACHE_ACTIONS).map(function (a) {
+      return cacheKeyFor(a, params); })); } catch (err) {}
+  }
 
   try {
     // ---- ตรวจสิทธิ์สำหรับ action ฝั่งเจ้าหน้าที่/แอดมิน ----
@@ -142,6 +186,9 @@ function handleRequest(e) {
       case 'saveStaff':       result = saveStaff(params); break;
       case 'delStaff':        result = delStaff(params); break;
       case 'staffChangePass': result = staffChangePass(params); break;
+      case 'getArchivedActivities': result = getArchivedActivities(params); break;
+      case 'setActivityVisible':    result = setActivityVisible(params); break;
+      case 'getActivityCounts': result = getActivityCounts(params); break;
       case 'getOpenActivities': result = getOpenActivities(params); break;
       case 'toggleLike':        result = toggleLike(params); break;
       case 'getComments':       result = getComments(params); break;
@@ -158,6 +205,11 @@ function handleRequest(e) {
   } catch (err) {
     result = { success: false, error: String(err && err.message || err) };
     try { writeLog('', '', action, '', String(err), 'fail'); } catch (ignore) {}
+  }
+
+  /* ---- เก็บผลลัพธ์ที่อ่านสำเร็จลงแคช ---- */
+  if (cache && cacheKey && result && result.success) {
+    try { cache.put(cacheKey, JSON.stringify(result), cacheTtl); } catch (err) {}
   }
 
   return jsonOut(result, e);
@@ -480,7 +532,8 @@ function getActivities(params) {
       banner: data[i][7] || '', detail: data[i][8] || '',
       eventDate: data[i][9] || '', location: data[i][10] || '',
       capacity: Number(data[i][11]) || 0,
-      openReg: !(data[i][12] === false || data[i][12] === 'false')
+      openReg: !(data[i][12] === false || data[i][12] === 'false'),
+      closeDate: data[i][13] || '', archived: String(data[i][14] || '')
     });
   }
   activities.reverse();
@@ -508,7 +561,8 @@ function addActivity(params) {
   }
   sheet.appendRow([actId, name, Number(score), params.description || '', params.createdBy || '', dateStr, true,
                    bannerUrl, params.detail || '', params.eventDate || '', params.location || '',
-                   Number(params.capacity) || 0, String(params.openReg) !== 'false']);
+                   Number(params.capacity) || 0, String(params.openReg) !== 'false',
+                   params.closeDate || '', '']);
   writeLog(params.createdBy || '', 'staff', 'addActivity', actId, name, 'success');
 
   const qrData = JSON.stringify({ id: actId, name: name, score: Number(score) });
@@ -1165,6 +1219,9 @@ function getOpenActivities(params) {
     else if (t === 'comment') cmtBy[k] = (cmtBy[k]||0)+1;
   }
 
+  const sheet = SS.getSheetByName('Activities');
+  const todayKey = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+
   const out = [];
   for (let i = 1; i < data.length; i++) {
     if (!data[i][0]) continue;
@@ -1174,13 +1231,29 @@ function getOpenActivities(params) {
     const id = String(data[i][0]);
     const cap = Number(data[i][11]) || 0;
     const taken = regBy[id] || 0;
+
+    /* ---- เก็บเข้าคลังอัตโนมัติ: คนเต็ม หรือ หมดเขตลงทะเบียน ---- */
+    const archived = String(data[i][14] || '');
+    if (archived !== 'yes') {
+      const close = dateKey(data[i][13]);
+      const expired = close && close < todayKey;
+      const full = cap > 0 && taken >= cap;
+      if (expired || full) {
+        try {
+          sheet.getRange(i + 1, 13).setValue(false);                 /* open_reg = false */
+          sheet.getRange(i + 1, 15).setValue(full ? 'full' : 'expired');
+        } catch (err) {}
+        continue;
+      }
+    }
     out.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], banner: data[i][7] || '', detail: data[i][8] || '',
       eventDate: data[i][9] || '', location: data[i][10] || '',
       capacity: cap, taken: taken, full: cap > 0 && taken >= cap,
       myRegId: myReg[id] || '',
-      likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0
+      likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0,
+      closeDate: data[i][13] || ''
     });
   }
   out.reverse();
@@ -1319,11 +1392,90 @@ function delComment(params) {
   return { success: false, error: 'ไม่พบคอมเมนต์' };
 }
 
+/* อ่านชีตครั้งเดียวต่อหนึ่งคำขอ — ฟังก์ชันที่เรียกซ้ำจะได้ของเดิมทันที */
+var _sheetCache = {};
+/* ยอดผู้เข้าร่วมต่อกิจกรรม — ส่งเฉพาะตัวเลข ไม่ส่งบันทึกทั้งหมด */
+function getActivityCounts(params) {
+  const log = sheetData('Scan_Log');
+  const counts = {};
+  for (let i = 1; i < log.length; i++) {
+    const k = String(log[i][2]);
+    if (!k) continue;
+    counts[k] = (counts[k] || 0) + 1;
+  }
+  return { success: true, counts: counts };
+}
+
+/* แปลงค่าวันที่จากชีตเป็น yyyy-MM-dd (รับทั้ง Date และข้อความ) */
+/* คลังกิจกรรมสำหรับเจ้าหน้าที่ — ที่ไม่ได้แสดงบนหน้ากิจกรรม */
+function getArchivedActivities(params) {
+  const data = sheetData('Activities');
+  const eng  = engageData();
+  const regBy = {};
+  for (let i = 1; i < eng.length; i++) {
+    const r = eng[i];
+    if (String(r[E_TYPE]) !== 'reg' || !isLive(r)) continue;
+    const k = String(r[E_ACT]);
+    regBy[k] = (regBy[k] || 0) + 1;
+  }
+  const out = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const openReg = !(data[i][12] === false || data[i][12] === 'false');
+    if (openReg) continue;
+    const id = String(data[i][0]);
+    const cap = Number(data[i][11]) || 0;
+    out.push({
+      id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
+      eventDate: data[i][9] || '', location: data[i][10] || '',
+      capacity: cap, taken: regBy[id] || 0,
+      closeDate: data[i][13] || '', reason: String(data[i][14] || 'manual')
+    });
+  }
+  out.reverse();
+  return { success: true, activities: out, total: out.length };
+}
+
+/* เจ้าหน้าที่กดเปิด/ปิดการแสดงผลเองได้ตลอด */
+function setActivityVisible(params) {
+  const sheet = SS.getSheetByName('Activities');
+  const data = sheet.getDataRange().getValues();
+  const show = String(params.show) === 'true';
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(params.activityId)) {
+      sheet.getRange(i + 1, 13).setValue(show);
+      /* เปิดเองแล้วไม่ให้ระบบเก็บเข้าคลังซ้ำ */
+      sheet.getRange(i + 1, 15).setValue(show ? 'yes' : (data[i][14] || 'manual'));
+      writeLog(params.staff_id || '', 'staff', 'setActivityVisible',
+               params.activityId, show ? 'show' : 'hide', 'success');
+      return { success: true, show: show };
+    }
+  }
+  return { success: false, error: 'ไม่พบกิจกรรม' };
+}
+
+function dateKey(v) {
+  if (!v) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, TZ, 'yyyy-MM-dd');
+  }
+  const s = String(v).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1] + '-' + m[2] + '-' + m[3];
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return m[3] + '-' + ('0'+m[2]).slice(-2) + '-' + ('0'+m[1]).slice(-2);
+  return '';
+}
+
 function sheetData(name) {
+  if (_sheetCache[name]) return _sheetCache[name];
   const sh = SS.getSheetByName(name);
   if (!sh) throw new Error('ไม่พบแท็บ "' + name + '" — กรุณารัน setupSheets() ก่อน');
-  return sh.getDataRange().getValues();
+  const v = sh.getDataRange().getValues();
+  _sheetCache[name] = v;
+  return v;
 }
+function clearSheetCache() { _sheetCache = {}; }
 
 function findStudent(id) {
   const data = sheetData('Students');

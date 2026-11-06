@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -204,10 +208,23 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js" defer></script>
 <script>
 /* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่
+
+/* ---------- แคชฝั่งเบราว์เซอร์: แสดงของเดิมทันที แล้วค่อยรีเฟรช ---------- */
+function cacheGet(k, maxAgeMs){
+  try{
+    var o = JSON.parse(localStorage.getItem('c_'+k) || 'null');
+    if(!o) return null;
+    if(maxAgeMs && Date.now() - o.t > maxAgeMs) return null;
+    return o.v;
+  }catch(e){ return null; }
+}
+function cachePut(k, v){
+  try{ localStorage.setItem('c_'+k, JSON.stringify({t:Date.now(), v:v})); }catch(e){}
+}
 
 /* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
 function msuSave(k, v){
@@ -359,8 +376,17 @@ async function enter(){
   document.getElementById('main').hidden = false;
 
   labelsFor();
-  if(mode === 'student'){ loadHistory(); }
-  else { document.getElementById('pickAct').hidden = false; loadActivities(); }
+  if(mode === 'student'){
+    var ch = cacheGet('scanhist_'+me.id, 24*3600e3);
+    if(ch){
+      document.getElementById('totalScore').textContent = ch.totalScore || 0;
+      if(ch.html) document.getElementById('hist').innerHTML = ch.html;
+    }
+    loadHistory();
+  } else {
+    document.getElementById('pickAct').hidden = false;
+    loadActivities();
+  }
 }
 
 document.getElementById('logout').addEventListener('click', function(){
@@ -391,13 +417,15 @@ async function loadHistory(){
     if(!r.success) return;
     document.getElementById('totalScore').textContent = r.totalScore || 0;
     var h = document.getElementById('hist');
-    h.innerHTML = (r.history||[]).length
+    var built = (r.history||[]).length
       ? r.history.slice(0,12).map(function(x){
           return '<div class="it"><span class="nm">'+esc(x.activityName)+
                  '<br><span class="muted" style="font-size:12px">'+esc(x.date+' '+x.time)+'</span></span>'+
                  '<span class="sc">+'+x.score+'</span></div>';
         }).join('')
       : '<p class="muted" style="margin:0">'+t('noItem')+'</p>';
+    h.innerHTML = built;
+    cachePut('scanhist_'+me.id, {totalScore:r.totalScore||0, html:built});
   }catch(e){}
 }
 

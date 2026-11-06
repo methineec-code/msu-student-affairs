@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -50,11 +53,8 @@ a{color:var(--blue)}
 @media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
 
 .wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
-.top{text-align:center;margin:8px 0 22px}
 .crest{width:52px;height:52px;border-radius:var(--r-p);background:linear-gradient(135deg,#6b74e8,#a06fe0);color:#fff;
   display:grid;place-items:center;font-family:var(--display);font-weight:700;margin:0 auto 10px}
-.top h1{font-size:22px;letter-spacing:-.3px}
-.top p{margin:4px 0 0;font-size:13px;color:var(--ink-3)}
 
 .me{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue-soft);
   border-radius:var(--r);padding:11px 16px;margin-bottom:18px;font-size:13.5px}
@@ -63,6 +63,7 @@ a{color:var(--blue)}
 .ev{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
   margin-bottom:16px;box-shadow:0 1px 3px rgba(43,42,61,.04)}
 .ev .ban{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;background:var(--blue-soft)}
+.ev .ban.ph{aspect-ratio:16/4;font-size:26px;letter-spacing:.08em;font-family:var(--display);font-weight:700}
 .ev .ban.ph{display:grid;place-items:center;color:#fff;font-size:40px;background:linear-gradient(135deg,#8a8fea,#b57bd8)}
 .ev .bd{padding:16px 18px 18px}
 .ev h3{font-size:17px;letter-spacing:-.2px}
@@ -82,6 +83,28 @@ a{color:var(--blue)}
 .btn.ghost:hover{background:var(--blue-soft);filter:none}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
+/* แถบบน */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  margin:0 0 22px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand .crest{width:46px;height:46px;margin:0;flex:none}
+.brand .bt{min-width:0}
+.brand h1{font-size:20px;letter-spacing:-.3px;line-height:1.25}
+.brand p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3)}
+.acct{display:flex;align-items:center;gap:10px;margin-left:auto}
+.acct #meBar{display:flex;align-items:center;gap:10px;background:var(--blue-soft);
+  border-radius:var(--r-p);padding:6px 6px 6px 16px;max-width:100%}
+.acct .whoTxt{min-width:0;font-size:13px;line-height:1.3}
+.acct .lbl{display:block;font-size:11px;color:var(--ink-3)}
+.acct .sid{color:var(--ink-3);margin-left:4px}
+.acct .btn{width:auto;margin:0;padding:7px 15px;font-size:13px;flex:none}
+@media(max-width:560px){
+  .bar{gap:10px}
+  .brand h1{font-size:18px}
+  .brand p{display:none}
+  .acct{width:100%}
+  .acct #meBar{width:100%;justify-content:space-between}
+}
 .acts{display:flex;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .act{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);
   border-radius:var(--r-p);padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer;
@@ -123,6 +146,8 @@ input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:va
 
 /* เว้นที่ให้ปุ่มย้อนกลับ */
 .wrap{padding-top:64px!important}
+.bar{padding-left:4px}
+@media(min-width:561px){.brand{padding-left:0}}
 @media(max-width:480px){.wrap{padding-top:56px!important}}
 </style>
 </head>
@@ -130,11 +155,27 @@ input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:va
 <a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
 
 <div class="wrap">
-  <div class="top">
-    <div class="crest">MSU</div>
-    <h1 data-i18n="title">กิจกรรมที่เปิดรับ</h1>
-    <p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p>
-  </div>
+  <header class="bar">
+    <div class="brand">
+      <div class="crest">MSU</div>
+      <div class="bt">
+        <h1 data-i18n="title">กิจกรรมที่เปิดรับ</h1>
+        <p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p>
+      </div>
+    </div>
+
+    <div class="acct">
+      <div id="meBar" hidden>
+        <span class="whoTxt">
+          <span class="lbl" data-i18n="signedAs">เข้าใช้งานในชื่อ</span>
+          <b id="meName">—</b>
+          <span class="sid" id="meId"></span>
+        </span>
+        <button class="btn ghost" id="logout" data-i18n="btnOut">ออก</button>
+      </div>
+      <button class="btn" id="signInBtn" data-i18n="btnLogin">เข้าสู่ระบบ</button>
+    </div>
+  </header>
 
   <!-- เข้าสู่ระบบ (เฉพาะตอนจะลงชื่อ) -->
   <form class="gate" id="gate" hidden>
@@ -149,16 +190,25 @@ input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:va
     <p style="margin:12px 0 0;font-size:12.5px;color:var(--ink-3);text-align:center" data-i18n="hintPass">รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ</p>
   </form>
 
-  <div id="meBar" class="me" hidden>
-    <span><b id="meName">—</b> <span class="muted" id="meId" style="color:var(--ink-3)"></span></span>
-    <button class="btn ghost" id="logout" style="width:auto;margin:0;padding:6px 14px;font-size:13px" data-i18n="btnOut">ออก</button>
-  </div>
 
   <div id="list"><div class="empty" data-i18n="loading">กำลังโหลด…</div></div>
 </div>
 
 <script>
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec';
+
+/* ---------- แคชฝั่งเบราว์เซอร์: แสดงของเดิมทันที แล้วค่อยรีเฟรช ---------- */
+function cacheGet(k, maxAgeMs){
+  try{
+    var o = JSON.parse(localStorage.getItem('c_'+k) || 'null');
+    if(!o) return null;
+    if(maxAgeMs && Date.now() - o.t > maxAgeMs) return null;
+    return o.v;
+  }catch(e){ return null; }
+}
+function cachePut(k, v){
+  try{ localStorage.setItem('c_'+k, JSON.stringify({t:Date.now(), v:v})); }catch(e){}
+}
 
 /* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
 function msuSave(k, v){
@@ -182,7 +232,7 @@ var I18N = {
   signInTitle:'เข้าสู่ระบบเพื่อลงชื่อ', signInSub:'ใช้อีเมลมหาวิทยาลัยหรือรหัสนิสิต',
   lbEmail:'อีเมลมหาวิทยาลัย', lbPass:'รหัสผ่าน', btnLogin:'เข้าสู่ระบบ', btnOut:'ออก',
   hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',
-  like:'ถูกใจ', comment:'ความเห็น', writeCm:'เขียนความเห็น…', send:'ส่ง',
+  signedAs:'เข้าใช้งานในชื่อ', like:'ถูกใจ', comment:'ความเห็น', writeCm:'เขียนความเห็น…', send:'ส่ง',
   noCm:'ยังไม่มีความเห็น เป็นคนแรกเลย', rmCm:'ลบ', okCm:'ส่งความเห็นแล้ว', okRm:'ลบแล้ว',
   signInCm:'เข้าสู่ระบบก่อนจึงจะไลก์หรือแสดงความเห็นได้',
   okJoin:'ลงชื่อเรียบร้อย', okCancel:'ยกเลิกแล้ว', dup:'คุณลงชื่อกิจกรรมนี้ไว้แล้ว',
@@ -194,7 +244,7 @@ var I18N = {
   signInTitle:'Sign in to register', signInSub:'Use your university email or student ID',
   lbEmail:'University email', lbPass:'Password', btnLogin:'Sign in', btnOut:'Sign out',
   hintPass:'Your default password is your student ID',
-  like:'Like', comment:'Comments', writeCm:'Write a comment…', send:'Send',
+  signedAs:'Signed in as', like:'Like', comment:'Comments', writeCm:'Write a comment…', send:'Send',
   noCm:'No comments yet — be the first', rmCm:'Delete', okCm:'Comment posted', okRm:'Deleted',
   signInCm:'Sign in to like or comment',
   okJoin:'You are signed up', okCancel:'Sign-up cancelled', dup:'You already signed up for this',
@@ -206,7 +256,7 @@ var I18N = {
   signInTitle:'登录后报名', signInSub:'使用学校邮箱或学号',
   lbEmail:'学校邮箱', lbPass:'密码', btnLogin:'登录', btnOut:'退出',
   hintPass:'初始密码为您的学号',
-  like:'点赞', comment:'评论', writeCm:'写下评论…', send:'发送',
+  signedAs:'当前登录', like:'点赞', comment:'评论', writeCm:'写下评论…', send:'发送',
   noCm:'还没有评论，来做第一个吧', rmCm:'删除', okCm:'评论已发布', okRm:'已删除',
   signInCm:'登录后才能点赞或评论',
   okJoin:'报名成功', okCancel:'已取消报名', dup:'您已报名此活动',
@@ -221,6 +271,20 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
 }
 
+/* วันที่จาก Google Sheets อาจมาเป็น ISO — แปลงให้อ่านง่าย */
+function fmtDate(v){
+  if(!v) return '';
+  var str = String(v).trim();
+  /* รูปแบบ วว/ดด/ปปปป อยู่แล้ว */
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) return str;
+  /* ISO จาก Google Sheets — อ่านตัวเลขตรง ๆ ไม่แปลงโซนเวลา กันวันเพี้ยน */
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m){
+    var yy = Number(m[1]) + (lang==='th' ? 543 : 0);
+    return m[3]+'/'+m[2]+'/'+yy;
+  }
+  return str;
+}
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
@@ -243,6 +307,7 @@ var me=null, pendingJoin=null;
 
 function showMe(){
   document.getElementById('meBar').hidden = !me;
+  document.getElementById('signInBtn').hidden = !!me;
   if(me){
     document.getElementById('meName').textContent = me.name;
     document.getElementById('meId').textContent = me.id;
@@ -269,6 +334,13 @@ document.getElementById('gate').addEventListener('submit', async function(e){
   btn.disabled=false;
 });
 
+document.getElementById('signInBtn').addEventListener('click', function(){
+  var g=document.getElementById('gate');
+  g.hidden=false;
+  document.getElementById('uid').focus();
+  g.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
 document.getElementById('logout').addEventListener('click', function(){
   me=null;
   msuClear();
@@ -279,11 +351,15 @@ document.getElementById('logout').addEventListener('click', function(){
 var D=[];
 async function load(){
   var box=document.getElementById('list');
+  var ck='acts_'+(me?me.id:'guest');
+  var cached=cacheGet(ck, 24*3600e3);
+  if(cached && cached.length){ D=cached; render(); }
   try{
     var r = await api({action:'getOpenActivities', studentId: me ? me.id : ''});
     if(!r.success){ box.innerHTML='<div class="empty">'+esc(r.error||'')+'</div>'; return; }
     D = r.activities||[];
     render();
+    cachePut(ck, D);
   }catch(e){ box.innerHTML='<div class="empty">'+t('netErr')+'</div>'; }
 }
 
@@ -295,7 +371,7 @@ function render(){
   box.innerHTML = D.map(function(a){
     var tags=[];
     tags.push('<span class="tag">'+a.score+' '+t('pts')+'</span>');
-    if(a.eventDate) tags.push('<span class="tag">'+esc(a.eventDate)+'</span>');
+    if(a.eventDate) tags.push('<span class="tag">'+esc(fmtDate(a.eventDate))+'</span>');
     if(a.location)  tags.push('<span class="tag">'+esc(a.location)+'</span>');
     if(a.capacity)  tags.push('<span class="tag'+(a.full?' full':'')+'">'+
                       t('taken')+' '+a.taken+'/'+a.capacity+'</span>');
@@ -308,8 +384,7 @@ function render(){
     else btn='<button class="btn" data-join="'+esc(a.id)+'">'+t('join')+'</button>';
 
     return '<article class="ev">'+
-      (a.banner ? '<img class="ban" src="'+esc(a.banner)+'" alt="" loading="lazy">'
-                : '<div class="ban ph">▣</div>')+
+      (a.banner ? '<img class="ban" src="'+esc(a.banner)+'" alt="" loading="lazy">' : '')+
       '<div class="bd"><h3>'+esc(a.name)+'</h3>'+
       '<div class="meta">'+tags.join('')+'</div>'+
       (a.detail||a.description ? '<div class="txt">'+esc(a.detail||a.description)+'</div>' : '')+
@@ -396,7 +471,13 @@ document.getElementById('list').addEventListener('click', async function(e){
     c.disabled=true;
     try{
       var r=await api({action:'cancelRegistration', regId:c.dataset.cancel, studentId:me.id});
-      if(r.success){ toast(t('okCancel')); await load(); }
+      if(r.success){
+        toast(t('okCancel'));
+        var it=D.filter(function(x){ return x.myRegId===c.dataset.cancel; })[0];
+        if(it){ it.myRegId=''; it.taken=Math.max(0,(it.taken||0)-1);
+                it.full = it.capacity>0 && it.taken>=it.capacity; }
+        render();
+      }
       else { toast(r.error||t('netErr')); c.disabled=false; }
     }catch(err){ toast(t('netErr')); c.disabled=false; }
   }
@@ -451,7 +532,13 @@ async function join(actId, btn){
   if(btn) btn.disabled=true;
   try{
     var r=await api({action:'registerActivity', activityId:actId, studentId:me.id});
-    if(r.success){ toast(t('okJoin')); await load(); }
+    if(r.success){
+      toast(t('okJoin'));
+      var it=D.filter(function(x){ return x.id===actId; })[0];
+      if(it){ it.myRegId=r.regId||'1'; it.taken=(it.taken||0)+1;
+              it.full = it.capacity>0 && it.taken>=it.capacity; }
+      render();
+    }
     else { toast(r.duplicate ? t('dup') : (r.error||t('netErr'))); if(btn) btn.disabled=false; }
   }catch(err){ toast(t('netErr')); if(btn) btn.disabled=false; }
 }

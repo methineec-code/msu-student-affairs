@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -278,6 +281,8 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
               <textarea id="actDesc" rows="3" placeholder="อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป"
                 style="width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper);font:inherit;resize:vertical"></textarea></div>
             <div class="row2">
+              <div class="field"><label for="actClose" data-i18n="actClose">ปิดรับลงทะเบียนวันที่</label>
+                <input id="actClose" type="date"></div>
               <div class="field"><label for="actCap" data-i18n="actCap">จำนวนที่รับ</label>
                 <input id="actCap" type="number" min="0" placeholder="0 = ไม่จำกัด"></div>
               <div class="field"><label for="actOpen" data-i18n="actOpen">เปิดรับลงชื่อ</label>
@@ -288,18 +293,12 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
               <p style="margin:6px 0 0;font-size:12px;color:var(--ink-3)" data-i18n="bannerHint">แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB</p></div>
             <button class="btn wide" type="submit" data-i18n="createQr">สร้าง + ออก QR</button>
           </form>
-          <div id="qrOut" hidden style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
-            <div class="qr-box">
-              <img id="qrImg" alt="QR code">
-              <div style="min-width:0">
-                <b id="qrName" class="dsp"></b>
-                <div style="font-size:12.5px;color:var(--ink-2);margin:3px 0 7px" id="qrScore"></div>
-                <span class="code" id="qrId"></span>
-              </div>
-            </div>
-          </div>
+          
         </div>
         <div class="panel" style="padding:0;overflow:hidden">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--line);text-align:right">
+            <button class="btn ghost sm" id="openArchive" data-i18n="archived">คลังกิจกรรม</button>
+          </div>
           <div class="tbl-wrap" style="border:none;border-radius:0"><table id="actTable"><thead><tr>
             <th data-i18n="cAct">กิจกรรม</th><th style="text-align:right" data-i18n="cScore">คะแนน</th>
             <th style="text-align:right" data-i18n="cJoin">ผู้เข้าร่วม</th><th data-i18n="cStatus">สถานะ</th><th></th>
@@ -340,6 +339,19 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 /* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่ก่อนขึ้น Netlify
 
+/* ---------- แคชฝั่งเบราว์เซอร์: แสดงของเดิมทันที แล้วค่อยรีเฟรช ---------- */
+function cacheGet(k, maxAgeMs){
+  try{
+    var o = JSON.parse(localStorage.getItem('c_'+k) || 'null');
+    if(!o) return null;
+    if(maxAgeMs && Date.now() - o.t > maxAgeMs) return null;
+    return o.v;
+  }catch(e){ return null; }
+}
+function cachePut(k, v){
+  try{ localStorage.setItem('c_'+k, JSON.stringify({t:Date.now(), v:v})); }catch(e){}
+}
+
 /* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
 function msuSave(k, v){
   try{ sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){}
@@ -366,7 +378,7 @@ var I18N = {
     cScans:'ครั้ง',cStatus:'สถานะ',cAct:'กิจกรรม',cJoin:'ผู้เข้าร่วม',cWhen:'วันเวลา',newAct:'สร้างกิจกรรมใหม่',
     actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
     tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
-    pageTag:'หน้าเจ้าหน้าที่',roleWord:'สิทธิ์',roleAdmin2:'ผู้ดูแลระบบ',roleStaff2:'เจ้าหน้าที่',
+    actClose:'ปิดรับลงทะเบียนวันที่',showPost:'แสดง',hidePost:'ซ่อน',okShow:'แสดงบนหน้ากิจกรรมแล้ว',okHide:'ซ่อนแล้ว เก็บไว้ในคลัง',archived:'คลังกิจกรรม',rFull:'คนเต็ม',rExpired:'หมดเขต',rManual:'ซ่อนเอง',qrOpen:'เปิดรูป QR',qrPrint:'พิมพ์',pageTag:'หน้าเจ้าหน้าที่',roleWord:'สิทธิ์',roleAdmin2:'ผู้ดูแลระบบ',roleStaff2:'เจ้าหน้าที่',
     actPlace:'สถานที่จัด',actCap:'จำนวนที่รับ',actOpen:'เปิดรับลงชื่อ',yesOpen:'เปิด',noOpen:'ไม่เปิด',
     actBanner:'รูปแบนเนอร์',bannerHint:'แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB',imgBig:'รูปใหญ่เกิน 5 MB',saving:'กำลังบันทึก…',
     regList:'ผู้ลงชื่อ',noReg:'ยังไม่มีผู้ลงชื่อ',
@@ -385,7 +397,7 @@ var I18N = {
     cScans:'Scans',cStatus:'Status',cAct:'Activity',cJoin:'Attended',cWhen:'Date & time',newAct:'New activity',
     actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
     tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
-    pageTag:'Staff console',roleWord:'Role:',roleAdmin2:'Administrator',roleStaff2:'Staff',
+    actClose:'Registration closes on',showPost:'Show',hidePost:'Hide',okShow:'Now visible on the activities page',okHide:'Hidden — kept in the archive',archived:'Archive',rFull:'Full',rExpired:'Closed',rManual:'Hidden manually',qrOpen:'Open QR image',qrPrint:'Print',pageTag:'Staff console',roleWord:'Role:',roleAdmin2:'Administrator',roleStaff2:'Staff',
     actPlace:'Venue',actCap:'Seats',actOpen:'Open for sign-up',yesOpen:'Open',noOpen:'Closed',
     actBanner:'Banner image',bannerHint:'Landscape 16:7 · max 5 MB',imgBig:'Image is larger than 5 MB',saving:'Saving…',
     regList:'Sign-ups',noReg:'No sign-ups yet',
@@ -404,7 +416,7 @@ var I18N = {
     cScans:'次数',cStatus:'状态',cAct:'活动',cJoin:'参与人数',cWhen:'日期时间',newAct:'新建活动',
     actName:'活动名称',actScore:'积分',actDate:'举办日期',actDesc:'详情',createQr:'创建并生成二维码',
     tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
-    pageTag:'职员页面',roleWord:'权限',roleAdmin2:'管理员',roleStaff2:'职员',
+    actClose:'报名截止日期',showPost:'显示',hidePost:'隐藏',okShow:'已显示在活动页',okHide:'已隐藏，收入归档',archived:'活动归档',rFull:'已满',rExpired:'已截止',rManual:'手动隐藏',qrOpen:'打开二维码',qrPrint:'打印',pageTag:'职员页面',roleWord:'权限',roleAdmin2:'管理员',roleStaff2:'职员',
     actPlace:'举办地点',actCap:'名额',actOpen:'开放报名',yesOpen:'开放',noOpen:'关闭',
     actBanner:'横幅图片',bannerHint:'建议横向 16:7 · 不超过 5 MB',imgBig:'图片超过 5 MB',saving:'保存中…',
     regList:'报名名单',noReg:'暂无报名',
@@ -567,7 +579,10 @@ async function tryApi(payload){
 
 /* ======================= โหลดข้อมูล ============================ */
 async function loadDash(){
+  var cd = cacheGet('dash', 6*3600e3);
+  if(cd){ state.dash = cd; try{ renderDash(); }catch(e){} }
   var r = await tryApi({action:'getDashboard'});
+  if(r && r.success) cachePut('dash', r);
   state.dash = r || demoDash();
   renderDash();
 }
@@ -592,18 +607,29 @@ async function loadStudents(){
 }
 
 async function loadActs(){
-  var r = await tryApi({ action:'getActivities' });
-  if(r){
-    // นับผู้เข้าร่วมจากรายงานการสแกน
-    var rep = await tryApi({ action:'getScanReport' });
-    var count = {};
-    if(rep) (rep.report||[]).forEach(function(x){ count[x.activityId] = (count[x.activityId]||0)+1; });
-    D.acts = (r.activities||[]).map(function(a){
-      return { id:a.id, name:a.name, score:Number(a.score)||0, description:a.description,
-               active:a.active !== false, joined: count[a.id] || 0 };
+  var ca = cacheGet('acts', 6*3600e3);
+  if(ca){ D.acts = ca; renderActs(); }
+  var res = await Promise.all([
+    tryApi({ action:'getActivities' }).catch(function(){ return null; }),
+    tryApi({ action:'getActivityCounts' }).catch(function(){ return null; })
+  ]);
+  var r = res[0], rep = res[1];
+  if(r && r.activities){
+    var joined = {};
+    if(rep && rep.counts) joined = rep.counts;
+    else if(rep && rep.report) rep.report.forEach(function(x){
+      var k = String(x.activityId);
+      joined[k] = (joined[k] || 0) + 1;
     });
-  }else{
-    D.acts = demo.acts;
+    D.acts = r.activities.map(function(a){
+      return { id:a.id, name:a.name, score:a.score, description:a.description,
+               active:a.active, openReg:a.openReg, archived:a.archived,
+               closeDate:a.closeDate, joined: joined[String(a.id)] || 0 };
+    });
+    DEMO = false;
+    cachePut('acts', D.acts);
+  } else if(!ca) {
+    D.acts = demo.acts.slice();
   }
   renderActs();
 }
@@ -725,7 +751,7 @@ function renderStudents(){
 function showSheet(title, html){
   var old=document.querySelector('.msheet'); if(old) old.remove();
   var d=document.createElement('div'); d.className='msheet';
-  d.innerHTML='<div class="box"><button class="x" aria-label="close">\u00d7</button>'+
+  d.innerHTML='<div class="box" style="max-width:560px"><button class="x" aria-label="close">\u00d7</button>'+
               '<h3>'+esc(title)+'</h3>'+html+'</div>';
   d.addEventListener('click', function(ev){
     if(ev.target===d || ev.target.classList.contains('x')) d.remove();
@@ -740,6 +766,8 @@ function renderActs(){
       '<td><span class="pill '+(a.active?'ok':'off')+'">'+t(a.active?'open':'close')+'</span></td>'+
       '<td style="text-align:right"><button class="btn ghost sm" data-qr="'+esc(a.id)+'">QR</button>'+
       ' <button class="btn ghost sm" data-regs="'+esc(a.id)+'">'+t('regList')+'</button>'+
+      ' <button class="btn ghost sm" data-vis="'+esc(a.id)+'" data-show="'+(a.openReg===false?'true':'false')+'">'+
+        t(a.openReg===false ? 'showPost' : 'hidePost')+'</button>'+
       ' <button class="btn ghost sm" data-toggleact="'+esc(a.id)+'">'+t(a.active?'close':'open')+'</button></td></tr>';
   }).join('') : '<tr><td colspan="5"><div class="empty">'+t('noData')+'</div></td></tr>';
 
@@ -814,7 +842,59 @@ document.querySelector('#stuTable tbody').addEventListener('click', async functi
   }
 });
 
+document.getElementById('openArchive').addEventListener('click', async function(){
+  var b=this; b.disabled=true;
+  var r=await tryApi({ action:'getArchivedActivities' });
+  b.disabled=false;
+  var rows=(r && r.activities)||[];
+  var reasonTxt=function(x){
+    return x==='full' ? t('rFull') : x==='expired' ? t('rExpired') : t('rManual');
+  };
+  var html = rows.length
+    ? '<div class="tbl-wrap"><table><thead><tr>'+
+      '<th>'+t('cAct')+'</th><th style="text-align:right">'+t('cScore')+'</th>'+
+      '<th style="text-align:right">'+t('cJoin')+'</th><th>'+t('cStatus')+'</th><th></th>'+
+      '</tr></thead><tbody>'+ rows.map(function(x){
+        return '<tr><td>'+esc(x.name)+'</td><td class="num">'+x.score+'</td>'+
+          '<td class="num">'+x.taken+(x.capacity?'/'+x.capacity:'')+'</td>'+
+          '<td><span class="pill off">'+reasonTxt(x.reason)+'</span></td>'+
+          '<td style="text-align:right"><button class="btn ghost sm" data-unarch="'+esc(x.id)+'">'+
+            t('showPost')+'</button></td></tr>'; }).join('')+
+      '</tbody></table></div>'
+    : '<div class="empty">'+t('noData')+'</div>';
+  showSheet(t('archived')+' ('+rows.length+')', html);
+});
+
+/* กดแสดงจากในคลัง */
+document.addEventListener('click', async function(e){
+  var u=e.target.closest('[data-unarch]');
+  if(!u) return;
+  u.disabled=true;
+  var r=await tryApi({ action:'setActivityVisible', activityId:u.dataset.unarch, show:'true' });
+  if(r && r.success){
+    toast(t('okShow'));
+    var sheet=document.querySelector('.msheet'); if(sheet) sheet.remove();
+    loadActs();
+  } else u.disabled=false;
+});
+
 document.querySelector('#actTable tbody').addEventListener('click', async function(e){
+  var vb = e.target.closest('[data-vis]');
+  if(vb){
+    vb.disabled = true;
+    var want = vb.dataset.show;
+    var rv = await tryApi({ action:'setActivityVisible', activityId: vb.dataset.vis, show: want });
+    vb.disabled = false;
+    if(rv && rv.success){
+      var it = D.acts.filter(function(x){ return x.id === vb.dataset.vis; })[0];
+      if(it) it.openReg = (want === 'true');
+      toast(t(want === 'true' ? 'okShow' : 'okHide'));
+      renderActs();
+      cachePut('acts', D.acts);
+    }
+    return;
+  }
+
   var rg = e.target.closest('[data-regs]');
   if(rg){
     var aid = rg.dataset.regs;
@@ -893,6 +973,7 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
                          eventDate: document.getElementById('actDate').value,
                          location: document.getElementById('actPlace').value.trim(),
                          capacity: Number(document.getElementById('actCap').value) || 0,
+                         closeDate: document.getElementById('actClose').value,
                          openReg: document.getElementById('actOpen').value,
                          bannerData: bannerData, bannerName: bannerName, bannerType: bannerType,
                          createdBy: auth && auth.staff_id });
@@ -908,13 +989,21 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
 
 function showQR(a){
   var payload = JSON.stringify({ id:a.id, name:a.name, score:a.score });
-  document.getElementById('qrImg').src =
-    'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(payload);
-  document.getElementById('qrImg').alt = 'QR ' + a.name;
-  document.getElementById('qrName').textContent = a.name;
-  document.getElementById('qrScore').textContent = a.score + ' ' + t('cScore');
-  document.getElementById('qrId').textContent = a.id;
-  document.getElementById('qrOut').hidden = false;
+  var src = 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=' + encodeURIComponent(payload);
+  var html =
+    '<div style="text-align:center">'+
+      '<img src="'+src+'" alt="QR '+esc(a.name)+'" '+
+        'style="width:100%;max-width:440px;padding:18px;border:1px solid var(--line);'+
+        'border-radius:var(--r);background:#fff;box-shadow:0 6px 24px rgba(43,42,61,.10)">'+
+      '<div style="margin-top:14px;font-family:var(--display);font-weight:700;font-size:20px">'+a.score+' '+t('cScore')+'</div>'+
+      '<div class="code" style="display:inline-block;margin-top:8px">'+esc(a.id)+'</div>'+
+      '<div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+
+        '<a class="btn sm" href="'+src+'" target="_blank" rel="noopener" '+
+          'style="text-decoration:none;padding:8px 18px">'+t('qrOpen')+'</a>'+
+        '<button class="btn ghost sm" onclick="window.print()" style="padding:8px 18px">'+t('qrPrint')+'</button>'+
+      '</div>'+
+    '</div>';
+  showSheet(a.name, html);
 }
 
 async function doExport(type){

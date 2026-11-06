@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -266,6 +269,19 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 /* ============ ตั้งค่า: URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec';
 
+/* ---------- แคชฝั่งเบราว์เซอร์: แสดงของเดิมทันที แล้วค่อยรีเฟรช ---------- */
+function cacheGet(k, maxAgeMs){
+  try{
+    var o = JSON.parse(localStorage.getItem('c_'+k) || 'null');
+    if(!o) return null;
+    if(maxAgeMs && Date.now() - o.t > maxAgeMs) return null;
+    return o.v;
+  }catch(e){ return null; }
+}
+function cachePut(k, v){
+  try{ localStorage.setItem('c_'+k, JSON.stringify({t:Date.now(), v:v})); }catch(e){}
+}
+
 /* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
 function msuSave(k, v){
   try{ sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){}
@@ -388,23 +404,33 @@ document.querySelectorAll('.tabs button').forEach(function(b){
 
 /* -------- โหลดข้อมูล -------- */
 async function loadAll(){
-  try{
-    var s = await api({action:'getSettings'});
-    if(s.success && s.settings && s.settings.min_score) minScore = Number(s.settings.min_score)||30;
-  }catch(e){}
-  try{
-    var a = await api({action:'getAnnouncements', audience:'student'});
-    if(a.success) renderAnn(a.announcements||[]);
-  }catch(e){}
-  try{
-    var h = await api({action:'getHistory', studentId:me.id});
-    if(h.success){ D.history=h.history||[]; D.total=h.totalScore||0; D.count=h.count||0; }
-  }catch(e){}
-  try{
-    var p = await api({action:'getPortfolio', studentId:me.id});
-    if(p.success) D.portfolio=p.portfolio||[];
-  }catch(e){}
+  /* 1) แสดงของเดิมทันที ไม่ต้องรอเน็ต */
+  var ck = 'stu_'+me.id;
+  var cached = cacheGet(ck, 24*3600e3);
+  if(cached){
+    D.history = cached.history||[]; D.total = cached.total||0;
+    D.count = cached.count||0; D.portfolio = cached.portfolio||[];
+    if(cached.minScore) minScore = cached.minScore;
+    render();
+  }
+
+  /* 2) ยิงพร้อมกันทั้งหมด แทนที่จะรอทีละอัน */
+  var calls = [
+    api({action:'getSettings'}).catch(function(){ return null; }),
+    api({action:'getAnnouncements', audience:'student'}).catch(function(){ return null; }),
+    api({action:'getHistory', studentId:me.id}).catch(function(){ return null; }),
+    api({action:'getPortfolio', studentId:me.id}).catch(function(){ return null; })
+  ];
+  var res = await Promise.all(calls);
+  var s = res[0], a = res[1], h = res[2], p = res[3];
+
+  if(s && s.success && s.settings && s.settings.min_score) minScore = Number(s.settings.min_score)||30;
+  if(a && a.success) renderAnn(a.announcements||[]);
+  if(h && h.success){ D.history=h.history||[]; D.total=h.totalScore||0; D.count=h.count||0; }
+  if(p && p.success) D.portfolio=p.portfolio||[];
   render();
+  cachePut(ck, {history:D.history, total:D.total, count:D.count,
+                portfolio:D.portfolio, minScore:minScore});
 }
 
 function render(){

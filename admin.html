@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta name="theme-color" content="#5a62d6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -246,6 +249,19 @@ tbody tr:hover{background:var(--blue-soft)}
 <script>
 /* ============ ตั้งค่า: ใส่ URL /exec ของ Apps Script ============ */
 var API_URL = 'https://script.google.com/macros/s/AKfycbywZyla-grKyccIvHnt8Y3LW51AOvDew4R_SKExDRY4CZiht-W__NHdxYtf1aHo2NkndA/exec'; // <-- วาง Web app URL ที่นี่
+
+/* ---------- แคชฝั่งเบราว์เซอร์: แสดงของเดิมทันที แล้วค่อยรีเฟรช ---------- */
+function cacheGet(k, maxAgeMs){
+  try{
+    var o = JSON.parse(localStorage.getItem('c_'+k) || 'null');
+    if(!o) return null;
+    if(maxAgeMs && Date.now() - o.t > maxAgeMs) return null;
+    return o.v;
+  }catch(e){ return null; }
+}
+function cachePut(k, v){
+  try{ localStorage.setItem('c_'+k, JSON.stringify({t:Date.now(), v:v})); }catch(e){}
+}
 
 /* ---------- จำการเข้าสู่ระบบ เฉพาะแท็บนี้ (ปิดแท็บแล้วหลุด) ---------- */
 function msuSave(k, v){
