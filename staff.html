@@ -988,8 +988,9 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
 });
 
 function showQR(a){
-  var payload = JSON.stringify({ id:a.id, name:a.name, score:a.score });
-  var src = 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=' + encodeURIComponent(payload);
+  /* เข้ารหัสเฉพาะรหัสกิจกรรม — สั้น ลายโปร่ง กล้องอ่านง่ายกว่าการใส่ชื่อไทย */
+  var src = 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&ecc=M&data='
+            + encodeURIComponent(a.id);
   var html =
     '<div style="text-align:center">'+
       '<img src="'+src+'" alt="QR '+esc(a.name)+'" '+

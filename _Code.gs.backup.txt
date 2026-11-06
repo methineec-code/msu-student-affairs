@@ -533,7 +533,7 @@ function getActivities(params) {
       eventDate: data[i][9] || '', location: data[i][10] || '',
       capacity: Number(data[i][11]) || 0,
       openReg: !(data[i][12] === false || data[i][12] === 'false'),
-      closeDate: data[i][13] || '', archived: String(data[i][14] || '')
+      closeDate: outDate(data[i][13]), archived: String(data[i][14] || '')
     });
   }
   activities.reverse();
@@ -1249,11 +1249,11 @@ function getOpenActivities(params) {
     out.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], banner: data[i][7] || '', detail: data[i][8] || '',
-      eventDate: data[i][9] || '', location: data[i][10] || '',
+      eventDate: outDate(data[i][9]), location: data[i][10] || '',
       capacity: cap, taken: taken, full: cap > 0 && taken >= cap,
       myRegId: myReg[id] || '',
       likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0,
-      closeDate: data[i][13] || ''
+      closeDate: outDate(data[i][13])
     });
   }
   out.reverse();
@@ -1319,7 +1319,8 @@ function getRegistrations(params) {
     if (String(r[E_TYPE]) !== 'reg' || !isLive(r)) continue;
     if (params.activityId && String(r[E_ACT]) !== String(params.activityId)) continue;
     rows.push({ regId: r[E_ID], activityId: r[E_ACT], studentId: r[E_SID],
-                name: r[E_NAME], dept: r[E_DEPT], date: r[E_DATE], time: r[E_TIME] });
+                name: r[E_NAME], dept: r[E_DEPT],
+                date: outDate(r[E_DATE]), time: outTime(r[E_TIME]) });
   }
   rows.reverse();
   return { success: true, registrations: rows, total: rows.length };
@@ -1354,7 +1355,8 @@ function getComments(params) {
     if (String(r[E_TYPE]) !== 'comment' || !isLive(r)) continue;
     if (params.activityId && String(r[E_ACT]) !== String(params.activityId)) continue;
     rows.push({ id: r[E_ID], activityId: r[E_ACT], studentId: r[E_SID],
-                name: r[E_NAME], text: r[E_TEXT], date: r[E_DATE], time: r[E_TIME] });
+                name: r[E_NAME], text: r[E_TEXT],
+                date: outDate(r[E_DATE]), time: outTime(r[E_TIME]) });
   }
   return { success: true, comments: rows, total: rows.length };
 }
@@ -1452,6 +1454,22 @@ function setActivityVisible(params) {
     }
   }
   return { success: false, error: 'ไม่พบกิจกรรม' };
+}
+
+/* ส่งออกเป็นข้อความเสมอ กันเบราว์เซอร์แปลงโซนเวลาแล้ววันเพี้ยน */
+function outDate(v) {
+  if (!v) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, TZ, 'dd/MM/yyyy');
+  }
+  return String(v);
+}
+function outTime(v) {
+  if (!v) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, TZ, 'HH:mm');
+  }
+  return String(v);
 }
 
 function dateKey(v) {

@@ -475,8 +475,8 @@ function render(){
 
   var qi=document.getElementById('myQrImg');
   if(qi && me){
-    var payload=JSON.stringify({sid:me.id, name:me.name});
-    var want='https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='+encodeURIComponent(payload);
+    var want='https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=12&ecc=M&data='
+             +encodeURIComponent(me.id);
     if(qi.dataset.src!==want){ qi.dataset.src=want; qi.src=want; }
     document.getElementById('myQrId').textContent=me.id;
   }

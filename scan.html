@@ -75,7 +75,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 .seg button[aria-pressed="true"]{background:var(--card);color:var(--blue);box-shadow:0 2px 8px -4px rgba(90,98,214,.4)}
 
 /* กล้อง */
-.cam{position:relative;aspect-ratio:1;max-width:100%;border-radius:var(--r);overflow:hidden;
+.cam{position:relative;aspect-ratio:1;max-width:100%;border-radius:var(--r);overflow:hidden;cursor:pointer;
   background:#000;margin-bottom:14px}
 .cam video{width:100%;height:100%;object-fit:cover;display:block}
 .reticle{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.9);border-radius:var(--r);
@@ -179,22 +179,12 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
     <div class="cam">
       <video id="video" playsinline muted></video>
       <div class="reticle" id="reticle"></div>
-      <div class="camoff" id="camoff" data-i18n="camHint">กดปุ่มด้านล่างเพื่อเปิดกล้อง</div>
+      <div class="camoff" id="camoff" data-i18n="camTap">แตะเพื่อเปิดกล้อง</div>
     </div>
     <canvas id="canvas" hidden></canvas>
 
-    <div class="row" style="margin-bottom:14px">
-      <button class="btn" id="camBtn" data-i18n="camOpen">เปิดกล้อง</button>
-      <button class="btn ghost" id="manualBtn" style="flex:none;width:auto;padding:11px 16px" data-i18n="manual">พิมพ์เอง</button>
-    </div>
 
-    <form class="card" id="manualBox" hidden>
-      <div class="field" style="margin:0 0 11px">
-        <label for="manualIn" id="manualLab">รหัสกิจกรรม</label>
-        <input id="manualIn" placeholder="ACT1760012345678" required>
-      </div>
-      <button class="btn" type="submit" data-i18n="btnSave">บันทึกการเข้าร่วม</button>
-    </form>
+    
 
     <div id="result"></div>
 
@@ -246,9 +236,9 @@ var I18N={
   tabStu:'นิสิต',tabStaff:'เจ้าหน้าที่',lbEmail:'อีเมลมหาวิทยาลัย',lbPass:'รหัสผ่าน',
   btnLogin:'เข้าสู่ระบบ',hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',lbStaffEmail:'อีเมลเจ้าหน้าที่',
   btnOut:'ออก',lbAct:'กิจกรรมที่กำลังรับสแกน',actPick:'— เลือกกิจกรรม —',
-  camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
+  camTap:'แตะเพื่อเปิดกล้อง',tapToStart:'แตะหน้าจอเพื่อเปิดกล้อง',camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
   btnSave:'บันทึกการเข้าร่วม',noItem:'ยังไม่มีรายการ',noItemRound:'ยังไม่มีรายการในรอบนี้',
-  lbActCode:'รหัสกิจกรรม',lbStuId:'รหัสนิสิต',totalLab:'คะแนนสะสม',scanLab:'สแกนไปแล้ว (ครั้ง)',
+  lbActCode:'รหัสกิจกรรม',lbStuId:'รหัสนิสิต',totalLab:'ประวัติกิจกรรมที่เคยเข้าร่วม',scanLab:'สแกนไปแล้ว (ครั้ง)',
   roleWord:'สิทธิ์',roleAdmin:'ผู้ดูแลระบบ',roleStaff:'เจ้าหน้าที่',pts:'คะแนน',
   errApi:'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html',
   errConn:'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy',
@@ -261,9 +251,9 @@ var I18N={
   tabStu:'Student',tabStaff:'Staff',lbEmail:'University email',lbPass:'Password',
   btnLogin:'Sign in',hintPass:'Your default password is your student ID',lbStaffEmail:'Staff email',
   btnOut:'Sign out',lbAct:'Activity being scanned',actPick:'— Select activity —',
-  camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
+  camTap:'Tap to start the camera',tapToStart:'Tap the screen to start the camera',camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
   btnSave:'Record attendance',noItem:'No records yet',noItemRound:'No records in this session',
-  lbActCode:'Activity code',lbStuId:'Student ID',totalLab:'Total points',scanLab:'Scans so far',
+  lbActCode:'Activity code',lbStuId:'Student ID',totalLab:'Activities you have joined',scanLab:'Scans so far',
   roleWord:'Role:',roleAdmin:'Administrator',roleStaff:'Staff',pts:'pts',
   errApi:'API_URL is not set in scan.html',
   errConn:'Cannot reach the backend. Check API_URL and the deployment.',
@@ -276,9 +266,9 @@ var I18N={
   tabStu:'学生',tabStaff:'职员',lbEmail:'学校邮箱',lbPass:'密码',
   btnLogin:'登录',hintPass:'初始密码为您的学号',lbStaffEmail:'职员邮箱',
   btnOut:'退出',lbAct:'当前扫描的活动',actPick:'— 选择活动 —',
-  camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
+  camTap:'点击开启摄像头',tapToStart:'点击屏幕开启摄像头',camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
   btnSave:'记录参加',noItem:'暂无记录',noItemRound:'本次暂无记录',
-  lbActCode:'活动代码',lbStuId:'学号',totalLab:'累计积分',scanLab:'已扫描次数',
+  lbActCode:'活动代码',lbStuId:'学号',totalLab:'已参加的活动',scanLab:'已扫描次数',
   roleWord:'权限',roleAdmin:'管理员',roleStaff:'职员',pts:'分',
   errApi:'scan.html 中尚未设置 API_URL',
   errConn:'无法连接后端，请检查 API_URL 与部署状态',
@@ -295,8 +285,7 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.title=t('title')+' — '+t('sub');
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
-  document.getElementById('camBtn').textContent = scanning? t('camClose') : t('camOpen');
-  var co=document.getElementById('camoff'); if(co && !scanning) co.textContent=t('camHint');
+  var co=document.getElementById('camoff'); if(co && !scanning) co.textContent=t('camTap');
   if(me) labelsFor();
 }
 
@@ -362,13 +351,9 @@ function labelsFor(){
   document.getElementById('whoName').textContent = me.name;
   if(mode === 'student'){
     document.getElementById('whoMeta').textContent = me.id + ' · ' + (me.dept||'');
-    document.getElementById('manualLab').textContent = t('lbActCode');
-    document.getElementById('manualIn').placeholder = 'ACT1760012345678';
     document.getElementById('histLab').textContent = t('totalLab');
   }else{
     document.getElementById('whoMeta').textContent = t('roleWord')+' '+(me.role==='admin'?t('roleAdmin'):t('roleStaff')) + ' · ' + me.email;
-    document.getElementById('manualLab').textContent = t('lbStuId');
-    document.getElementById('manualIn').placeholder = '65010000001';
     document.getElementById('histLab').textContent = t('scanLab');
     if(!staffCount) document.getElementById('hist').innerHTML = '<p class="muted" style="margin:0">'+t('noItemRound')+'</p>';
   }
@@ -379,6 +364,7 @@ async function enter(){
   document.getElementById('main').hidden = false;
 
   labelsFor();
+  setTimeout(autoCam, 150);
   if(mode === 'student'){
     var ch = cacheGet('scanhist_'+me.id, 24*3600e3);
     if(ch){
@@ -437,12 +423,40 @@ var video = document.getElementById('video');
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d', { willReadFrequently:true });
 
-document.getElementById('camBtn').addEventListener('click', function(){
+/* แตะพื้นที่กล้องเพื่อเปิด/ปิด (ปกติเปิดเองอยู่แล้ว) */
+document.querySelector('.cam').addEventListener('click', function(){
   if(scanning) stopCam(); else startCam();
 });
 
-async function startCam(){
-  var btn = document.getElementById('camBtn');
+/* เปิดกล้องเองถ้าเคยอนุญาตไว้แล้ว ไม่ต้องให้กดปุ่ม */
+var camArmed = false;
+async function autoCam(){
+  if(scanning) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  try{
+    if(navigator.permissions && navigator.permissions.query){
+      var st = await navigator.permissions.query({name:'camera'});
+      if(st && st.state === 'denied') return;
+    }
+  }catch(e){}
+  await startCam(true);
+  /* บางเบราว์เซอร์ (โดยเฉพาะ iPhone) ต้องมีการแตะหน้าจอก่อน
+     จึงจะเปิดกล้องได้ — ดักแตะครั้งแรกแล้วเปิดให้เอง */
+  if(!scanning && !camArmed){
+    camArmed = true;
+    var once = function(){
+      document.removeEventListener('pointerdown', once, true);
+      document.removeEventListener('touchstart', once, true);
+      if(!scanning) startCam(true);
+    };
+    document.addEventListener('pointerdown', once, true);
+    document.addEventListener('touchstart', once, true);
+    var co = document.getElementById('camoff');
+    if(co) co.textContent = t('tapToStart');
+  }
+}
+
+async function startCam(silent){
   try{
     stream = await navigator.mediaDevices.getUserMedia({
       video:{ facingMode:{ ideal:'environment' },
@@ -452,12 +466,11 @@ async function startCam(){
     video.srcObject = stream;
     await video.play();
     document.getElementById('camoff').hidden = true;
-    scanning = true; btn.textContent = t('camClose');
+    scanning = true;
     requestAnimationFrame(tick);
   }catch(err){
     document.getElementById('camoff').hidden = false;
-    document.getElementById('camoff').textContent =
-      t('camFail');
+    document.getElementById('camoff').textContent = silent ? t('camTap') : t('camFail');
   }
 }
 
@@ -466,8 +479,7 @@ function stopCam(){
   if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
   video.srcObject = null;
   document.getElementById('camoff').hidden = false;
-  document.getElementById('camoff').textContent = t('camHint');
-  document.getElementById('camBtn').textContent = t('camOpen');
+  document.getElementById('camoff').textContent = t('camTap');
   document.getElementById('reticle').classList.remove('lock');
 }
 
@@ -546,18 +558,8 @@ function handleCode(raw){
   submitScan(val);
 }
 
-document.getElementById('manualBtn').addEventListener('click', function(){
-  var b = document.getElementById('manualBox');
-  b.hidden = !b.hidden;
-  if(!b.hidden) document.getElementById('manualIn').focus();
-});
 
-document.getElementById('manualBox').addEventListener('submit', function(e){
-  e.preventDefault();
-  var v = document.getElementById('manualIn').value.trim();
-  if(v) submitScan(v);
-  document.getElementById('manualIn').value = '';
-});
+
 
 var sending = false;
 async function submitScan(code){
@@ -625,6 +627,7 @@ try{ var _o=msuLoad('msu_staff'), _st=msuLoad('msu_stu');
   else if(_st){ me=_st; mode='student'; enter(); } }catch(e){}
 
 applyLang();
+if(me) setTimeout(autoCam, 300);
 
 if('serviceWorker' in navigator && location.protocol === 'https:'){
   navigator.serviceWorker.register('sw.js').catch(function(){});
