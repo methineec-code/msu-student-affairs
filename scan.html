@@ -193,6 +193,10 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
     </div>
     <canvas id="canvas" hidden></canvas>
 
+    <input id="shotIn" type="file" accept="image/*" capture="environment" hidden>
+    <button class="btn ghost" type="button" id="shotBtn"
+      style="margin-bottom:14px" data-i18n="takeShot">ถ่ายรูป QR</button>
+
 
     
 
@@ -246,6 +250,8 @@ var I18N={
   tabStu:'นิสิต',tabStaff:'เจ้าหน้าที่',lbEmail:'อีเมลมหาวิทยาลัย',lbPass:'รหัสผ่าน',
   btnLogin:'เข้าสู่ระบบ',hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',lbStaffEmail:'อีเมลเจ้าหน้าที่',
   btnOut:'ออก',lbAct:'กิจกรรมที่กำลังรับสแกน',actPick:'— เลือกกิจกรรม —',
+  takeShot:'ถ่ายรูป QR', reading:'กำลังอ่าน…', noQr:'ไม่พบ QR ในรูป',
+  noQrSub:'ลองถ่ายใหม่ให้ QR เต็มกรอบและชัด',
   camTap:'แตะเพื่อเปิดกล้อง',tapToStart:'แตะหน้าจอเพื่อเปิดกล้อง',camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
   bonusNew:'+ สร้างคะแนนพิเศษ', bName:'เรื่องที่ให้คะแนน', bScore:'คะแนน',
   bCreate:'สร้างแล้วเริ่มสแกน', bonusReady:'พร้อมสแกนแล้ว · ให้คนละ {n} คะแนน',
@@ -263,6 +269,8 @@ var I18N={
   tabStu:'Student',tabStaff:'Staff',lbEmail:'University email',lbPass:'Password',
   btnLogin:'Sign in',hintPass:'Your default password is your student ID',lbStaffEmail:'Staff email',
   btnOut:'Sign out',lbAct:'Activity being scanned',actPick:'— Select activity —',
+  takeShot:'Take a photo of the QR', reading:'Reading…', noQr:'No QR found in the photo',
+  noQrSub:'Try again with the QR filling the frame',
   camTap:'Tap to start the camera',tapToStart:'Tap the screen to start the camera',camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
   bonusNew:'+ New bonus points', bName:'What are the points for', bScore:'Points',
   bCreate:'Create and start scanning', bonusReady:'Ready to scan · {n} points each',
@@ -280,6 +288,8 @@ var I18N={
   tabStu:'学生',tabStaff:'职员',lbEmail:'学校邮箱',lbPass:'密码',
   btnLogin:'登录',hintPass:'初始密码为您的学号',lbStaffEmail:'职员邮箱',
   btnOut:'退出',lbAct:'当前扫描的活动',actPick:'— 选择活动 —',
+  takeShot:'拍摄二维码', reading:'识别中…', noQr:'照片中未找到二维码',
+  noQrSub:'请让二维码占满画面后重拍',
   camTap:'点击开启摄像头',tapToStart:'点击屏幕开启摄像头',camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
   bonusNew:'+ 新增特别加分', bName:'加分事由', bScore:'分数',
   bCreate:'创建并开始扫描', bonusReady:'可以扫描了 · 每人 {n} 分',
@@ -507,9 +517,7 @@ async function autoCam(){
 async function startCam(silent){
   try{
     stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ ideal:'environment' },
-              width:{ ideal:1920 }, height:{ ideal:1080 },
-              focusMode:'continuous', advanced:[{focusMode:'continuous'}] }, audio:false
+      video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 } }, audio:false
     });
     video.srcObject = stream;
     await video.play();
@@ -531,50 +539,89 @@ function stopCam(){
   document.getElementById('reticle').classList.remove('lock');
 }
 
-function scanFrame(sx, sy, sw, sh, outW){
-  /* ตัดเฉพาะบริเวณที่ต้องการแล้วขยาย ช่วยให้อ่าน QR จากหน้าจอได้ดีขึ้น */
-  var scale = outW / sw;
-  canvas.width  = Math.round(sw * scale);
-  canvas.height = Math.round(sh * scale);
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-  var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  return jsQR(img.data, img.width, img.height, { inversionAttempts:'attemptBoth' });
+var nativeDet = null;
+try{
+  if('BarcodeDetector' in window) nativeDet = new BarcodeDetector({formats:['qr_code']});
+}catch(e){ nativeDet = null; }
+
+/* ถอดรหัสจากรูปภาพหนึ่งใบ */
+async function decodeImage(src){
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  var ok = await new Promise(function(res){
+    img.onload = function(){ res(true); };
+    img.onerror = function(){ res(false); };
+    img.src = src;
+  });
+  if(!ok) return null;
+
+  if(nativeDet){
+    try{
+      var found = await nativeDet.detect(img);
+      if(found && found.length) return found[0].rawValue;
+    }catch(e){}
+  }
+
+  /* ย่อให้ด้านยาวไม่เกิน 1400 px แล้วอ่านด้วย jsQR */
+  var W = img.naturalWidth, H = img.naturalHeight;
+  var k = Math.min(1, 1400 / Math.max(W, H));
+  canvas.width = Math.round(W * k); canvas.height = Math.round(H * k);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  var d = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  var code = window.jsQR && jsQR(d.data, d.width, d.height, { inversionAttempts:'attemptBoth' });
+  return code && code.data ? code.data : null;
 }
 
-var frameNo = 0;
+document.getElementById('shotBtn').addEventListener('click', function(){
+  document.getElementById('shotIn').click();
+});
+
+document.getElementById('shotIn').addEventListener('change', async function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  var url = URL.createObjectURL(f);
+  show('dup', t('reading'), '');
+  var data = await decodeImage(url);
+  URL.revokeObjectURL(url);
+  if(data){ beep(); handleCode(data); }
+  else show('err', t('noQr'), t('noQrSub'));
+});
+
+var frameNo = 0, nativeBusy = false;
+
+function gotCode(data){
+  var now = Date.now();
+  if(data === lastCode && now - lastAt < 3000) return;
+  lastCode = data; lastAt = now;
+  document.getElementById('reticle').classList.add('lock');
+  beep();
+  handleCode(data);
+  setTimeout(function(){ document.getElementById('reticle').classList.remove('lock'); }, 700);
+}
+
 function tick(){
   if(!scanning) return;
-  if(video.readyState === video.HAVE_ENOUGH_DATA && window.jsQR){
-    var vw = video.videoWidth, vh = video.videoHeight;
-    if(vw && vh){
-      var code = null;
-      frameNo++;
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    frameNo++;
 
-      /* 1) กรอบกลางภาพ (ตรงกับกรอบขาวบนหน้าจอ) */
-      var side = Math.min(vw, vh) * 0.70;
-      code = scanFrame((vw - side)/2, (vh - side)/2, side, side, 640);
+    /* ตัวอ่านในตัวเบราว์เซอร์ ถ้ามี (Android/Chrome) */
+    if(nativeDet && !nativeBusy){
+      nativeBusy = true;
+      nativeDet.detect(video).then(function(found){
+        nativeBusy = false;
+        if(found && found.length && found[0].rawValue) gotCode(found[0].rawValue);
+      }).catch(function(){ nativeBusy = false; });
+    }
 
-      /* 2) ถ้ายังไม่เจอ ลองกรอบกลางที่กว้างขึ้น */
-      if(!code){
-        var s2 = Math.min(vw, vh) * 0.95;
-        code = scanFrame((vw - s2)/2, (vh - s2)/2, s2, s2, 720);
-      }
-
-      /* 3) ทุก ๆ 3 เฟรม ลองทั้งภาพ เผื่อ QR อยู่นอกกรอบ */
-      if(!code && frameNo % 3 === 0){
-        code = scanFrame(0, 0, vw, vh, Math.min(900, vw));
-      }
-
-      if(code && code.data){
-        var now = Date.now();
-        if(code.data !== lastCode || now - lastAt > 3000){
-          lastCode = code.data; lastAt = now;
-          document.getElementById('reticle').classList.add('lock');
-          beep();
-          handleCode(code.data);
-          setTimeout(function(){ document.getElementById('reticle').classList.remove('lock'); }, 700);
-        }
+    /* อ่านทั้งเฟรมตรง ๆ แบบเดิม — เร็วที่สุด */
+    if(window.jsQR){
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      if(canvas.width && canvas.height){
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var code = jsQR(img.data, img.width, img.height, { inversionAttempts:'dontInvert' });
+        if(code && code.data) gotCode(code.data);
       }
     }
   }

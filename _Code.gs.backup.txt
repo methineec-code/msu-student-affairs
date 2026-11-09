@@ -40,7 +40,7 @@ const SCHEMA = {
   // A..G  (เดิม)
   Activities:    ['activity_id','name','score','description','created_by','created_date','active',
                   'banner_url','detail','event_date','location','capacity','open_reg',
-                  'close_date','archived'],
+                  'close_date','archived','kind'],
   Engage:        ['id','type','activity_id','student_id','student_name','dept','text','date','time','status'],
   // A..G  (เดิม)
   Scan_Log:      ['log_id','student_id','activity_id','score','date','time','scanned_by'],
@@ -56,7 +56,7 @@ const SCHEMA = {
 const STAFF_ACTIONS = [
   'getDashboard','getStudents','saveStudent','resetStudentPass','toggleStudent',
   'updateActivity','getAllScans','deleteScan','exportCSV','getScanReport',
-  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard','getRegistrations','getArchivedActivities','setActivityVisible'
+  'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard','getRegistrations','getArchivedActivities','setActivityVisible','createBonus'
 ];
 const ADMIN_ACTIONS = [
   'getStaff','saveStaff','delStaff','saveSetting','initStudents','setupSheets'
@@ -72,7 +72,7 @@ const CACHE_ACTIONS = {
 const CACHE_BUST = ['scan','addActivity','updateActivity','delActivity','deleteScan',
   'registerActivity','cancelRegistration','toggleLike','addComment','delComment',
   'saveAnnouncement','delAnnouncement','saveSetting','saveStudent','syncFromForm',
-  'addPortfolio','delPortfolio','changePass','setActivityVisible'];
+  'addPortfolio','delPortfolio','changePass','setActivityVisible','createBonus'];
 
 function cacheKeyFor(action, params) {
   const keep = ['activeOnly','audience','studentId','activityId','limit','lang'];
@@ -186,6 +186,7 @@ function handleRequest(e) {
       case 'saveStaff':       result = saveStaff(params); break;
       case 'delStaff':        result = delStaff(params); break;
       case 'staffChangePass': result = staffChangePass(params); break;
+      case 'createBonus':       result = createBonus(params); break;
       case 'getArchivedActivities': result = getArchivedActivities(params); break;
       case 'setActivityVisible':    result = setActivityVisible(params); break;
       case 'getActivityCounts': result = getActivityCounts(params); break;
@@ -562,7 +563,7 @@ function addActivity(params) {
   sheet.appendRow([actId, name, Number(score), params.description || '', params.createdBy || '', dateStr, true,
                    bannerUrl, params.detail || '', params.eventDate || '', params.location || '',
                    Number(params.capacity) || 0, String(params.openReg) !== 'false',
-                   params.closeDate || '', '']);
+                   params.closeDate || '', '', params.kind || 'activity']);
   writeLog(params.createdBy || '', 'staff', 'addActivity', actId, name, 'success');
 
   const qrData = JSON.stringify({ id: actId, name: name, score: Number(score) });
@@ -1232,25 +1233,17 @@ function getOpenActivities(params) {
     const cap = Number(data[i][11]) || 0;
     const taken = regBy[id] || 0;
 
-    /* ---- เก็บเข้าคลังอัตโนมัติ: คนเต็ม หรือ หมดเขตลงทะเบียน ---- */
-    const archived = String(data[i][14] || '');
-    if (archived !== 'yes') {
-      const close = dateKey(data[i][13]);
-      const expired = close && close < todayKey;
-      const full = cap > 0 && taken >= cap;
-      if (expired || full) {
-        try {
-          sheet.getRange(i + 1, 13).setValue(false);                 /* open_reg = false */
-          sheet.getRange(i + 1, 15).setValue(full ? 'full' : 'expired');
-        } catch (err) {}
-        continue;
-      }
-    }
+    const closeKey = dateKey(data[i][13]);
+    const expired = !!closeKey && closeKey < todayKey;
+    const isFull  = cap > 0 && taken >= cap;
+
     out.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], banner: data[i][7] || '', detail: data[i][8] || '',
       eventDate: outDate(data[i][9]), location: data[i][10] || '',
-      capacity: cap, taken: taken, full: cap > 0 && taken >= cap,
+      capacity: cap, taken: taken, full: isFull,
+      expired: expired, closed: expired || isFull,
+      kind: String(data[i][15] || 'activity'),
       myRegId: myReg[id] || '',
       likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0,
       closeDate: outDate(data[i][13])
@@ -1282,9 +1275,14 @@ function registerActivity(params) {
   }
 
   const act = sheetData('Activities');
-  let cap = 0, actName = '';
+  let cap = 0, actName = '', closeKey = '';
   for (let i = 1; i < act.length; i++) {
-    if (String(act[i][0]) === String(actId)) { cap = Number(act[i][11]) || 0; actName = act[i][1]; break; }
+    if (String(act[i][0]) === String(actId)) {
+      cap = Number(act[i][11]) || 0; actName = act[i][1]; closeKey = dateKey(act[i][13]); break;
+    }
+  }
+  if (closeKey && closeKey < Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd')) {
+    return { success: false, closed: true, error: 'หมดเขตลงทะเบียนแล้ว' };
   }
   if (cap > 0 && taken >= cap) return { success: false, full: true, error: 'กิจกรรมนี้เต็มแล้ว' };
 
@@ -1470,6 +1468,22 @@ function outTime(v) {
     return Utilities.formatDate(v, TZ, 'HH:mm');
   }
   return String(v);
+}
+
+/* คะแนนพิเศษ: สร้างกิจกรรมเร็ว ๆ สำหรับแจกคะแนนหน้างาน ไม่แสดงบนหน้ากิจกรรม */
+function createBonus(params) {
+  const lang = params.lang || 'th';
+  const name = String(params.name || '').trim();
+  const score = Number(params.score);
+  if (!name || !score) return { success: false, error: msg('MISSING', lang) };
+
+  const sheet = SS.getSheetByName('Activities');
+  const actId = 'ACT' + new Date().getTime();
+  const dateStr = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
+  sheet.appendRow([actId, name, score, params.description || '', params.createdBy || '', dateStr, true,
+                   '', '', dateStr, params.location || '', 0, false, '', 'manual', 'bonus']);
+  writeLog(params.createdBy || '', 'staff', 'createBonus', actId, name, 'success');
+  return { success: true, activityId: actId, name: name, score: score };
 }
 
 function dateKey(v) {
