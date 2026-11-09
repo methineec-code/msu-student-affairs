@@ -193,9 +193,6 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
     </div>
     <canvas id="canvas" hidden></canvas>
 
-    <input id="shotIn" type="file" accept="image/*" capture="environment" hidden>
-    <button class="btn ghost" type="button" id="shotBtn"
-      style="margin-bottom:14px" data-i18n="takeShot">ถ่ายรูป QR</button>
 
 
     
@@ -576,22 +573,6 @@ async function decodeImage(src){
   return code && code.data ? code.data : null;
 }
 
-document.getElementById('shotBtn').addEventListener('click', function(){
-  document.getElementById('shotIn').click();
-});
-
-document.getElementById('shotIn').addEventListener('change', async function(e){
-  var f = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if(!f) return;
-  var url = URL.createObjectURL(f);
-  show('dup', t('reading'), '');
-  var data = await decodeImage(url);
-  URL.revokeObjectURL(url);
-  if(data){ beep(); handleCode(data); }
-  else show('err', t('noQr'), t('noQrSub'));
-});
-
 var frameNo = 0, nativeBusy = false;
 
 function gotCode(data){
@@ -688,7 +669,12 @@ async function submitScan(code){
            t('gotPts').replace('{n}', r.score) +
            (r.totalScore!==undefined ? ' · ' + t('totalNow').replace('{n}', r.totalScore) : ''),
            '+' + r.score);
-      if(mode==='student'){ loadHistory(); }
+      if(mode==='student'){
+        loadHistory();
+        /* ล้างแคชหน้านิสิตให้เห็นคะแนนใหม่ แล้วเด้งกลับไปหน้าสะสมคะแนน */
+        try{ localStorage.removeItem('c_stu_'+me.id); }catch(_){}
+        setTimeout(function(){ location.href='student.html'; }, 1600);
+      }
       else { pushStaffRow(r.studentName||studentId, r.score); }
     }else if(r.duplicate){
       show('dup',t('dup'),
