@@ -182,6 +182,15 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 .backfab:hover{background:var(--blue-soft,#eef0ff);transform:translateX(-2px)}
 .backfab:active{transform:scale(.94)}
 @media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
+
+.helpbox{margin:14px 0 0;padding:12px 14px;border:1px dashed var(--line);
+  border-radius:var(--r);background:rgba(0,0,0,.02);text-align:left}
+.helpbox b{display:block;font-size:13px;margin-bottom:4px}
+.helpbox p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.helpbox a{color:inherit}
+
+.btn.danger{color:#c0392b;border-color:rgba(192,57,43,.35)}
+.btn.danger:hover{background:rgba(192,57,43,.07)}
 </style>
 <a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
 
@@ -203,6 +212,11 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
     <button class="btn wide" type="submit" data-i18n="signIn">เข้าสู่ระบบ</button>
     
     <p class="note" id="gateNote"></p>
+    <div class="helpbox">
+      <b data-i18n="needHelp">เข้าสู่ระบบไม่ได้?</b>
+      <p data-i18n="helpBody">บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต</p>
+      <p style="margin-top:6px"><a href="mailto:student.affairs@msu.ac.th">student.affairs@msu.ac.th</a></p>
+    </div>
   </form>
 </div>
 
@@ -297,6 +311,8 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
               <input id="actBanner" type="file" accept="image/*" style="padding:8px 10px;font-size:13px">
               <p style="margin:6px 0 0;font-size:12px;color:var(--ink-3)" data-i18n="bannerHint">แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB</p></div>
             <button class="btn wide" type="submit" data-i18n="createQr">สร้าง + ออก QR</button>
+            <button class="btn ghost wide" type="button" id="cancelEdit" hidden
+              style="margin-top:8px" data-i18n="cancelEdit">ยกเลิกการแก้ไข</button>
           </form>
           
         </div>
@@ -375,7 +391,7 @@ var DEMO = false;
 /* ============================ ภาษา ============================= */
 var I18N = {
   th:{appName:'ระบบกิจการนิสิต',forStaff:'เข้าสู่ระบบสำหรับเจ้าหน้าที่',email:'อีเมล',password:'รหัสผ่าน',
-    signIn:'เข้าสู่ระบบ',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
+    signIn:'เข้าสู่ระบบ', needHelp:'เข้าสู่ระบบไม่ได้?', helpBody:'บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
     goScan:'สแกน QR',tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
     kickScans:'บันทึกการเข้าร่วม',kickRank:'คะแนนสะสม',refresh:'รีเฟรช',byDept:'นิสิตแยกตามสาขา',
     byAct:'ผู้เข้าร่วมแยกตามกิจกรรม',searchStu:'ค้นหารหัส / ชื่อ',allDept:'ทุกสาขา',allAct:'ทุกกิจกรรม',
@@ -392,9 +408,9 @@ var I18N = {
     of:'จาก',prev:'ก่อนหน้า',next:'ถัดไป',noData:'ยังไม่มีข้อมูล',
     demoMsg:'โหมดตัวอย่าง — ยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อหลังบ้านไม่ได้ ตัวเลขที่เห็นเป็นข้อมูลสมมติ',
     hint:'ยังไม่ได้ตั้งค่า API_URL — กดเข้าสู่ระบบเพื่อดูโหมดตัวอย่าง',
-    saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน'},
+    saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน',edit:'แก้ไข',del:'ลบ',deleted:'ลบแล้ว',cancelEdit:'ยกเลิกการแก้ไข',editingAct:'แก้ไขกิจกรรม',saveEdit:'บันทึกการแก้ไข',delUsed:'กิจกรรมนี้มีนิสิตสแกนเข้าร่วมแล้ว {n} คน ถ้าลบ ประวัติคะแนนที่ให้ไปจะยังอยู่ แต่กิจกรรมจะหายจากระบบ ยืนยันลบหรือไม่?'},
   en:{appName:'Student Affairs',forStaff:'Staff sign-in',email:'Email',password:'Password',
-    signIn:'Sign in',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
+    signIn:'Sign in', needHelp:'Cannot sign in?', helpBody:'Staff accounts must be created by an administrator. If you forgot your password, contact the administrator to reset it.',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
     goScan:'Scan QR',tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
     kickScans:'Attendance log',kickRank:'Accumulated points',refresh:'Refresh',byDept:'Students by department',
     byAct:'Attendance by activity',searchStu:'Search ID / name',allDept:'All departments',allAct:'All activities',
@@ -411,9 +427,9 @@ var I18N = {
     of:'of',prev:'Previous',next:'Next',noData:'Nothing here yet',
     demoMsg:'Demo mode — API_URL is not set or the backend is unreachable. These figures are sample data.',
     hint:'API_URL is not set — sign in to view the demo.',
-    saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm'},
+    saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm',edit:'Edit',del:'Delete',deleted:'Deleted',cancelEdit:'Cancel editing',editingAct:'Edit activity',saveEdit:'Save changes',delUsed:'{n} student(s) already scanned this activity. Deleting removes the activity but keeps their points. Delete anyway?'},
   zh:{appName:'学生事务系统',forStaff:'职员登录',email:'邮箱',password:'密码',
-    signIn:'登录',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
+    signIn:'登录', needHelp:'无法登录?', helpBody:'工作人员账号需由管理员创建并设置密码。如忘记密码,请联系管理员重置。',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
     goScan:'扫码',tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
     kickScans:'参与记录',kickRank:'累计积分',refresh:'刷新',byDept:'各专业学生数',
     byAct:'各活动参与人数',searchStu:'搜索学号 / 姓名',allDept:'全部专业',allAct:'全部活动',
@@ -430,7 +446,7 @@ var I18N = {
     of:'/',prev:'上一页',next:'下一页',noData:'暂无数据',
     demoMsg:'演示模式 — 未设置 API_URL 或无法连接后端，以下为示例数据。',
     hint:'未设置 API_URL — 登录后查看演示数据。',
-    saved:'已保存',copied:'已复制',confirmDel:'再次点击确认'}
+    saved:'已保存',copied:'已复制',confirmDel:'再次点击确认',edit:'编辑',del:'删除',deleted:'已删除',cancelEdit:'取消编辑',editingAct:'编辑活动',saveEdit:'保存修改',delUsed:'已有 {n} 名学生扫码参加此活动。删除后活动将消失,但已获得的积分保留。确定删除吗?'}
 };
 var lang = 'th';
 try{ var _sv=localStorage.getItem('msu_lang'); if(_sv) lang=_sv; }catch(e){}
@@ -773,7 +789,9 @@ function renderActs(){
       ' <button class="btn ghost sm" data-regs="'+esc(a.id)+'">'+t('regList')+'</button>'+
       ' <button class="btn ghost sm" data-vis="'+esc(a.id)+'" data-show="'+(a.openReg===false?'true':'false')+'">'+
         t(a.openReg===false ? 'showPost' : 'hidePost')+'</button>'+
-      ' <button class="btn ghost sm" data-toggleact="'+esc(a.id)+'">'+t(a.active?'close':'open')+'</button></td></tr>';
+      ' <button class="btn ghost sm" data-toggleact="'+esc(a.id)+'">'+t(a.active?'close':'open')+'</button>'+
+      ' <button class="btn ghost sm" data-editact="'+esc(a.id)+'">'+t('edit')+'</button>'+
+      ' <button class="btn ghost sm danger" data-delact="'+esc(a.id)+'">'+t('del')+'</button></td></tr>';
   }).join('') : '<tr><td colspan="5"><div class="empty">'+t('noData')+'</div></td></tr>';
 
   var sel = document.getElementById('scanAct');
@@ -925,6 +943,40 @@ document.querySelector('#actTable tbody').addEventListener('click', async functi
     if(a) showQR(a);
     return;
   }
+  var ed = e.target.closest('[data-editact]');
+  if(ed){
+    var a = D.acts.filter(function(x){ return x.id === ed.dataset.editact; })[0];
+    if(a) startEdit(a);
+    return;
+  }
+  var dl = e.target.closest('[data-delact]');
+  if(dl){
+    if(dl.dataset.armed !== '1'){
+      dl.dataset.armed = '1'; dl.textContent = t('confirmDel');
+      setTimeout(function(){ if(dl.dataset.armed==='1'){ dl.dataset.armed='0'; dl.textContent = t('del'); } }, 6000);
+      return;
+    }
+    var id = dl.dataset.delact;
+    var r = null;
+    try{
+      r = await api({ action:'delActivity', activityId:id });
+      if(r && r.needConfirm){
+        if(!confirm(t('delUsed').replace('{n}', r.used))){
+          dl.dataset.armed='0'; dl.textContent = t('del'); return;
+        }
+        r = await api({ action:'delActivity', activityId:id, force:true });
+      }
+    }catch(err){ toast(t('netErr')); dl.dataset.armed='0'; dl.textContent=t('del'); return; }
+    if(!r || r.success !== true){
+      toast((r && r.error) || t('netErr')); dl.dataset.armed='0'; dl.textContent=t('del'); return;
+    }
+    D.acts = D.acts.filter(function(x){ return x.id !== id; });
+    if(DEMO) demo.acts = demo.acts.filter(function(x){ return x.id !== id; });
+    if(editId === id) cancelEditMode();
+    try{ localStorage.removeItem('c_acts'); }catch(_){}
+    renderActs(); toast(t('deleted'));
+    return;
+  }
   var tg = e.target.closest('[data-toggleact]');
   if(tg){
     var act = D.acts.filter(function(x){ return x.id === tg.dataset.toggleact; })[0];
@@ -967,6 +1019,43 @@ function syncKindFields(){
 }
 document.getElementById('actKind').addEventListener('change', syncKindFields);
 
+var editId = null;
+
+function startEdit(a){
+  editId = a.id;
+  document.getElementById('actKind').value  = a.kind || 'activity';
+  document.getElementById('actName').value  = a.name || '';
+  document.getElementById('actScore').value = a.score || 0;
+  document.getElementById('actDate').value  = a.eventDateISO || '';
+  document.getElementById('actPlace').value = a.location || '';
+  document.getElementById('actDesc').value  = a.detail || a.description || '';
+  document.getElementById('actClose').value = a.closeDateISO || '';
+  document.getElementById('actCap').value   = a.capacity || '';
+  document.getElementById('actOpen').value  = (a.openReg === false) ? 'false' : 'true';
+  document.getElementById('actBanner').value = '';
+  syncKindFields();
+  document.getElementById('cancelEdit').hidden = false;
+  var h = document.querySelector('#actForm').closest('.panel').querySelector('h3');
+  if(h) h.textContent = t('editingAct');
+  var sb = document.querySelector('#actForm button[type=submit]');
+  if(sb) sb.textContent = t('saveEdit');
+  document.getElementById('actName').focus();
+  document.getElementById('actName').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function cancelEditMode(){
+  editId = null;
+  var f = document.getElementById('actForm');
+  f.reset();
+  document.getElementById('actScore').value = 5;
+  document.getElementById('actOpen').value = 'true';
+  document.getElementById('cancelEdit').hidden = true;
+  var h = f.closest('.panel').querySelector('h3');
+  if(h) h.textContent = t('newAct');
+  syncKindFields();
+}
+document.getElementById('cancelEdit').addEventListener('click', cancelEditMode);
+
 document.getElementById('actForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var name = document.getElementById('actName').value.trim();
@@ -984,6 +1073,40 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
     if(bf.size > 5*1024*1024){ toast(t('imgBig')); sb.disabled=false; return; }
     sb.textContent = t('saving');
     bannerData = await readB64(bf); bannerName = bf.name; bannerType = bf.type||'image/jpeg';
+  }
+
+  var payload = {
+    name:name, score:score, description:desc, detail:desc,
+    eventDate: document.getElementById('actDate').value,
+    location: document.getElementById('actPlace').value.trim(),
+    capacity: Number(document.getElementById('actCap').value) || 0,
+    closeDate: document.getElementById('actClose').value,
+    openReg: document.getElementById('actOpen').value,
+    kind: document.getElementById('actKind').value,
+    bannerData: bannerData, bannerName: bannerName, bannerType: bannerType
+  };
+
+  // ---- โหมดแก้ไข ----
+  if(editId){
+    payload.action = 'updateActivity';
+    payload.activityId = editId;
+    payload.staff_id = auth && auth.staff_id;
+    var ru = await tryApi(payload);
+    sb.textContent = sbLabel; sb.disabled = false;
+    if(ru && ru.success === false){ toast(ru.error || t('netErr')); return; }
+    D.acts = D.acts.map(function(x){
+      if(x.id !== editId) return x;
+      return Object.assign({}, x, {
+        name:name, score:score, description:desc, detail:desc,
+        eventDateISO: payload.eventDate, location: payload.location,
+        capacity: payload.capacity, closeDateISO: payload.closeDate,
+        openReg: payload.openReg !== 'false', kind: payload.kind
+      });
+    });
+    try{ localStorage.removeItem('c_acts'); }catch(_){}
+    cancelEditMode();
+    renderActs(); toast(t('saved'));
+    return;
   }
 
   var act = { id:'ACT'+Date.now(), name:name, score:score, description:desc, active:true, joined:0 };

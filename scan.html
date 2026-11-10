@@ -186,6 +186,14 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
       </form>
     </div>
 
+    <form class="card" id="sidBox" hidden>
+      <div class="field" style="margin:0 0 11px">
+        <label for="sidIn" data-i18n="lbStuId">รหัสนิสิต</label>
+        <input id="sidIn" inputmode="numeric" placeholder="68010310236" required>
+      </div>
+      <button class="btn" type="submit" data-i18n="btnSave">บันทึกการเข้าร่วม</button>
+    </form>
+
     <div class="cam">
       <video id="video" playsinline muted></video>
       <div class="reticle" id="reticle"></div>
@@ -251,6 +259,9 @@ var I18N={
   readerFail:'โหลดตัวอ่าน QR ไม่สำเร็จ', readerFailSub:'ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้านี้',
   takeShot:'ถ่ายรูป QR', reading:'กำลังอ่าน…', noQr:'ไม่พบ QR ในรูป',
   noQrSub:'ลองถ่ายใหม่ให้ QR เต็มกรอบและชัด',
+  camNone:'เครื่องนี้ไม่มีกล้อง — ใช้มือถือสแกนแทน',
+  camDenied:'ยังไม่ได้อนุญาตให้ใช้กล้อง — กดไอคอนกล้องบนแถบที่อยู่ แล้วแตะตรงนี้อีกครั้ง',
+  camBusy:'กล้องถูกใช้งานโดยโปรแกรมอื่นอยู่ — ปิดโปรแกรมนั้นแล้วแตะตรงนี้',
   camTap:'แตะเพื่อเปิดกล้อง',tapToStart:'แตะหน้าจอเพื่อเปิดกล้อง',camHint:'กดปุ่มด้านล่างเพื่อเปิดกล้อง',camOpen:'เปิดกล้อง',camClose:'ปิดกล้อง',manual:'พิมพ์เอง',
   bonusNew:'+ สร้างคะแนนพิเศษ', bName:'เรื่องที่ให้คะแนน', bScore:'คะแนน',
   bCreate:'สร้างแล้วเริ่มสแกน', bonusReady:'พร้อมสแกนแล้ว · ให้คนละ {n} คะแนน',
@@ -259,7 +270,7 @@ var I18N={
   roleWord:'สิทธิ์',roleAdmin:'ผู้ดูแลระบบ',roleStaff:'เจ้าหน้าที่',pts:'คะแนน',
   errApi:'ยังไม่ได้ตั้งค่า API_URL ในไฟล์ scan.html',
   errConn:'เชื่อมต่อหลังบ้านไม่ได้ ตรวจสอบ API_URL และการ Deploy',
-  camFail:'เปิดกล้องไม่ได้ — ต้องเปิดผ่าน https และอนุญาตให้ใช้กล้อง หรือกด "พิมพ์เอง"',
+  camFail:'เปิดกล้องไม่ได้ — แตะตรงนี้เพื่อลองใหม่',
   pickFirst:'เลือกกิจกรรมก่อน',pickFirstSub:'กดเลือกกิจกรรมที่ช่องด้านบน แล้วค่อยสแกน',
   gotPts:'ได้ {n} คะแนน', totalNow:'รวม {n} คะแนน',
   saved:'บันทึกแล้ว',dup:'สแกนซ้ำ',dupAt:'บันทึกไว้แล้วเมื่อ',fail:'ไม่สำเร็จ',
@@ -271,6 +282,9 @@ var I18N={
   readerFail:'QR reader failed to load', readerFailSub:'Check your connection and refresh',
   takeShot:'Take a photo of the QR', reading:'Reading…', noQr:'No QR found in the photo',
   noQrSub:'Try again with the QR filling the frame',
+  camNone:'No camera on this device — use a phone instead',
+  camDenied:'Camera not allowed — allow it in the address bar, then tap here again',
+  camBusy:'Camera is in use by another app — close it and tap here',
   camTap:'Tap to start the camera',tapToStart:'Tap the screen to start the camera',camHint:'Tap the button below to start the camera',camOpen:'Start camera',camClose:'Stop camera',manual:'Type it',
   bonusNew:'+ New bonus points', bName:'What are the points for', bScore:'Points',
   bCreate:'Create and start scanning', bonusReady:'Ready to scan · {n} points each',
@@ -279,7 +293,7 @@ var I18N={
   roleWord:'Role:',roleAdmin:'Administrator',roleStaff:'Staff',pts:'pts',
   errApi:'API_URL is not set in scan.html',
   errConn:'Cannot reach the backend. Check API_URL and the deployment.',
-  camFail:'Camera unavailable — the page must be on https and camera access allowed, or use "Type it".',
+  camFail:'Camera unavailable — tap here to try again',
   pickFirst:'Select an activity first',pickFirstSub:'Choose an activity above, then scan.',
   gotPts:'+{n} points', totalNow:'total {n}',
   saved:'Recorded',dup:'Already scanned',dupAt:'recorded on',fail:'Failed',
@@ -291,6 +305,9 @@ var I18N={
   readerFail:'二维码识别库加载失败', readerFailSub:'请检查网络后刷新页面',
   takeShot:'拍摄二维码', reading:'识别中…', noQr:'照片中未找到二维码',
   noQrSub:'请让二维码占满画面后重拍',
+  camNone:'此设备没有摄像头 — 请改用手机',
+  camDenied:'尚未允许使用摄像头 — 在地址栏允许后再点击这里',
+  camBusy:'摄像头被其他程序占用 — 关闭后点击这里',
   camTap:'点击开启摄像头',tapToStart:'点击屏幕开启摄像头',camHint:'点击下方按钮开启摄像头',camOpen:'开启摄像头',camClose:'关闭摄像头',manual:'手动输入',
   bonusNew:'+ 新增特别加分', bName:'加分事由', bScore:'分数',
   bCreate:'创建并开始扫描', bonusReady:'可以扫描了 · 每人 {n} 分',
@@ -299,7 +316,7 @@ var I18N={
   roleWord:'权限',roleAdmin:'管理员',roleStaff:'职员',pts:'分',
   errApi:'scan.html 中尚未设置 API_URL',
   errConn:'无法连接后端，请检查 API_URL 与部署状态',
-  camFail:'无法开启摄像头 — 需通过 https 访问并允许使用摄像头，或点击"手动输入"',
+  camFail:'无法开启摄像头 — 点击这里重试',
   pickFirst:'请先选择活动',pickFirstSub:'请在上方选择活动后再扫描',
   gotPts:'获得 {n} 分', totalNow:'累计 {n} 分',
   saved:'已记录',dup:'重复扫描',dupAt:'已于',fail:'失败',
@@ -401,6 +418,7 @@ async function enter(){
     loadHistory();
   } else {
     document.getElementById('pickAct').hidden = false;
+    document.getElementById('sidBox').hidden = false;
     loadActivities();
   }
 }
@@ -477,6 +495,15 @@ async function loadHistory(){
   }catch(e){}
 }
 
+/* กรอกรหัสนิสิตเอง (เฉพาะเจ้าหน้าที่) */
+document.getElementById('sidBox').addEventListener('submit', function(e){
+  e.preventDefault();
+  var v = document.getElementById('sidIn').value.trim();
+  if(v) submitScan(v);
+  document.getElementById('sidIn').value = '';
+  document.getElementById('sidIn').focus();
+});
+
 /* =========================== กล้อง ============================ */
 var video = document.getElementById('video');
 var canvas = document.getElementById('canvas');
@@ -526,8 +553,17 @@ async function startCam(silent){
     scanning = true;
     requestAnimationFrame(tick);
   }catch(err){
+    var n = (err && err.name) || '';
+    var msg;
+    if(n === 'NotFoundError' || n === 'OverconstrainedError' || n === 'DevicesNotFoundError')
+      msg = t('camNone');
+    else if(n === 'NotAllowedError' || n === 'PermissionDeniedError')
+      msg = t('camDenied');
+    else if(n === 'NotReadableError' || n === 'TrackStartError')
+      msg = t('camBusy');
+    else msg = silent ? t('camTap') : t('camFail');
     document.getElementById('camoff').hidden = false;
-    document.getElementById('camoff').textContent = silent ? t('camTap') : t('camFail');
+    document.getElementById('camoff').textContent = msg;
   }
 }
 

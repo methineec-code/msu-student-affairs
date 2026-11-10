@@ -55,7 +55,7 @@ const SCHEMA = {
 /* action ที่ต้องเป็นเจ้าหน้าที่/แอดมิน (ตรวจด้วย staff_id + password ที่ส่งมากับคำขอ) */
 const STAFF_ACTIONS = [
   'getDashboard','getStudents','saveStudent','resetStudentPass','toggleStudent',
-  'updateActivity','getAllScans','deleteScan','exportCSV','getScanReport',
+  'updateActivity','delActivity','addActivity','getAllScans','deleteScan','exportCSV','getScanReport',
   'saveAnnouncement','delAnnouncement','getLogs','getLeaderboard','getRegistrations','getArchivedActivities','setActivityVisible','createBonus'
 ];
 const ADMIN_ACTIONS = [
@@ -534,7 +534,9 @@ function getActivities(params) {
       eventDate: data[i][9] || '', location: data[i][10] || '',
       capacity: Number(data[i][11]) || 0,
       openReg: !(data[i][12] === false || data[i][12] === 'false'),
-      closeDate: outDate(data[i][13]), archived: String(data[i][14] || '')
+      closeDate: outDate(data[i][13]), archived: String(data[i][14] || ''),
+      kind: String(data[i][15] || 'activity'),
+      eventDateISO: outISO(data[i][9]), closeDateISO: outISO(data[i][13])
     });
   }
   activities.reverse();
@@ -577,14 +579,29 @@ function updateActivity(params) {
   const sheet = SS.getSheetByName('Activities');
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(params.activityId)) {
-      if (params.name !== undefined)        sheet.getRange(i + 1, 2).setValue(params.name);
-      if (params.score !== undefined)       sheet.getRange(i + 1, 3).setValue(Number(params.score));
-      if (params.description !== undefined) sheet.getRange(i + 1, 4).setValue(params.description);
-      if (params.active !== undefined)      sheet.getRange(i + 1, 7).setValue(params.active === true || params.active === 'true');
-      writeLog(params.staff_id || '', 'staff', 'updateActivity', params.activityId, '', 'success');
-      return { success: true };
+    if (String(data[i][0]) !== String(params.activityId)) continue;
+    const r = i + 1;
+    const set = function (col, val) { sheet.getRange(r, col).setValue(val); };
+
+    if (params.name        !== undefined) set(2,  params.name);
+    if (params.score       !== undefined) set(3,  Number(params.score) || 0);
+    if (params.description !== undefined) set(4,  params.description);
+    if (params.active      !== undefined) set(7,  params.active === true || params.active === 'true');
+    if (params.detail      !== undefined) set(9,  params.detail);
+    if (params.eventDate   !== undefined) set(10, params.eventDate);
+    if (params.location    !== undefined) set(11, params.location);
+    if (params.capacity    !== undefined) set(12, Number(params.capacity) || 0);
+    if (params.openReg     !== undefined) set(13, params.openReg === true || params.openReg === 'true');
+    if (params.closeDate   !== undefined) set(14, params.closeDate);
+    if (params.kind        !== undefined) set(16, params.kind);
+
+    if (params.bannerData) {
+      const url = saveBanner(params.bannerData, params.bannerName, params.bannerType);
+      if (url) set(8, url);
     }
+
+    writeLog(params.staff_id || '', 'staff', 'updateActivity', params.activityId, '', 'success');
+    return { success: true };
   }
   return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
 }
@@ -593,11 +610,24 @@ function deleteActivity(params) {
   const sheet = SS.getSheetByName('Activities');
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(params.activityId)) {
-      sheet.getRange(i + 1, 7).setValue(false);   // ปิดใช้งาน ไม่ลบจริง (คงประวัติสแกน)
-      writeLog(params.staff_id || '', 'staff', 'delActivity', params.activityId, '', 'success');
-      return { success: true };
+    if (String(data[i][0]) !== String(params.activityId)) continue;
+
+    let used = 0;
+    try {
+      const log = sheetData('Scan_Log');
+      for (let j = 1; j < log.length; j++) {
+        if (String(log[j][2]) === String(params.activityId)) used++;
+      }
+    } catch (e) {}
+
+    if (used > 0 && !(params.force === true || params.force === 'true')) {
+      return { success: false, needConfirm: true, used: used,
+               error: msg('ACT_HAS_SCANS', params.lang || 'th') };
     }
+
+    sheet.deleteRow(i + 1);
+    writeLog(params.staff_id || '', 'staff', 'delActivity', params.activityId, 'used=' + used, 'success');
+    return { success: true, used: used };
   }
   return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
 }
@@ -1455,6 +1485,28 @@ function setActivityVisible(params) {
 }
 
 /* ส่งออกเป็นข้อความเสมอ กันเบราว์เซอร์แปลงโซนเวลาแล้ววันเพี้ยน */
+function saveBanner(b64, fname, ftype) {
+  if (!b64) return '';
+  try {
+    const bytes = Utilities.base64Decode(b64);
+    const safe  = String(fname || 'banner').replace(/[\\/:*?"<>|]/g, '_');
+    const blob  = Utilities.newBlob(bytes, ftype || 'image/jpeg', 'ACT' + new Date().getTime() + '_' + safe);
+    const file  = portfolioFolder().createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200';
+  } catch (err) { return ''; }
+}
+
+function outISO(v) {
+  if (!v) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') return Utilities.formatDate(v, TZ, 'yyyy-MM-dd');
+  const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[0];
+  const d = String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (d) { let y = Number(d[3]); if (y > 2400) y -= 543;
+           return y + '-' + ('0' + d[2]).slice(-2) + '-' + ('0' + d[1]).slice(-2); }
+  return '';
+}
+
 function outDate(v) {
   if (!v) return '';
   if (Object.prototype.toString.call(v) === '[object Date]') {
@@ -1543,6 +1595,7 @@ const MESSAGES = {
   NOT_FOUND:          { th:'ไม่พบข้อมูล',                    en:'Not found',                 zh:'未找到数据' },
   NOT_FOUND_STUDENT:  { th:'ไม่พบข้อมูลนิสิต',                en:'Student not found',         zh:'未找到学生' },
   NOT_FOUND_STAFF:    { th:'ไม่พบข้อมูลเจ้าหน้าที่',           en:'Staff not found',           zh:'未找到工作人员' },
+  ACT_HAS_SCANS:      { th:'กิจกรรมนี้มีประวัติการสแกนแล้ว',  en:'This activity already has scan records', zh:'该活动已有扫码记录' },
   ACT_NOT_FOUND:      { th:'ไม่พบกิจกรรมนี้',                 en:'Activity not found',        zh:'未找到活动' },
   ACT_INACTIVE:       { th:'กิจกรรมนี้ปิดรับการสแกนแล้ว',      en:'Activity is inactive',      zh:'活动已关闭' },
   DUPLICATE:          { th:'คุณสแกนกิจกรรมนี้ไปแล้ว',          en:'Already scanned',           zh:'您已扫描过此活动' },

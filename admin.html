@@ -138,6 +138,12 @@ tbody tr:hover{background:var(--blue-soft)}
 .backfab:hover{background:var(--blue-soft,#eef0ff);transform:translateX(-2px)}
 .backfab:active{transform:scale(.94)}
 @media(max-width:480px){.backfab{top:10px;left:10px;width:36px;height:36px;font-size:18px}}
+
+.helpbox{margin:14px 0 0;padding:12px 14px;border:1px dashed var(--line);
+  border-radius:var(--r);background:rgba(0,0,0,.02);text-align:left}
+.helpbox b{display:block;font-size:13px;margin-bottom:4px}
+.helpbox p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.helpbox a{color:inherit}
 </style>
 <a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
 
@@ -153,7 +159,11 @@ tbody tr:hover{background:var(--blue-soft)}
     <div class="field"><label for="pass" data-i18n="lbPass">รหัสผ่าน</label>
       <input id="pass" type="password" autocomplete="current-password" required></div>
     <button class="btn wide" type="submit" data-i18n="btnLogin">เข้าสู่ระบบ</button>
-    
+    <div class="helpbox">
+      <b data-i18n="needHelp">เข้าสู่ระบบไม่ได้?</b>
+      <p data-i18n="helpBody">บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต</p>
+      <p style="margin-top:6px"><a href="mailto:student.affairs@msu.ac.th">student.affairs@msu.ac.th</a></p>
+    </div>
   </form>
 </div>
 
@@ -280,7 +290,7 @@ function msuClear(){
 
 var I18N={
  th:{pageTag:'ผู้ดูแลระบบ',h1:'ผู้ดูแลระบบ',sub:'เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin',lbEmail:'อีเมล',lbPass:'รหัสผ่าน',
-  btnLogin:'เข้าสู่ระบบ',btnOut:'ออกจากระบบ',navStaff:'เจ้าหน้าที่',navAnn:'ประกาศ',
+  btnLogin:'เข้าสู่ระบบ', needHelp:'เข้าสู่ระบบไม่ได้?', helpBody:'บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต',btnOut:'ออกจากระบบ',navStaff:'เจ้าหน้าที่',navAnn:'ประกาศ',
   navSet:'ตั้งค่าระบบ',navLog:'ประวัติการใช้งาน',kickStaff:'สิทธิ์การเข้าถึง',kickAnn:'ข่าวสารถึงผู้ใช้',
   kickSet:'ค่ากลางของระบบ',kickLog:'ตรวจสอบย้อนหลัง',lbName:'ชื่อ-สกุล',lbRole:'สิทธิ์',lbStatus:'สถานะ',
   roleWord:'สิทธิ์',roleStaff:'เจ้าหน้าที่',roleAdmin:'ผู้ดูแลระบบ',stActive:'ใช้งาน',stOff:'ระงับ',
@@ -301,7 +311,7 @@ var I18N={
   okSaved:'บันทึกแล้ว',okPass:'บันทึกแล้ว · รหัสผ่าน ',okSuspend:'ระงับบัญชีแล้ว',
   okDel:'ลบแล้ว',okPub:'เผยแพร่แล้ว',okSet:'บันทึกแล้ว: '},
  en:{pageTag:'Admin console',h1:'Administrator',sub:'Admin accounts only',lbEmail:'Email',lbPass:'Password',
-  btnLogin:'Sign in',btnOut:'Sign out',navStaff:'Staff',navAnn:'Announcements',
+  btnLogin:'Sign in', needHelp:'Cannot sign in?', helpBody:'Staff accounts must be created by an administrator. If you forgot your password, contact the administrator to reset it.',btnOut:'Sign out',navStaff:'Staff',navAnn:'Announcements',
   navSet:'System settings',navLog:'Activity log',kickStaff:'Access control',kickAnn:'News for users',
   kickSet:'System-wide values',kickLog:'Audit trail',lbName:'Full name',lbRole:'Role',lbStatus:'Status',
   roleWord:'Role:',roleStaff:'Staff',roleAdmin:'Administrator',stActive:'Active',stOff:'Suspended',
@@ -322,7 +332,7 @@ var I18N={
   okSaved:'Saved',okPass:'Saved · password ',okSuspend:'Account suspended',
   okDel:'Deleted',okPub:'Published',okSet:'Saved: '},
  zh:{pageTag:'管理员',h1:'管理员',sub:'仅限具有管理员权限的账号',lbEmail:'邮箱',lbPass:'密码',
-  btnLogin:'登录',btnOut:'退出登录',navStaff:'职员',navAnn:'公告',
+  btnLogin:'登录', needHelp:'无法登录?', helpBody:'工作人员账号需由管理员创建并设置密码。如忘记密码,请联系管理员重置。',btnOut:'退出登录',navStaff:'职员',navAnn:'公告',
   navSet:'系统设置',navLog:'操作记录',kickStaff:'权限管理',kickAnn:'用户通知',
   kickSet:'系统参数',kickLog:'审计记录',lbName:'姓名',lbRole:'权限',lbStatus:'状态',
   roleWord:'权限',roleStaff:'职员',roleAdmin:'管理员',stActive:'启用',stOff:'停用',
