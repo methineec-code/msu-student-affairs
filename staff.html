@@ -186,11 +186,29 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 .helpbox{margin:14px 0 0;padding:12px 14px;border:1px dashed var(--line);
   border-radius:var(--r);background:rgba(0,0,0,.02);text-align:left}
 .helpbox b{display:block;font-size:13px;margin-bottom:4px}
-.helpbox p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.helpbox p{margin:0;font-size:12.5px;line-height:1.65;color:var(--muted)}
 .helpbox a{color:inherit}
 
 .btn.danger{color:#c0392b;border-color:rgba(192,57,43,.35)}
 .btn.danger:hover{background:rgba(192,57,43,.07)}
+
+tr.rowlink{cursor:pointer}
+tr.rowlink:hover td{background:rgba(90,98,214,.055)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}
+.sgrid > div{padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-s);min-width:0}
+.sgrid span{display:block;font-size:11.5px;color:var(--ink-3);margin-bottom:3px}
+.sgrid b{font-size:14px;word-break:break-word}
+.shead{margin:18px 0 8px;font-size:13px;color:var(--ink-3);font-weight:700}
+table.mini{width:100%;border-collapse:collapse;font-size:13px}
+table.mini td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.mini tr:last-child td{border-bottom:0}
+table.mini .dim{color:var(--ink-3);white-space:nowrap;font-size:12px}
+table.mini .num{text-align:right;font-weight:700;white-space:nowrap}
+
+.sphoto{width:76px;height:76px;margin:0 auto 14px;border-radius:50%;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#8b7ff0,#5a62d6);display:grid;place-items:center}
+.sphoto span{font-size:28px;font-weight:800;color:#fff}
+.sphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 </style>
 <a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
 
@@ -215,7 +233,6 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
     <div class="helpbox">
       <b data-i18n="needHelp">เข้าสู่ระบบไม่ได้?</b>
       <p data-i18n="helpBody">บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต</p>
-      <p style="margin-top:6px"><a href="mailto:student.affairs@msu.ac.th">student.affairs@msu.ac.th</a></p>
     </div>
   </form>
 </div>
@@ -264,6 +281,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
           <button class="btn sm" id="stuExport" data-i18n="exportCsv">ส่งออก CSV</button>
         </div>
       </div>
+      <p class="muted" style="margin:0 0 9px;font-size:12.5px" data-i18n="viewHint">กดที่แถวเพื่อดูข้อมูลรายคน</p>
       <div class="tbl-wrap"><table id="stuTable"><thead><tr>
         <th data-i18n="cId">รหัสนิสิต</th><th data-i18n="cName">ชื่อ-สกุล</th><th data-i18n="cDept">สาขา</th>
         <th data-i18n="cYear">ชั้นปี</th><th style="text-align:right" data-i18n="cScore">คะแนน</th>
@@ -290,7 +308,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
               <input id="actName" required data-ph="phActName" placeholder="ปฐมนิเทศนิสิตใหม่"></div>
             <div class="row2">
               <div class="field"><label for="actScore" data-i18n="actScore">คะแนน</label>
-                <input id="actScore" type="number" min="1" value="5" required></div>
+                <input id="actScore" type="number" min="0" value="5"></div>
               <div class="field"><label for="actDate" data-i18n="actDate">วันจัด</label>
                 <input id="actDate" type="date"></div>
             </div>
@@ -304,10 +322,13 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
                 <input id="actClose" type="date"></div>
               <div class="field"><label for="actCap" data-i18n="actCap">จำนวนที่รับ</label>
                 <input id="actCap" type="number" min="0" data-ph="phActCap" placeholder="0 = ไม่จำกัด"></div>
-              <div class="field"><label for="actOpen" data-i18n="actOpen">เปิดรับลงชื่อ</label>
+              <div class="field"><label for="actOpen" data-i18n="actOpen">เปิดให้ลงชื่อ</label>
                 <select id="actOpen"><option value="true" data-i18n="yesOpen">เปิด</option><option value="false" data-i18n="noOpen">ไม่เปิด</option></select></div>
             </div>
-            <div class="field"><label for="actBanner" data-i18n="actBanner">รูปแบนเนอร์</label>
+            <div class="field"><label for="actLink" data-i18n="actLink">ลิงก์แนบ</label>
+              <input id="actLink" type="url" data-ph="phActLink" placeholder="https://...">
+              <p style="margin:6px 0 0;font-size:12px;color:var(--ink-3)" data-i18n="linkHint">ไม่มีก็เว้นว่างไว้</p></div>
+            <div class="field"><label for="actBanner" data-i18n="actBanner">รูปภาพ</label>
               <input id="actBanner" type="file" accept="image/*" style="padding:8px 10px;font-size:13px">
               <p style="margin:6px 0 0;font-size:12px;color:var(--ink-3)" data-i18n="bannerHint">แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB</p></div>
             <button class="btn wide" type="submit" data-i18n="createQr">สร้าง + ออก QR</button>
@@ -390,7 +411,7 @@ var DEMO = false;
 
 /* ============================ ภาษา ============================= */
 var I18N = {
-  th:{ phStuQ:'ค้นหารหัส / ชื่อ', phActName:'ปฐมนิเทศนิสิตใหม่', phActPlace:'หอประชุม มมส', phActDesc:'อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป', phActCap:'0 = ไม่จำกัด',appName:'ระบบกิจการนิสิต',forStaff:'เข้าสู่ระบบสำหรับเจ้าหน้าที่',email:'อีเมล',password:'รหัสผ่าน',
+  th:{ portTitle:'ผลงาน', histTitle:'ประวัติกิจกรรม', viewHint:'กดที่แถวเพื่อดูข้อมูลรายคน', actLink:'ลิงก์แนบ', phActLink:'https://...', linkHint:'ไม่มีก็เว้นว่างไว้', bannerFail:'อัปโหลดรูปไม่สำเร็จ โพสต์ถูกบันทึกแล้วแต่ไม่มีรูป', phStuQ:'ค้นหารหัส / ชื่อ', phActName:'ปฐมนิเทศนิสิตใหม่', phActPlace:'หอประชุม มมส', phActDesc:'อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป', phActCap:'0 = ไม่จำกัด',appName:'ระบบกิจการนิสิต',forStaff:'เข้าสู่ระบบสำหรับเจ้าหน้าที่',email:'อีเมล',password:'รหัสผ่าน',
     signIn:'เข้าสู่ระบบ', needHelp:'เข้าสู่ระบบไม่ได้?', helpBody:'บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
     goScan:'สแกน QR',tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
     kickScans:'บันทึกการเข้าร่วม',kickRank:'คะแนนสะสม',refresh:'รีเฟรช',byDept:'นิสิตแยกตามสาขา',
@@ -400,8 +421,8 @@ var I18N = {
     actName:'ชื่อกิจกรรม',actScore:'คะแนน',actDate:'วันจัด',actDesc:'รายละเอียด',createQr:'สร้าง + ออก QR',
     tStudents:'นิสิตทั้งหมด',tActs:'กิจกรรมที่เปิด',tScans:'สแกนสะสม',tToday:'สแกนวันนี้',tScore:'คะแนนที่แจก',
     actKind:'ประเภทโพสต์',kActivity:'กิจกรรม (เปิดให้ลงทะเบียน)',kNews:'ประกาศ / แจ้งข่าว (ไม่มีลงทะเบียน)',createNews:'โพสต์ประกาศ',actClose:'ปิดรับลงทะเบียนวันที่',showPost:'แสดง',hidePost:'ซ่อน',okShow:'แสดงบนหน้ากิจกรรมแล้ว',okHide:'ซ่อนแล้ว เก็บไว้ในคลัง',archived:'คลังกิจกรรม',rFull:'คนเต็ม',rExpired:'หมดเขต',rManual:'ซ่อนเอง',qrOpen:'เปิดรูป QR',qrPrint:'พิมพ์',pageTag:'หน้าเจ้าหน้าที่',roleWord:'สิทธิ์',roleAdmin2:'ผู้ดูแลระบบ',roleStaff2:'เจ้าหน้าที่',
-    actPlace:'สถานที่จัด',actCap:'จำนวนที่รับ',actOpen:'เปิดรับลงชื่อ',yesOpen:'เปิด',noOpen:'ไม่เปิด',
-    actBanner:'รูปแบนเนอร์',bannerHint:'แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB',imgBig:'รูปใหญ่เกิน 5 MB',saving:'กำลังบันทึก…',
+    actPlace:'สถานที่จัด',actCap:'จำนวนที่รับ',actOpen:'เปิดให้ลงชื่อ',yesOpen:'เปิด',noOpen:'ไม่เปิด',
+    actBanner:'รูปภาพ',bannerHint:'แนะนำแนวนอน 16:7 · ไม่เกิน 5 MB',imgBig:'รูปใหญ่เกิน 5 MB',saving:'กำลังบันทึก…',
     regList:'ผู้ลงชื่อ',noReg:'ยังไม่มีผู้ลงชื่อ',
     cPass:'รหัสผ่าน',setPw:'เปลี่ยนรหัส',pwPh:'เว้นว่าง = รหัสนิสิต',pwOk:'เปลี่ยนรหัสแล้ว · ',
     active:'ใช้งาน',inactive:'ระงับ',reset:'รีเซ็ตรหัส',close:'ปิด',open:'เปิด',del:'ลบ',
@@ -409,7 +430,7 @@ var I18N = {
     demoMsg:'โหมดตัวอย่าง — ยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อหลังบ้านไม่ได้ ตัวเลขที่เห็นเป็นข้อมูลสมมติ',
     hint:'ยังไม่ได้ตั้งค่า API_URL — กดเข้าสู่ระบบเพื่อดูโหมดตัวอย่าง',
     saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน',edit:'แก้ไข',del:'ลบ',deleted:'ลบแล้ว',cancelEdit:'ยกเลิกการแก้ไข',editingAct:'แก้ไขกิจกรรม',saveEdit:'บันทึกการแก้ไข',delUsed:'กิจกรรมนี้มีนิสิตสแกนเข้าร่วมแล้ว {n} คน ถ้าลบ ประวัติคะแนนที่ให้ไปจะยังอยู่ แต่กิจกรรมจะหายจากระบบ ยืนยันลบหรือไม่?'},
-  en:{ phStuQ:'Search ID or name', phActName:'New student orientation', phActPlace:'MSU Auditorium', phActDesc:'Topic, who should attend, what they gain', phActCap:'0 = unlimited',appName:'Student Affairs',forStaff:'Staff sign-in',email:'Email',password:'Password',
+  en:{ portTitle:'Portfolio', histTitle:'Activity history', viewHint:'Click a row to view details', actLink:'Attach link', phActLink:'https://...', linkHint:'Leave blank if none', bannerFail:'Image upload failed. The post was saved without it.', phStuQ:'Search ID or name', phActName:'New student orientation', phActPlace:'MSU Auditorium', phActDesc:'Topic, who should attend, what they gain', phActCap:'0 = unlimited',appName:'Student Affairs',forStaff:'Staff sign-in',email:'Email',password:'Password',
     signIn:'Sign in', needHelp:'Cannot sign in?', helpBody:'Staff accounts must be created by an administrator. If you forgot your password, contact the administrator to reset it.',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
     goScan:'Scan QR',tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
     kickScans:'Attendance log',kickRank:'Accumulated points',refresh:'Refresh',byDept:'Students by department',
@@ -419,8 +440,8 @@ var I18N = {
     actName:'Activity name',actScore:'Points',actDate:'Date held',actDesc:'Details',createQr:'Create + QR',
     tStudents:'Students',tActs:'Open activities',tScans:'Total scans',tToday:'Scans today',tScore:'Points awarded',
     actKind:'Post type',kActivity:'Activity (open for sign-up)',kNews:'News / announcement (no sign-up)',createNews:'Post announcement',actClose:'Registration closes on',showPost:'Show',hidePost:'Hide',okShow:'Now visible on the activities page',okHide:'Hidden — kept in the archive',archived:'Archive',rFull:'Full',rExpired:'Closed',rManual:'Hidden manually',qrOpen:'Open QR image',qrPrint:'Print',pageTag:'Staff console',roleWord:'Role:',roleAdmin2:'Administrator',roleStaff2:'Staff',
-    actPlace:'Venue',actCap:'Seats',actOpen:'Open for sign-up',yesOpen:'Open',noOpen:'Closed',
-    actBanner:'Banner image',bannerHint:'Landscape 16:7 · max 5 MB',imgBig:'Image is larger than 5 MB',saving:'Saving…',
+    actPlace:'Venue',actCap:'Seats',actOpen:'Allow sign-up',yesOpen:'Open',noOpen:'Closed',
+    actBanner:'Image',bannerHint:'Landscape 16:7 · max 5 MB',imgBig:'Image is larger than 5 MB',saving:'Saving…',
     regList:'Sign-ups',noReg:'No sign-ups yet',
     cPass:'Password',setPw:'Change',pwPh:'blank = student ID',pwOk:'Password changed · ',
     active:'Active',inactive:'Disabled',reset:'Reset password',close:'Close',open:'Open',del:'Delete',
@@ -428,7 +449,7 @@ var I18N = {
     demoMsg:'Demo mode — API_URL is not set or the backend is unreachable. These figures are sample data.',
     hint:'API_URL is not set — sign in to view the demo.',
     saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm',edit:'Edit',del:'Delete',deleted:'Deleted',cancelEdit:'Cancel editing',editingAct:'Edit activity',saveEdit:'Save changes',delUsed:'{n} student(s) already scanned this activity. Deleting removes the activity but keeps their points. Delete anyway?'},
-  zh:{ phStuQ:'搜索学号或姓名', phActName:'新生入学教育', phActPlace:'马哈沙拉堪大学礼堂', phActDesc:'主题、适合人群、收获', phActCap:'0 = 不限',appName:'学生事务系统',forStaff:'职员登录',email:'邮箱',password:'密码',
+  zh:{ portTitle:'作品集', histTitle:'活动记录', viewHint:'点击行查看详情', actLink:'附加链接', phActLink:'https://...', linkHint:'没有可留空', bannerFail:'图片上传失败,帖子已保存但没有图片。', phStuQ:'搜索学号或姓名', phActName:'新生入学教育', phActPlace:'马哈沙拉堪大学礼堂', phActDesc:'主题、适合人群、收获', phActCap:'0 = 不限',appName:'学生事务系统',forStaff:'职员登录',email:'邮箱',password:'密码',
     signIn:'登录', needHelp:'无法登录?', helpBody:'工作人员账号需由管理员创建并设置密码。如忘记密码,请联系管理员重置。',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
     goScan:'扫码',tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
     kickScans:'参与记录',kickRank:'累计积分',refresh:'刷新',byDept:'各专业学生数',
@@ -439,7 +460,7 @@ var I18N = {
     tStudents:'学生总数',tActs:'开放活动',tScans:'累计扫码',tToday:'今日扫码',tScore:'已发积分',
     actKind:'帖子类型',kActivity:'活动（开放报名）',kNews:'公告 / 通知（不开放报名）',createNews:'发布公告',actClose:'报名截止日期',showPost:'显示',hidePost:'隐藏',okShow:'已显示在活动页',okHide:'已隐藏，收入归档',archived:'活动归档',rFull:'已满',rExpired:'已截止',rManual:'手动隐藏',qrOpen:'打开二维码',qrPrint:'打印',pageTag:'职员页面',roleWord:'权限',roleAdmin2:'管理员',roleStaff2:'职员',
     actPlace:'举办地点',actCap:'名额',actOpen:'开放报名',yesOpen:'开放',noOpen:'关闭',
-    actBanner:'横幅图片',bannerHint:'建议横向 16:7 · 不超过 5 MB',imgBig:'图片超过 5 MB',saving:'保存中…',
+    actBanner:'图片',bannerHint:'建议横向 16:7 · 不超过 5 MB',imgBig:'图片超过 5 MB',saving:'保存中…',
     regList:'报名名单',noReg:'暂无报名',
     cPass:'密码',setPw:'修改',pwPh:'留空 = 学号',pwOk:'密码已修改 · ',
     active:'正常',inactive:'停用',reset:'重置密码',close:'关闭',open:'开放',del:'删除',
@@ -758,7 +779,7 @@ function renderStudents(){
   var tb = document.querySelector('#stuTable tbody');
 
   tb.innerHTML = page.length ? page.map(function(r){
-    return '<tr><td>'+esc(r.id)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.dept)+'</td><td>'+r.year+'</td>'+
+    return '<tr class="rowlink" data-stu="'+esc(r.id)+'"><td>'+esc(r.id)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.dept)+'</td><td>'+r.year+'</td>'+
       '<td class="num">'+fmt(r.totalScore)+'</td><td class="num">'+r.scanCount+'</td>'+
       '<td class="pwcell" data-row="'+esc(r.id)+'">'+
         '<button class="btn ghost sm" data-setpw="'+esc(r.id)+'">'+t('setPw')+'</button></td></tr>';
@@ -768,6 +789,53 @@ function renderStudents(){
     '<button class="btn ghost sm" data-pg="-1"'+(state.stuPage<=1?' disabled':'')+'>'+t('prev')+'</button>'+
     '<span>'+state.stuPage+' '+t('of')+' '+pages+' · '+fmt(state.stuTotal)+'</span>'+
     '<button class="btn ghost sm" data-pg="1"'+(state.stuPage>=pages?' disabled':'')+'>'+t('next')+'</button>';
+}
+
+/* ---------- ข้อมูลนิสิตรายคน ---------- */
+async function openStudent(sid){
+  var r = (D.students||[]).filter(function(x){ return String(x.id)===String(sid); })[0] || {id:sid};
+  var ini = String(r.name || r.id || '?').trim().charAt(0).toUpperCase();
+  var head =
+    '<div class="sphoto">'+
+      (r.photo ? '<img src="'+esc(r.photo)+'" alt="">' : '<span>'+esc(ini)+'</span>')+
+    '</div>'+
+    '<div class="sgrid">'+
+      '<div><span>'+t('cId')+'</span><b>'+esc(r.id)+'</b></div>'+
+      '<div><span>'+t('cName')+'</span><b>'+esc(r.name||'-')+'</b></div>'+
+      '<div><span>'+t('cDept')+'</span><b>'+esc(r.dept||'-')+'</b></div>'+
+      '<div><span>'+t('cYear')+'</span><b>'+esc(String(r.year||'-'))+'</b></div>'+
+      '<div><span>'+t('cScore')+'</span><b>'+fmt(r.totalScore||0)+'</b></div>'+
+      '<div><span>'+t('cJoin')+'</span><b>'+(r.scanCount||0)+'</b></div>'+
+    '</div>'+
+    '<div id="sdBody"><div class="empty" style="padding:22px">'+t('loading')+'</div></div>';
+  showSheet(r.name || sid, head);
+
+  var res = await Promise.all([
+    api({action:'getHistory',   studentId:sid}).catch(function(){ return null; }),
+    api({action:'getPortfolio', studentId:sid}).catch(function(){ return null; })
+  ]);
+  var hist = (res[0] && res[0].history)   || [];
+  var port = (res[1] && res[1].portfolio) || [];
+  var body = document.getElementById('sdBody');
+  if(!body) return;
+
+  var hh = hist.length ? '<table class="mini"><tbody>'+hist.map(function(x){
+      var nm = (x.activity && x.activity.name) || x.activityId || '-';
+      return '<tr><td>'+esc(String(nm))+'</td>'+
+             '<td class="dim">'+esc(String(x.date||''))+' '+esc(String(x.time||''))+'</td>'+
+             '<td class="num">+'+(x.score||0)+'</td></tr>';
+    }).join('')+'</tbody></table>'
+    : '<div class="empty" style="padding:18px">'+t('noData')+'</div>';
+
+  var pp = port.length ? '<table class="mini"><tbody>'+port.map(function(p){
+      return '<tr><td>'+esc(String(p.name||'-'))+'</td>'+
+             '<td class="dim">'+esc(String(p.date||''))+'</td></tr>';
+    }).join('')+'</tbody></table>'
+    : '<div class="empty" style="padding:18px">'+t('noData')+'</div>';
+
+  body.innerHTML =
+    '<h4 class="shead">'+t('histTitle')+' ('+hist.length+')</h4>'+hh+
+    '<h4 class="shead">'+t('portTitle')+' ('+port.length+')</h4>'+pp;
 }
 
 function showSheet(title, html){
@@ -843,6 +911,10 @@ document.getElementById('stuPager').addEventListener('click', function(e){
 });
 
 document.querySelector('#stuTable tbody').addEventListener('click', async function(e){
+  /* กดที่แถว -> ดูข้อมูลรายคน (ยกเว้นคอลัมน์ปุ่มเปลี่ยนรหัส) */
+  var row = e.target.closest('[data-stu]');
+  if(row && !e.target.closest('.pwcell')){ openStudent(row.dataset.stu); return; }
+
   var open = e.target.closest('[data-setpw]');
   if(open){
     var id = open.dataset.setpw;
@@ -1009,14 +1081,14 @@ function readB64(f){
 
 function syncKindFields(){
   var news = document.getElementById('actKind').value === 'news';
-  [['actScore',1],['actCap',1],['actOpen',1],['actClose',1]].forEach(function(p){
-    var el=document.getElementById(p[0]);
+  /* ประกาศ: ไม่มีคะแนน ไม่มีลงทะเบียน  ·  กิจกรรม: มีให้เลือก แต่ไม่บังคับ */
+  ['actScore','actCap','actOpen','actClose'].forEach(function(id){
+    var el=document.getElementById(id);
     if(el && el.closest('.field')) el.closest('.field').hidden = news;
   });
-  var sc=document.getElementById('actScore');
-  if(sc) sc.required = !news;
+  var sc=document.getElementById('actScore'); if(sc) sc.required = false;
   var btn=document.querySelector('#actForm button[type=submit]');
-  if(btn) btn.textContent = news ? t('createNews') : t('createQr');
+  if(btn) btn.textContent = editId ? t('saveEdit') : (news ? t('createNews') : t('createQr'));
 }
 document.getElementById('actKind').addEventListener('change', syncKindFields);
 
@@ -1032,7 +1104,8 @@ function startEdit(a){
   document.getElementById('actDesc').value  = a.detail || a.description || '';
   document.getElementById('actClose').value = a.closeDateISO || '';
   document.getElementById('actCap').value   = a.capacity || '';
-  document.getElementById('actOpen').value  = (a.openReg === false) ? 'false' : 'true';
+  document.getElementById('actOpen').value  = (a.allowReg === false) ? 'false' : 'true';
+  document.getElementById('actLink').value  = a.link || '';
   document.getElementById('actBanner').value = '';
   syncKindFields();
   document.getElementById('cancelEdit').hidden = false;
@@ -1061,9 +1134,9 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var name = document.getElementById('actName').value.trim();
   var isNews = document.getElementById('actKind').value === 'news';
-  var score = isNews ? 0 : Number(document.getElementById('actScore').value);
+  var score = isNews ? 0 : (Number(document.getElementById('actScore').value) || 0);
   var desc = document.getElementById('actDesc').value.trim();
-  if(!name || (!isNews && !score)) return;
+  if(!name) return;
 
   var sb = e.target.querySelector('button[type=submit]');
   var sbLabel = sb.textContent; sb.disabled = true;
@@ -1082,7 +1155,9 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
     location: document.getElementById('actPlace').value.trim(),
     capacity: Number(document.getElementById('actCap').value) || 0,
     closeDate: document.getElementById('actClose').value,
-    openReg: document.getElementById('actOpen').value,
+    visible: 'true',
+    allowReg: isNews ? 'false' : document.getElementById('actOpen').value,
+    link: document.getElementById('actLink').value.trim(),
     kind: document.getElementById('actKind').value,
     bannerData: bannerData, bannerName: bannerName, bannerType: bannerType
   };
@@ -1095,6 +1170,7 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
     var ru = await tryApi(payload);
     sb.textContent = sbLabel; sb.disabled = false;
     if(ru && ru.success === false){ toast(ru.error || t('netErr')); return; }
+    if(ru && ru.bannerFailed) toast(t('bannerFail'));
     D.acts = D.acts.map(function(x){
       if(x.id !== editId) return x;
       return Object.assign({}, x, {
@@ -1117,7 +1193,9 @@ document.getElementById('actForm').addEventListener('submit', async function(e){
                          location: document.getElementById('actPlace').value.trim(),
                          capacity: Number(document.getElementById('actCap').value) || 0,
                          closeDate: document.getElementById('actClose').value,
-                         openReg: document.getElementById('actOpen').value,
+                         visible: 'true',
+                         allowReg: isNews ? 'false' : document.getElementById('actOpen').value,
+                         link: document.getElementById('actLink').value.trim(),
                          kind: document.getElementById('actKind').value,
                          bannerData: bannerData, bannerName: bannerName, bannerType: bannerType,
                          createdBy: auth && auth.staff_id });

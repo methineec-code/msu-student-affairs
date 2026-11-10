@@ -18,7 +18,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="กิจการนิสิต มมส">
-<title>กิจกรรมที่เปิดรับ — กิจการนิสิต มมส</title>
+<title>ประกาศข่าวสารและกิจกรรม — กิจการนิสิต มมส</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap">
 <style>
 :root{
@@ -149,6 +149,20 @@ input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:va
 .bar{padding-left:4px}
 @media(min-width:561px){.brand{padding-left:0}}
 @media(max-width:480px){.wrap{padding-top:56px!important}}
+
+.txt.clip{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.more{background:none;border:0;padding:4px 0 0;font:inherit;font-size:13px;font-weight:600;
+  color:var(--brand);cursor:pointer}
+.lnk{display:flex;align-items:center;gap:9px;margin:10px 0 0;padding:11px 13px;
+  border:1px solid var(--line);border-radius:var(--r-s);background:rgba(0,0,0,.02);
+  text-decoration:none;color:inherit;font-size:13px}
+.lnk:hover{background:rgba(0,0,0,.045)}
+.lnk .ic{font-size:14px;opacity:.6;flex:none}
+.lnk .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--brand);font-weight:600}
+.tag.news{background:rgba(124,92,255,.14);color:#6b4ddb}
+.shut{margin-top:12px;padding:12px;border-radius:var(--r-s);background:rgba(0,0,0,.04);
+  text-align:center;font-size:13px;font-weight:600;color:var(--muted)}
+.ev .bd > .btn, .ev .bd > .shut{margin-top:12px}
 </style>
 </head>
 <body>
@@ -159,7 +173,7 @@ input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:va
     <div class="brand">
       <div class="crest">MSU</div>
       <div class="bt">
-        <h1 data-i18n="title">กิจกรรมที่เปิดรับ</h1>
+        <h1 data-i18n="title">ประกาศข่าวสารและกิจกรรม</h1>
         <p data-i18n="sub">ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม</p>
       </div>
     </div>
@@ -225,8 +239,8 @@ function msuClear(){
 }
 
 var I18N = {
- th:{title:'กิจกรรมที่เปิดรับ', sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
-  loading:'กำลังโหลด…', none:'ตอนนี้ยังไม่มีกิจกรรมที่เปิดรับ',
+ th:{ more:'ดูเพิ่มเติม', less:'ย่อลง',title:'ประกาศข่าวสารและกิจกรรม', sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
+  loading:'กำลังโหลด…', none:'ยังไม่มีประกาศหรือกิจกรรม',
   join:'ลงชื่อเข้าร่วม', cancel:'ยกเลิกการลงชื่อ', joined:'ลงชื่อแล้ว', full:'เต็มแล้ว',
   pts:'คะแนน', seats:'รับ', taken:'ลงชื่อแล้ว', people:'คน',
   signInTitle:'เข้าสู่ระบบเพื่อลงชื่อ', signInSub:'ใช้อีเมลมหาวิทยาลัยหรือรหัสนิสิต',
@@ -239,8 +253,8 @@ var I18N = {
   signInCm:'เข้าสู่ระบบก่อนจึงจะไลก์หรือแสดงความเห็นได้',
   okJoin:'ลงชื่อเรียบร้อย', okCancel:'ยกเลิกแล้ว', dup:'คุณลงชื่อกิจกรรมนี้ไว้แล้ว',
   netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'},
- en:{title:'Open activities', sub:'Student Affairs · Mahasarakham University',
-  loading:'Loading…', none:'No activities are open right now',
+ en:{ more:'See more', less:'Show less',title:'News & Activities', sub:'Student Affairs · Mahasarakham University',
+  loading:'Loading…', none:'No posts yet',
   join:'Sign up', cancel:'Cancel sign-up', joined:'Signed up', full:'Full',
   pts:'pts', seats:'Seats', taken:'Signed up', people:'',
   signInTitle:'Sign in to register', signInSub:'Use your university email or student ID',
@@ -253,8 +267,8 @@ var I18N = {
   signInCm:'Sign in to like or comment',
   okJoin:'You are signed up', okCancel:'Sign-up cancelled', dup:'You already signed up for this',
   netErr:'Connection failed, please try again'},
- zh:{title:'开放报名的活动', sub:'玛哈沙拉堪大学 · 学生事务',
-  loading:'加载中…', none:'目前没有开放报名的活动',
+ zh:{ more:'展开', less:'收起',title:'公告与活动', sub:'玛哈沙拉堪大学 · 学生事务',
+  loading:'加载中…', none:'暂无公告或活动',
   join:'报名参加', cancel:'取消报名', joined:'已报名', full:'已满',
   pts:'分', seats:'名额', taken:'已报名', people:'人',
   signInTitle:'登录后报名', signInSub:'使用学校邮箱或学号',
@@ -383,27 +397,52 @@ function render(){
   var openCm={};
   document.querySelectorAll('.cwrap').forEach(function(w){ if(!w.hidden) openCm[w.id]=true; });
   if(!D.length){ box.innerHTML='<div class="empty">'+t('none')+'</div>'; return; }
-  box.innerHTML = D.map(function(a){
-    var tags=[];
-    tags.push('<span class="tag">'+a.score+' '+t('pts')+'</span>');
-    if(a.eventDate) tags.push('<span class="tag">'+esc(fmtDate(a.eventDate))+'</span>');
-    if(a.location)  tags.push('<span class="tag">'+esc(a.location)+'</span>');
-    if(a.capacity)  tags.push('<span class="tag'+(a.full?' full':'')+'">'+
-                      t('taken')+' '+a.taken+'/'+a.capacity+'</span>');
-    else            tags.push('<span class="tag">'+t('taken')+' '+a.taken+'</span>');
-    if(a.myRegId)   tags.push('<span class="tag got">'+t('joined')+'</span>');
 
-    var btn;
-    if(a.myRegId) btn='<button class="btn ghost" data-cancel="'+esc(a.myRegId)+'">'+t('cancel')+'</button>';
-    else if(a.full) btn='<button class="btn" disabled>'+t('full')+'</button>';
-    else btn='<button class="btn" data-join="'+esc(a.id)+'">'+t('join')+'</button>';
+  box.innerHTML = D.map(function(a){
+    var isNews = (a.kind === 'news');
+
+    /* ---- ป้ายกำกับ: ขึ้นเฉพาะอันที่มีข้อมูลจริง ---- */
+    var tags=[];
+    if(isNews)        tags.push('<span class="tag news">'+t('newsTag')+'</span>');
+    if(a.score > 0)   tags.push('<span class="tag">'+a.score+' '+t('pts')+'</span>');
+    if(a.eventDate)   tags.push('<span class="tag">'+esc(fmtDate(a.eventDate))+'</span>');
+    if(a.location)    tags.push('<span class="tag">'+esc(a.location)+'</span>');
+    if(a.allowReg){
+      if(a.capacity)  tags.push('<span class="tag'+(a.full?' full':'')+'">'+
+                        t('taken')+' '+a.taken+'/'+a.capacity+'</span>');
+      else if(a.taken) tags.push('<span class="tag">'+t('taken')+' '+a.taken+'</span>');
+      if(a.myRegId)   tags.push('<span class="tag got">'+t('joined')+'</span>');
+    }
+
+    /* ---- ข้อความ: ยาวเกินก็พับไว้ ---- */
+    var body = a.detail || a.description || '';
+    var txt = '';
+    if(body){
+      var long = body.length > 220 || (body.match(/\n/g)||[]).length > 3;
+      txt = '<div class="txt'+(long?' clip':'')+'" id="tx_'+esc(a.id)+'">'+esc(body)+'</div>'+
+            (long ? '<button class="more" data-more="'+esc(a.id)+'">'+t('more')+'</button>' : '');
+    }
+
+    /* ---- ลิงก์แนบ ---- */
+    var link = a.link
+      ? '<a class="lnk" href="'+esc(a.link)+'" target="_blank" rel="noopener noreferrer">'+
+        '<span class="ic">\u2197</span><span class="u">'+esc(shortUrl(a.link))+'</span></a>'
+      : '';
+
+    /* ---- ปุ่มลงทะเบียน: มีเฉพาะโพสต์ที่เปิดรับ ---- */
+    var btn='';
+    if(a.allowReg){
+      if(a.myRegId)      btn='<button class="btn ghost" data-cancel="'+esc(a.myRegId)+'">'+t('cancel')+'</button>';
+      else if(a.expired) btn='<div class="shut">'+t('closedReg')+'</div>';
+      else if(a.full)    btn='<div class="shut">'+t('fullReg')+'</div>';
+      else               btn='<button class="btn" data-join="'+esc(a.id)+'">'+t('join')+'</button>';
+    }
 
     return '<article class="ev">'+
       (a.banner ? '<img class="ban" src="'+esc(a.banner)+'" alt="" loading="lazy">' : '')+
       '<div class="bd"><h3>'+esc(a.name)+'</h3>'+
-      '<div class="meta">'+tags.join('')+'</div>'+
-      (a.detail||a.description ? '<div class="txt">'+esc(a.detail||a.description)+'</div>' : '')+
-      btn+
+      (tags.length ? '<div class="meta">'+tags.join('')+'</div>' : '')+
+      txt + link + btn +
       '<div class="acts">'+
         '<button class="act'+(a.liked?' on':'')+'" data-like="'+esc(a.id)+'">'+
           '<span class="ic">'+(a.liked?'\u2665':'\u2661')+'</span>'+t('like')+
@@ -414,6 +453,7 @@ function render(){
       '<div class="cwrap" id="cw_'+esc(a.id)+'" hidden></div>'+
       '</div></article>';
   }).join('');
+
   Object.keys(openCm).forEach(function(id){
     var w=document.getElementById(id);
     if(w){ w.hidden=false; renderComments(id.replace('cw_','')); }
@@ -519,6 +559,27 @@ async function loadComments(actId, force){
     }catch(e){ CM[actId]=[]; }
   }
   renderComments(actId);
+}
+
+
+/* ปุ่มดูเพิ่มเติม สำหรับข้อความยาว */
+document.getElementById('list').addEventListener('click', function(e){
+  var m=e.target.closest('[data-more]');
+  if(!m) return;
+  var tx=document.getElementById('tx_'+m.dataset.more);
+  if(!tx) return;
+  var open=tx.classList.toggle('clip');
+  m.textContent = open ? t('more') : t('less');
+});
+
+/* ย่อ URL ให้อ่านง่าย */
+function shortUrl(u){
+  try{
+    var x=new URL(u);
+    var p=(x.pathname||'').replace(/\/$/,'');
+    var out=x.hostname.replace(/^www\./,'')+p;
+    return out.length>52 ? out.slice(0,52)+'\u2026' : out;
+  }catch(e){ return u.length>52 ? u.slice(0,52)+'\u2026' : u; }
 }
 
 function renderComments(actId){

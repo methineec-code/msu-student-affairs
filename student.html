@@ -152,8 +152,17 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
 .helpbox{margin:14px 0 0;padding:12px 14px;border:1px dashed var(--line);
   border-radius:var(--r);background:rgba(0,0,0,.02);text-align:left}
 .helpbox b{display:block;font-size:13px;margin-bottom:4px}
-.helpbox p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.helpbox p{margin:0;font-size:12.5px;line-height:1.65;color:var(--muted)}
 .helpbox a{color:inherit}
+
+.pfwrap{display:flex;gap:16px;align-items:center;margin:0 0 18px;
+  padding-bottom:18px;border-bottom:1px solid var(--line)}
+.pf{width:86px;height:86px;flex:none;border-radius:50%;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#8b7ff0,#5a62d6);display:grid;place-items:center}
+.pf span{font-size:32px;font-weight:800;color:#fff}
+.pf img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pfbtns{min-width:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pfbtns p{flex-basis:100%}
 </style>
 <a class="backfab" href="index.html" aria-label="กลับหน้าแรก" title="กลับหน้าแรก">&#8592;</a>
 
@@ -175,7 +184,6 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
     <div class="helpbox">
       <b data-i18n="needHelp">เข้าสู่ระบบไม่ได้ / ยังไม่มีชื่อในระบบ?</b>
       <p data-i18n="helpBody">ลืมรหัสผ่าน หรือค้นหารหัสนิสิตไม่พบ ติดต่อสำนักกิจการนิสิตเพื่อขอรีเซ็ตรหัสผ่านหรือเพิ่มชื่อเข้าระบบ</p>
-      <p style="margin-top:6px"><a href="mailto:student.affairs@msu.ac.th">student.affairs@msu.ac.th</a></p>
     </div>
   </form>
 </div>
@@ -257,6 +265,15 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
     <!-- บัญชี -->
     <section data-pane="me" hidden>
       <div class="card">
+        <div class="pfwrap">
+          <div class="pf" id="pfBox"><span id="pfInit">—</span><img id="pfImg" alt="" hidden></div>
+          <div class="pfbtns">
+            <button type="button" class="btn ghost sm" id="pfPick" data-i18n="changePhoto">เปลี่ยนรูป</button>
+            <button type="button" class="btn ghost sm" id="pfDel" hidden data-i18n="removePhoto">ลบรูป</button>
+            <input type="file" id="pfFile" accept="image/*" hidden>
+            <p class="muted" style="margin:7px 0 0;font-size:11.5px" data-i18n="photoHint">ไฟล์ภาพ ไม่เกิน 5 MB</p>
+          </div>
+        </div>
         <h3 style="font-size:15px;margin-bottom:12px" data-i18n="myInfo">ข้อมูลของฉัน</h3>
         <div id="infoList"></div>
       </div>
@@ -308,7 +325,7 @@ function msuClear(){
 }
 
 var I18N = {
- th:{ phName:'อบรมเชิงปฏิบัติการระบบอัตโนมัติ', phOrg:'บริษัท เอบีซี จำกัด', phPlace:'อาคารวิศวกรรมศาสตร์ มมส', phDesc:'อบรมเรื่องอะไร ได้ความรู้อะไรมา',title:'หน้านิสิต', sub:'ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ',
+ th:{ changePhoto:'เปลี่ยนรูป', removePhoto:'ลบรูป', photoHint:'ไฟล์ภาพ ไม่เกิน 5 MB', saving:'กำลังบันทึก…', phName:'อบรมเชิงปฏิบัติการระบบอัตโนมัติ', phOrg:'บริษัท เอบีซี จำกัด', phPlace:'อาคารวิศวกรรมศาสตร์ มมส', phDesc:'อบรมเรื่องอะไร ได้ความรู้อะไรมา',title:'หน้านิสิต', sub:'ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ',
    lblUser:'อีเมลมหาวิทยาลัย', lblPass:'รหัสผ่าน', signIn:'เข้าสู่ระบบ', signOut:'ออก',
    hint:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ', needHelp:'เข้าสู่ระบบไม่ได้ / ยังไม่มีชื่อในระบบ?', helpBody:'ลืมรหัสผ่าน หรือค้นหารหัสนิสิตไม่พบ ติดต่อสำนักกิจการนิสิตเพื่อขอรีเซ็ตรหัสผ่านหรือเพิ่มชื่อเข้าระบบ', totalLab:'คะแนนกิจกรรมสะสม', timesWord:'กิจกรรม',
    tabHistory:'ประวัติ', tabPort:'ผลงาน', tabMe:'บัญชี', histTitle:'กิจกรรมที่เข้าร่วม',
@@ -322,7 +339,7 @@ var I18N = {
    netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง', pwOk:'เปลี่ยนรหัสผ่านแล้ว',
    goal:'จากเกณฑ์ขั้นต่ำ', passed:'ผ่านเกณฑ์แล้ว',
    fId:'รหัสนิสิต', fDept:'สาขา', fYear:'ชั้นปี', fEmail:'อีเมล', fGpa:'เกรดเฉลี่ย'},
- en:{ phName:'Automation systems workshop', phOrg:'ABC Company Ltd.', phPlace:'MSU Faculty of Engineering', phDesc:'What was it about and what did you learn?',title:'Student Portal', sub:'Your activity points, history and portfolio',
+ en:{ changePhoto:'Change photo', removePhoto:'Remove', photoHint:'Image file, max 5 MB', saving:'Saving…', phName:'Automation systems workshop', phOrg:'ABC Company Ltd.', phPlace:'MSU Faculty of Engineering', phDesc:'What was it about and what did you learn?',title:'Student Portal', sub:'Your activity points, history and portfolio',
    lblUser:'University email', lblPass:'Password', signIn:'Sign in', signOut:'Out',
    hint:'Your default password is your student ID.', needHelp:'Cannot sign in / not registered yet?', helpBody:'If you forgot your password or your student ID is not found, contact the Student Affairs Office to reset it or be added to the system.', totalLab:'Total activity points', timesWord:'activities',
    tabHistory:'History', tabPort:'Portfolio', tabMe:'Account', histTitle:'Activities attended',
@@ -336,7 +353,7 @@ var I18N = {
    netErr:'Connection failed, please try again', pwOk:'Password changed',
    goal:'of the minimum requirement', passed:'Requirement met',
    fId:'Student ID', fDept:'Department', fYear:'Year', fEmail:'Email', fGpa:'GPA'},
- zh:{ phName:'自动化系统工作坊', phOrg:'ABC 有限公司', phPlace:'马哈沙拉堪大学工学院', phDesc:'培训内容与收获',title:'学生页面', sub:'查看积分、活动记录与作品集',
+ zh:{ changePhoto:'更换照片', removePhoto:'删除', photoHint:'图片文件,最大 5 MB', saving:'保存中…', phName:'自动化系统工作坊', phOrg:'ABC 有限公司', phPlace:'马哈沙拉堪大学工学院', phDesc:'培训内容与收获',title:'学生页面', sub:'查看积分、活动记录与作品集',
    lblUser:'校园邮箱', lblPass:'密码', signIn:'登录', signOut:'退出',
    hint:'初始密码为您的学号。', needHelp:'无法登录 / 系统中没有您的学号?', helpBody:'忘记密码或查无学号,请联系学生事务处重置密码或将您加入系统。', totalLab:'累计活动积分', timesWord:'项活动',
    tabHistory:'记录', tabPort:'作品集', tabMe:'账号', histTitle:'已参加的活动',
@@ -446,6 +463,7 @@ async function loadAll(){
 }
 
 function render(){
+  paintPhoto();
   document.getElementById('totalScore').textContent = fmt(D.total);
   document.getElementById('scanCount').textContent = D.count;
   var pct = Math.min(100, Math.round(D.total/minScore*100));
@@ -518,6 +536,62 @@ function setPortMode(m){
 }
 document.getElementById('mOnsite').addEventListener('click', function(){ setPortMode('onsite'); });
 document.getElementById('mOnline').addEventListener('click', function(){ setPortMode('online'); });
+
+/* ---------- รูปโปรไฟล์ ---------- */
+function paintPhoto(){
+  var img=document.getElementById('pfImg'), ini=document.getElementById('pfInit'),
+      del=document.getElementById('pfDel');
+  if(!img || !me) return;
+  if(me.photo){
+    img.src = me.photo; img.hidden = false;
+    ini.hidden = true;  del.hidden = false;
+  } else {
+    img.hidden = true;  img.removeAttribute('src');
+    ini.hidden = false; del.hidden = true;
+    ini.textContent = String(me.name || me.id || '?').trim().charAt(0).toUpperCase();
+  }
+}
+
+document.getElementById('pfPick').addEventListener('click', function(){
+  document.getElementById('pfFile').click();
+});
+
+document.getElementById('pfFile').addEventListener('change', async function(e){
+  var f = e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  if(f.size > 5*1024*1024){ toast(t('fileBig')); return; }
+
+  var btn=document.getElementById('pfPick');
+  btn.disabled = true; btn.textContent = t('saving');
+  try{
+    var b64 = await readFileB64(f);
+    var r = await api({ action:'savePhoto', studentId:me.id,
+                        photoData:b64, photoName:f.name, photoType:f.type||'image/jpeg' });
+    if(r && r.success){
+      me.photo = r.photo;
+      msuSave('msu_stu', me);
+      paintPhoto();
+      toast(t('saved'));
+    } else toast((r && r.error) || t('netErr'));
+  }catch(err){ toast(t('netErr')); }
+  btn.disabled = false; btn.textContent = t('changePhoto');
+});
+
+document.getElementById('pfDel').addEventListener('click', async function(){
+  var b=this;
+  if(b.dataset.armed !== '1'){
+    b.dataset.armed='1'; b.textContent=t('confirmDel');
+    setTimeout(function(){ if(b.dataset.armed==='1'){ b.dataset.armed='0'; b.textContent=t('removePhoto'); } }, 5000);
+    return;
+  }
+  b.dataset.armed='0'; b.disabled=true;
+  try{
+    var r = await api({ action:'savePhoto', studentId:me.id, photoData:'' });
+    if(r && r.success){ me.photo=''; msuSave('msu_stu', me); paintPhoto(); toast(t('deleted')); }
+  }catch(err){ toast(t('netErr')); }
+  b.disabled=false; b.textContent=t('removePhoto');
+});
 
 function readFileB64(f){
   return new Promise(function(res,rej){

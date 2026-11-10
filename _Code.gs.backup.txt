@@ -34,13 +34,13 @@ const TZ = 'Asia/Bangkok';
 /* โครงสร้างแท็บ — คอลัมน์ตรงกับโค้ดเดิมทุกตัว (index เดิมไม่เปลี่ยน) */
 const SCHEMA = {
   // A..I  (เดิม)
-  Students:      ['student_id','name','dept','year','email','gpa','password','status','nationality'],
+  Students:      ['student_id','name','dept','year','email','gpa','password','status','nationality','photo_url'],
   // A..F  (เดิม)
   Staff:         ['staff_id','name','email','password','role','status'],
   // A..G  (เดิม)
   Activities:    ['activity_id','name','score','description','created_by','created_date','active',
                   'banner_url','detail','event_date','location','capacity','open_reg',
-                  'close_date','archived','kind'],
+                  'close_date','archived','kind','link','allow_reg'],
   Engage:        ['id','type','activity_id','student_id','student_name','dept','text','date','time','status'],
   // A..G  (เดิม)
   Scan_Log:      ['log_id','student_id','activity_id','score','date','time','scanned_by'],
@@ -72,8 +72,8 @@ const CACHE_ACTIONS = {
 const CACHE_BUST = ['scan','addActivity','updateActivity','delActivity','deleteScan',
   'registerActivity','cancelRegistration','toggleLike','addComment','delComment',
   'saveAnnouncement','delAnnouncement','saveSetting','saveStudent','syncFromForm',
-  'resetStudentPass','toggleStudent','staffChangePass',
-  'addPortfolio','delPortfolio','changePass','setActivityVisible','createBonus'];
+  'resetStudentPass','toggleStudent','staffChangePass','savePhoto',
+  'addPortfolio','delPortfolio','changePass','savePhoto','setActivityVisible','createBonus'];
 
 function cacheKeyFor(action, params) {
   const keep = ['activeOnly','audience','studentId','activityId','limit','lang'];
@@ -156,6 +156,7 @@ function handleRequest(e) {
       case 'getPortfolio':    result = getPortfolio(params); break;
       case 'delPortfolio':    result = deletePortfolio(params); break;
       case 'changePass':      result = changePassword(params); break;
+      case 'savePhoto':       result = savePhoto(params); break;
       case 'getActivities':   result = getActivities(params); break;
       case 'addActivity':     result = addActivity(params); break;
       case 'delActivity':     result = deleteActivity(params); break;
@@ -276,7 +277,8 @@ function login(params) {
         success: true,
         student: {
           id: row[0], name: row[1], dept: row[2], year: row[3],
-          email: row[4], gpa: row[5], status: row[7], nationality: row[8]
+          email: row[4], gpa: row[5], status: row[7], nationality: row[8],
+          photo: row[9] || ''
         },
         mustChangePass: String(row[6]).trim() === String(row[0]).trim() || !String(row[6]).trim()
       };
@@ -375,7 +377,8 @@ function getStudent(params) {
   const r = s.row;
   return {
     success: true,
-    student: { id: r[0], name: r[1], dept: r[2], year: r[3], email: r[4], gpa: r[5], status: r[7], nationality: r[8] }
+    student: { id: r[0], name: r[1], dept: r[2], year: r[3], email: r[4], gpa: r[5],
+               status: r[7], nationality: r[8], photo: r[9] || '' }
   };
 }
 
@@ -479,6 +482,31 @@ function deletePortfolio(params) {
   return { success: false, error: msg('NOT_FOUND', params.lang || 'th') };
 }
 
+/* ===================== รูปโปรไฟล์นิสิต ======================== */
+
+function savePhoto(params) {
+  const lang = params.lang || 'th';
+  const studentId = params.studentId;
+  if (!studentId) return { success: false, error: msg('MISSING', lang) };
+
+  const s = findStudent(studentId);
+  if (!s) return { success: false, error: msg('NOT_FOUND_STUDENT', lang) };
+
+  /* ส่ง photoData ว่าง = ลบรูป */
+  if (!params.photoData) {
+    SS.getSheetByName('Students').getRange(s.index, 10).setValue('');
+    writeLog(studentId, 'student', 'savePhoto', studentId, 'remove', 'success');
+    return { success: true, photo: '' };
+  }
+
+  const url = saveBanner(params.photoData, params.photoName || (studentId + '.jpg'), params.photoType);
+  if (!url) return { success: false, error: msg('UPLOAD_FAIL', lang) };
+
+  SS.getSheetByName('Students').getRange(s.index, 10).setValue(url);
+  writeLog(studentId, 'student', 'savePhoto', studentId, '', 'success');
+  return { success: true, photo: url };
+}
+
 /* ===================== เปลี่ยนรหัสผ่าน (เดิม+) ================== */
 
 function changePassword(params) {
@@ -538,6 +566,7 @@ function getActivities(params) {
       openReg: !(data[i][12] === false || data[i][12] === 'false'),
       closeDate: outDate(data[i][13]), archived: String(data[i][14] || ''),
       kind: String(data[i][15] || 'activity'),
+      link: data[i][16] || '', allowReg: allowRegOf(data[i]),
       eventDateISO: outISO(data[i][9]), closeDateISO: outISO(data[i][13])
     });
   }
@@ -554,6 +583,7 @@ function addActivity(params) {
   const actId = 'ACT' + new Date().getTime();
   const dateStr = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
   let bannerUrl = params.bannerUrl || '';
+  let bannerFailed = false;
   if (params.bannerData) {
     try {
       const bytes = Utilities.base64Decode(params.bannerData);
@@ -562,17 +592,20 @@ function addActivity(params) {
       const file  = portfolioFolder().createFile(blob);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       bannerUrl = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200';
-    } catch (err) { bannerUrl = ''; }
+    } catch (err) { bannerUrl = ''; bannerFailed = true; }
   }
+  if (params.bannerData && !bannerUrl) bannerFailed = true;
   sheet.appendRow([actId, name, Number(score), params.description || '', params.createdBy || '', dateStr, true,
                    bannerUrl, params.detail || '', params.eventDate || '', params.location || '',
-                   Number(params.capacity) || 0, String(params.openReg) !== 'false',
-                   params.closeDate || '', '', params.kind || 'activity']);
+                   Number(params.capacity) || 0, String(params.visible) !== 'false',
+                   params.closeDate || '', '', params.kind || 'activity',
+                   params.link || '', String(params.allowReg) === 'true']);
   writeLog(params.createdBy || '', 'staff', 'addActivity', actId, name, 'success');
 
   const qrData = JSON.stringify({ id: actId, name: name, score: Number(score) });
   return {
     success: true, activityId: actId, qrData: qrData, bannerUrl: bannerUrl,
+    bannerFailed: bannerFailed,
     qrUrl: qrImageUrl(qrData)
   };
 }
@@ -593,17 +626,21 @@ function updateActivity(params) {
     if (params.eventDate   !== undefined) set(10, params.eventDate);
     if (params.location    !== undefined) set(11, params.location);
     if (params.capacity    !== undefined) set(12, Number(params.capacity) || 0);
+    if (params.visible     !== undefined) set(13, params.visible === true || params.visible === 'true');
     if (params.openReg     !== undefined) set(13, params.openReg === true || params.openReg === 'true');
     if (params.closeDate   !== undefined) set(14, params.closeDate);
     if (params.kind        !== undefined) set(16, params.kind);
+    if (params.link        !== undefined) set(17, params.link);
+    if (params.allowReg    !== undefined) set(18, params.allowReg === true || params.allowReg === 'true');
 
+    let bannerFailed = false;
     if (params.bannerData) {
       const url = saveBanner(params.bannerData, params.bannerName, params.bannerType);
-      if (url) set(8, url);
+      if (url) set(8, url); else bannerFailed = true;
     }
 
     writeLog(params.staff_id || '', 'staff', 'updateActivity', params.activityId, '', 'success');
-    return { success: true };
+    return { success: true, bannerFailed: bannerFailed };
   }
   return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
 }
@@ -879,7 +916,8 @@ function getStudents(params) {
     rows.push({
       id: data[i][0], name: data[i][1], dept: data[i][2], year: data[i][3],
       email: data[i][4], gpa: data[i][5], status: data[i][7] || 'active',
-      nationality: data[i][8], totalScore: scores[sid] || 0, scanCount: counts[sid] || 0
+      nationality: data[i][8], photo: data[i][9] || '',
+      totalScore: scores[sid] || 0, scanCount: counts[sid] || 0
     });
   }
 
@@ -1292,6 +1330,7 @@ function getOpenActivities(params) {
       capacity: cap, taken: taken, full: isFull,
       expired: expired, closed: expired || isFull,
       kind: String(data[i][15] || 'activity'),
+      link: data[i][16] || '', allowReg: allowRegOf(data[i]),
       myRegId: myReg[id] || '',
       likes: likeBy[id] || 0, liked: !!myLike[id], comments: cmtBy[id] || 0,
       closeDate: outDate(data[i][13])
@@ -1503,6 +1542,15 @@ function setActivityVisible(params) {
 }
 
 /* ส่งออกเป็นข้อความเสมอ กันเบราว์เซอร์แปลงโซนเวลาแล้ววันเพี้ยน */
+/* โพสต์นี้เปิดให้ลงชื่อเข้าร่วมไหม
+   แถวเก่าที่ยังไม่มีคอลัมน์ allow_reg: กิจกรรม = เปิด, ประกาศ = ไม่เปิด */
+function allowRegOf(row) {
+  const v = row[17];
+  if (v === true  || v === 'true')  return true;
+  if (v === false || v === 'false') return false;
+  return String(row[15] || 'activity') !== 'news';
+}
+
 function saveBanner(b64, fname, ftype) {
   if (!b64) return '';
   try {
@@ -1631,6 +1679,7 @@ const MESSAGES = {
   NOT_FOUND:          { th:'ไม่พบข้อมูล',                    en:'Not found',                 zh:'未找到数据' },
   NOT_FOUND_STUDENT:  { th:'ไม่พบข้อมูลนิสิต',                en:'Student not found',         zh:'未找到学生' },
   NOT_FOUND_STAFF:    { th:'ไม่พบข้อมูลเจ้าหน้าที่',           en:'Staff not found',           zh:'未找到工作人员' },
+  UPLOAD_FAIL:        { th:'อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง',  en:'Upload failed, please try again', zh:'上传失败,请重试' },
   ACT_HAS_SCANS:      { th:'กิจกรรมนี้มีประวัติการสแกนแล้ว',  en:'This activity already has scan records', zh:'该活动已有扫码记录' },
   ACT_NOT_FOUND:      { th:'ไม่พบกิจกรรมนี้',                 en:'Activity not found',        zh:'未找到活动' },
   ACT_INACTIVE:       { th:'กิจกรรมนี้ปิดรับการสแกนแล้ว',      en:'Activity is inactive',      zh:'活动已关闭' },
@@ -1683,7 +1732,7 @@ function setupSheets() {
       ['academic_year', '2569', 'ปีการศึกษา', 'Academic year', '学年'],
       ['min_score', '30', 'คะแนนกิจกรรมขั้นต่ำ', 'Minimum score', '最低活动分'],
       ['allow_self_scan', 'true', 'ให้นิสิตสแกนเองได้', 'Allow self scan', '允许自助扫码'],
-      ['contact_email', 'student.affairs@msu.ac.th', 'อีเมลติดต่อ', 'Contact email', '联系邮箱']
+      ['contact_email', '', 'อีเมลติดต่อ', 'Contact email', '联系邮箱']
     ].forEach(function (r) { setting.appendRow(r); });
   }
 
