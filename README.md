@@ -68,4 +68,4 @@ Deploy → Manage deployments → ✏️ → Version: New version → Deploy
 
 ---
 
-สำนักกิจการนิสิต มหาวิทยาลัยมหาสารคาม · student.affairs@msu.ac.th
+สำนักกิจการนิสิต มหาวิทยาลัยมหาสารคาม
