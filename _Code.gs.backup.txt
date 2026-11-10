@@ -72,6 +72,7 @@ const CACHE_ACTIONS = {
 const CACHE_BUST = ['scan','addActivity','updateActivity','delActivity','deleteScan',
   'registerActivity','cancelRegistration','toggleLike','addComment','delComment',
   'saveAnnouncement','delAnnouncement','saveSetting','saveStudent','syncFromForm',
+  'resetStudentPass','toggleStudent','staffChangePass',
   'addPortfolio','delPortfolio','changePass','setActivityVisible','createBonus'];
 
 function cacheKeyFor(action, params) {
@@ -105,6 +106,7 @@ function handleRequest(e) {
 
   const action = params.action || '';
   const lang = params.lang || 'th';
+  REQ_LANG = lang;
   let result;
 
   clearSheetCache();
@@ -339,7 +341,7 @@ function scanQR(params) {
     if (String(logData[i][1]) === String(studentId) && String(logData[i][2]) === String(activityId)) {
       return {
         success: false, duplicate: true, error: msg('DUPLICATE', lang),
-        activity: activity, date: logData[i][4], time: logData[i][5]
+        activity: activity, date: outDate(logData[i][4]), time: outTime(logData[i][5])
       };
     }
   }
@@ -360,7 +362,7 @@ function scanQR(params) {
 
   return {
     success: true, duplicate: false, activity: activity,
-    score: activity.score, totalScore: total, date: dateStr, time: timeStr,
+    score: activity.score, totalScore: total, date: outDate(dateStr), time: timeStr,
     studentName: stu.row[1]
   };
 }
@@ -394,7 +396,7 @@ function getScanHistory(params) {
       history.push({
         logId: logData[i][0], activityId: logData[i][2],
         activityName: actMap[String(logData[i][2])] || logData[i][2],
-        score: score, date: logData[i][4], time: logData[i][5]
+        score: score, date: outDate(logData[i][4]), time: outTime(logData[i][5])
       });
     }
   }
@@ -457,7 +459,7 @@ function getPortfolio(params) {
     if (String(data[i][1]) === String(params.studentId)) {
       portfolio.push({
         portId: data[i][0], name: data[i][2], type: data[i][3],
-        description: data[i][4], date: data[i][5]
+        description: data[i][4], date: outDate(data[i][5])
       });
     }
   }
@@ -529,9 +531,9 @@ function getActivities(params) {
     activities.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], createdBy: data[i][4],
-      createdDate: data[i][5], active: active,
+      createdDate: outDate(data[i][5]), active: active,
       banner: data[i][7] || '', detail: data[i][8] || '',
-      eventDate: data[i][9] || '', location: data[i][10] || '',
+      eventDate: outDate(data[i][9]), location: data[i][10] || '',
       capacity: Number(data[i][11]) || 0,
       openReg: !(data[i][12] === false || data[i][12] === 'false'),
       closeDate: outDate(data[i][13]), archived: String(data[i][14] || ''),
@@ -626,10 +628,26 @@ function deleteActivity(params) {
     }
 
     sheet.deleteRow(i + 1);
-    writeLog(params.staff_id || '', 'staff', 'delActivity', params.activityId, 'used=' + used, 'success');
-    return { success: true, used: used };
+    const wiped = clearEngage(params.activityId);
+    writeLog(params.staff_id || '', 'staff', 'delActivity', params.activityId,
+             'used=' + used + ' engage=' + wiped, 'success');
+    return { success: true, used: used, engageRemoved: wiped };
   }
   return { success: false, error: msg('ACT_NOT_FOUND', params.lang || 'th') };
+}
+
+/* ลบไลก์ / คอมเมนต์ / รายชื่อลงทะเบียน ของกิจกรรมที่ถูกลบ */
+function clearEngage(activityId) {
+  try {
+    const sh = SS.getSheetByName(ENGAGE);
+    if (!sh) return 0;
+    const data = sh.getDataRange().getValues();
+    let n = 0;
+    for (let i = data.length - 1; i >= 1; i--) {
+      if (String(data[i][E_ACT]) === String(activityId)) { sh.deleteRow(i + 1); n++; }
+    }
+    return n;
+  } catch (e) { return 0; }
 }
 
 function getActivityQR(params) {
@@ -674,7 +692,7 @@ function getScanReport(params) {
       activityId: logData[i][2],
       activityName: actMap[String(logData[i][2])] || logData[i][2],
       score: Number(logData[i][3]) || 0,
-      date: logData[i][4], time: logData[i][5],
+      date: outDate(logData[i][4]), time: outTime(logData[i][5]),
       scannedBy: logData[i][6]
     });
   }
@@ -1270,7 +1288,7 @@ function getOpenActivities(params) {
     out.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
       description: data[i][3], banner: data[i][7] || '', detail: data[i][8] || '',
-      eventDate: outDate(data[i][9]), location: data[i][10] || '',
+      eventDate: outDate(data[i][9]), eventDateISO: outISO(data[i][9]), location: data[i][10] || '',
       capacity: cap, taken: taken, full: isFull,
       expired: expired, closed: expired || isFull,
       kind: String(data[i][15] || 'activity'),
@@ -1457,9 +1475,9 @@ function getArchivedActivities(params) {
     const cap = Number(data[i][11]) || 0;
     out.push({
       id: data[i][0], name: data[i][1], score: Number(data[i][2]) || 0,
-      eventDate: data[i][9] || '', location: data[i][10] || '',
+      eventDate: outDate(data[i][9]), location: data[i][10] || '',
       capacity: cap, taken: regBy[id] || 0,
-      closeDate: data[i][13] || '', reason: String(data[i][14] || 'manual')
+      closeDate: outDate(data[i][13]), reason: String(data[i][14] || 'manual')
     });
   }
   out.reverse();
@@ -1507,12 +1525,30 @@ function outISO(v) {
   return '';
 }
 
+/* ภาษาของคำขอปัจจุบัน — ไทยแสดงปี พ.ศ. ภาษาอื่นแสดง ค.ศ. */
+var REQ_LANG = 'th';
+
+/* แปลงปีเป็น พ.ศ. (ไทย) และคืนรูปแบบ วว/ดด/ปปปป */
+function thaiYear(d, m, y) {
+  var yy = Number(y);
+  if (REQ_LANG === 'th') { if (yy < 2400) yy += 543; }
+  else { if (yy > 2400) yy -= 543; }
+  return ('0' + d).slice(-2) + '/' + ('0' + m).slice(-2) + '/' + yy;
+}
+
 function outDate(v) {
   if (!v) return '';
   if (Object.prototype.toString.call(v) === '[object Date]') {
-    return Utilities.formatDate(v, TZ, 'dd/MM/yyyy');
+    return thaiYear(Utilities.formatDate(v, TZ, 'dd'),
+                    Utilities.formatDate(v, TZ, 'MM'),
+                    Utilities.formatDate(v, TZ, 'yyyy'));
   }
-  return String(v);
+  var str = String(v).trim();
+  var iso = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return thaiYear(iso[3], iso[2], iso[1]);
+  var dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (dmy) return thaiYear(dmy[1], dmy[2], dmy[3]);
+  return str;
 }
 function outTime(v) {
   if (!v) return '';

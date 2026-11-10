@@ -186,7 +186,7 @@ tbody tr:hover{background:var(--blue-soft)}
       <div class="page-head"><div class="kick" data-i18n="kickStaff">สิทธิ์การเข้าถึง</div><h2 data-i18n="navStaff">เจ้าหน้าที่</h2></div>
       <div class="cols">
         <div class="panel">
-          <h3 id="staffFormTitle">เพิ่มเจ้าหน้าที่</h3>
+          <h3 id="staffFormTitle" data-i18n="addStaffBtn">เพิ่มเจ้าหน้าที่</h3>
           <form id="staffForm">
             <input type="hidden" id="staffIdEdit">
             <div class="field"><label for="stName" data-i18n="lbName">ชื่อ-สกุล</label><input id="stName" required></div>
@@ -198,7 +198,7 @@ tbody tr:hover{background:var(--blue-soft)}
                 <select id="stStatus"><option value="active" data-i18n="stActive">ใช้งาน</option><option value="inactive" data-i18n="stOff">ระงับ</option></select></div>
             </div>
             <div class="field"><label for="stPass" data-i18n="lbPass">รหัสผ่าน</label>
-              <input id="stPass" placeholder="เว้นว่างเพื่อสุ่มให้"></div>
+              <input id="stPass" data-ph="phStPass" placeholder="เว้นว่างเพื่อสุ่มให้"></div>
             <button class="btn wide" type="submit" data-i18n="btnSave">บันทึก</button>
             <button class="btn ghost wide" type="button" id="staffCancel" hidden style="margin-top:9px" data-i18n="btnCancel">ยกเลิกการแก้ไข</button>
           </form>
@@ -289,7 +289,7 @@ function msuClear(){
 
 
 var I18N={
- th:{pageTag:'ผู้ดูแลระบบ',h1:'ผู้ดูแลระบบ',sub:'เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin',lbEmail:'อีเมล',lbPass:'รหัสผ่าน',
+ th:{ addStaffBtn:'เพิ่มเจ้าหน้าที่', phStPass:'เว้นว่างเพื่อสุ่มให้',pageTag:'ผู้ดูแลระบบ',h1:'ผู้ดูแลระบบ',sub:'เข้าได้เฉพาะบัญชีที่มีสิทธิ์ admin',lbEmail:'อีเมล',lbPass:'รหัสผ่าน',
   btnLogin:'เข้าสู่ระบบ', needHelp:'เข้าสู่ระบบไม่ได้?', helpBody:'บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต',btnOut:'ออกจากระบบ',navStaff:'เจ้าหน้าที่',navAnn:'ประกาศ',
   navSet:'ตั้งค่าระบบ',navLog:'ประวัติการใช้งาน',kickStaff:'สิทธิ์การเข้าถึง',kickAnn:'ข่าวสารถึงผู้ใช้',
   kickSet:'ค่ากลางของระบบ',kickLog:'ตรวจสอบย้อนหลัง',lbName:'ชื่อ-สกุล',lbRole:'สิทธิ์',lbStatus:'สถานะ',
@@ -310,7 +310,7 @@ var I18N={
   errRole:'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ',
   okSaved:'บันทึกแล้ว',okPass:'บันทึกแล้ว · รหัสผ่าน ',okSuspend:'ระงับบัญชีแล้ว',
   okDel:'ลบแล้ว',okPub:'เผยแพร่แล้ว',okSet:'บันทึกแล้ว: '},
- en:{pageTag:'Admin console',h1:'Administrator',sub:'Admin accounts only',lbEmail:'Email',lbPass:'Password',
+ en:{ addStaffBtn:'Add staff', phStPass:'Leave blank to generate one',pageTag:'Admin console',h1:'Administrator',sub:'Admin accounts only',lbEmail:'Email',lbPass:'Password',
   btnLogin:'Sign in', needHelp:'Cannot sign in?', helpBody:'Staff accounts must be created by an administrator. If you forgot your password, contact the administrator to reset it.',btnOut:'Sign out',navStaff:'Staff',navAnn:'Announcements',
   navSet:'System settings',navLog:'Activity log',kickStaff:'Access control',kickAnn:'News for users',
   kickSet:'System-wide values',kickLog:'Audit trail',lbName:'Full name',lbRole:'Role',lbStatus:'Status',
@@ -331,7 +331,7 @@ var I18N={
   errRole:'This account does not have administrator rights',
   okSaved:'Saved',okPass:'Saved · password ',okSuspend:'Account suspended',
   okDel:'Deleted',okPub:'Published',okSet:'Saved: '},
- zh:{pageTag:'管理员',h1:'管理员',sub:'仅限具有管理员权限的账号',lbEmail:'邮箱',lbPass:'密码',
+ zh:{ addStaffBtn:'添加工作人员', phStPass:'留空则自动生成',pageTag:'管理员',h1:'管理员',sub:'仅限具有管理员权限的账号',lbEmail:'邮箱',lbPass:'密码',
   btnLogin:'登录', needHelp:'无法登录?', helpBody:'工作人员账号需由管理员创建并设置密码。如忘记密码,请联系管理员重置。',btnOut:'退出登录',navStaff:'职员',navAnn:'公告',
   navSet:'系统设置',navLog:'操作记录',kickStaff:'权限管理',kickAnn:'用户通知',
   kickSet:'系统参数',kickLog:'审计记录',lbName:'姓名',lbRole:'权限',lbStatus:'状态',
@@ -360,6 +360,7 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.title=t('h1')+' — MSU';
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-ph]').forEach(function(el){ el.placeholder=t(el.dataset.ph); });
   var fid=document.getElementById('staffIdEdit').value;
   document.getElementById('stPass').placeholder = fid? t('phKeep') : t('phRandom');
   if(!fid) document.getElementById('staffFormTitle').textContent = t('addStaff');

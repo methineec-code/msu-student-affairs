@@ -231,17 +231,17 @@ textarea{min-height:70px;resize:vertical;font-family:inherit}
             <button type="button" id="mOnline" aria-pressed="false" data-i18n="online">ออนไลน์</button>
           </div>
           <div class="field"><label for="pName" data-i18n="pName">ชื่อการอบรม / ผลงาน</label>
-            <input id="pName" required placeholder="อบรมเชิงปฏิบัติการระบบอัตโนมัติ"></div>
+            <input id="pName" required data-ph="phName" placeholder="อบรมเชิงปฏิบัติการระบบอัตโนมัติ"></div>
           <div class="field"><label for="pOrg" data-i18n="pOrg">บริษัท / สังกัดที่จัด</label>
-            <input id="pOrg" required placeholder="บริษัท เอบีซี จำกัด"></div>
+            <input id="pOrg" required data-ph="phOrg" placeholder="บริษัท เอบีซี จำกัด"></div>
           <div class="field" id="fPlace"><label for="pPlace" data-i18n="pPlace">สถานที่อบรม</label>
-            <input id="pPlace" placeholder="อาคารวิศวกรรมศาสตร์ มมส"></div>
+            <input id="pPlace" data-ph="phPlace" placeholder="อาคารวิศวกรรมศาสตร์ มมส"></div>
           <div class="field" id="fUrl" hidden><label for="pUrl" data-i18n="pUrl">เว็บไซต์ที่อบรม</label>
             <input id="pUrl" type="url" placeholder="https://..."></div>
           <div class="field"><label for="pDate" data-i18n="pDate">วันที่เข้าร่วม</label>
             <input id="pDate" type="date" required></div>
           <div class="field"><label for="pDesc" data-i18n="pDesc">รายละเอียดการอบรม</label>
-            <textarea id="pDesc" placeholder="อบรมเรื่องอะไร ได้ความรู้อะไรมา"></textarea></div>
+            <textarea id="pDesc" data-ph="phDesc" placeholder="อบรมเรื่องอะไร ได้ความรู้อะไรมา"></textarea></div>
           <div class="field"><label for="pFile" data-i18n="pFile">ไฟล์หลักฐาน (รวมเป็นไฟล์เดียว)</label>
             <input id="pFile" type="file" accept=".pdf,image/*">
             <p class="muted" style="margin:6px 0 0;font-size:12px" data-i18n="pFileHint">เช่น ใบรับรองการอบรม · PDF หรือรูปภาพ ไม่เกิน 10 MB</p></div>
@@ -308,7 +308,7 @@ function msuClear(){
 }
 
 var I18N = {
- th:{title:'หน้านิสิต', sub:'ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ',
+ th:{ phName:'อบรมเชิงปฏิบัติการระบบอัตโนมัติ', phOrg:'บริษัท เอบีซี จำกัด', phPlace:'อาคารวิศวกรรมศาสตร์ มมส', phDesc:'อบรมเรื่องอะไร ได้ความรู้อะไรมา',title:'หน้านิสิต', sub:'ดูคะแนนสะสม ประวัติกิจกรรม และผลงานของคุณ',
    lblUser:'อีเมลมหาวิทยาลัย', lblPass:'รหัสผ่าน', signIn:'เข้าสู่ระบบ', signOut:'ออก',
    hint:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ', needHelp:'เข้าสู่ระบบไม่ได้ / ยังไม่มีชื่อในระบบ?', helpBody:'ลืมรหัสผ่าน หรือค้นหารหัสนิสิตไม่พบ ติดต่อสำนักกิจการนิสิตเพื่อขอรีเซ็ตรหัสผ่านหรือเพิ่มชื่อเข้าระบบ', totalLab:'คะแนนกิจกรรมสะสม', timesWord:'กิจกรรม',
    tabHistory:'ประวัติ', tabPort:'ผลงาน', tabMe:'บัญชี', histTitle:'กิจกรรมที่เข้าร่วม',
@@ -322,7 +322,7 @@ var I18N = {
    netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง', pwOk:'เปลี่ยนรหัสผ่านแล้ว',
    goal:'จากเกณฑ์ขั้นต่ำ', passed:'ผ่านเกณฑ์แล้ว',
    fId:'รหัสนิสิต', fDept:'สาขา', fYear:'ชั้นปี', fEmail:'อีเมล', fGpa:'เกรดเฉลี่ย'},
- en:{title:'Student Portal', sub:'Your activity points, history and portfolio',
+ en:{ phName:'Automation systems workshop', phOrg:'ABC Company Ltd.', phPlace:'MSU Faculty of Engineering', phDesc:'What was it about and what did you learn?',title:'Student Portal', sub:'Your activity points, history and portfolio',
    lblUser:'University email', lblPass:'Password', signIn:'Sign in', signOut:'Out',
    hint:'Your default password is your student ID.', needHelp:'Cannot sign in / not registered yet?', helpBody:'If you forgot your password or your student ID is not found, contact the Student Affairs Office to reset it or be added to the system.', totalLab:'Total activity points', timesWord:'activities',
    tabHistory:'History', tabPort:'Portfolio', tabMe:'Account', histTitle:'Activities attended',
@@ -336,7 +336,7 @@ var I18N = {
    netErr:'Connection failed, please try again', pwOk:'Password changed',
    goal:'of the minimum requirement', passed:'Requirement met',
    fId:'Student ID', fDept:'Department', fYear:'Year', fEmail:'Email', fGpa:'GPA'},
- zh:{title:'学生页面', sub:'查看积分、活动记录与作品集',
+ zh:{ phName:'自动化系统工作坊', phOrg:'ABC 有限公司', phPlace:'马哈沙拉堪大学工学院', phDesc:'培训内容与收获',title:'学生页面', sub:'查看积分、活动记录与作品集',
    lblUser:'校园邮箱', lblPass:'密码', signIn:'登录', signOut:'退出',
    hint:'初始密码为您的学号。', needHelp:'无法登录 / 系统中没有您的学号?', helpBody:'忘记密码或查无学号,请联系学生事务处重置密码或将您加入系统。', totalLab:'累计活动积分', timesWord:'项活动',
    tabHistory:'记录', tabPort:'作品集', tabMe:'账号', histTitle:'已参加的活动',
@@ -357,6 +357,7 @@ function t(k){ return (I18N[lang]&&I18N[lang][k]) || I18N.th[k] || k; }
 function applyLang(){
   document.documentElement.lang=lang;
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-ph]').forEach(function(el){ el.placeholder=t(el.dataset.ph); });
   if(me) render();
 }
 

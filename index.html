@@ -162,6 +162,9 @@ function setLang(l){
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     if(m[el.dataset.i18n]) el.textContent = m[el.dataset.i18n];
   });
+  document.querySelectorAll('[data-ph]').forEach(function(el){
+    if(m[el.dataset.ph]) el.placeholder = m[el.dataset.ph];
+  });
   document.querySelectorAll('[data-lang]').forEach(function(b){
     b.setAttribute('aria-pressed', b.dataset.lang === l);
   });

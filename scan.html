@@ -179,7 +179,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 
       <form id="bonusForm" hidden style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
         <div class="field"><label for="bName" data-i18n="bName">เรื่องที่ให้คะแนน</label>
-          <input id="bName" placeholder="ช่วยงานจัดสถานที่" required></div>
+          <input id="bName" data-ph="phBName" placeholder="ช่วยงานจัดสถานที่" required></div>
         <div class="field"><label for="bScore" data-i18n="bScore">คะแนน</label>
           <input id="bScore" type="number" min="1" value="5" required></div>
         <button class="btn" type="submit" data-i18n="bCreate">สร้างแล้วเริ่มสแกน</button>
@@ -209,7 +209,7 @@ input,select{width:100%;padding:10px 14px;border:1px solid var(--line);border-ra
 
     <div class="card" id="histCard">
       <div class="total">
-        <span class="muted" id="histLab">คะแนนสะสม</span>
+        <span class="muted" id="histLab" data-i18n="ptsLink">คะแนนสะสม</span>
         <span class="n" id="totalScore">0</span>
       </div>
       <div class="hist" id="hist"><p class="muted" style="margin:0" data-i18n="noItem">ยังไม่มีรายการ</p></div>
@@ -252,7 +252,7 @@ function msuClear(){
 
 
 var I18N={
- th:{title:'สแกน QR กิจกรรม',sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
+ th:{ ptsLink:'คะแนนสะสม', phBName:'ช่วยงานจัดสถานที่',title:'สแกน QR กิจกรรม',sub:'ระบบกิจการนิสิต มหาวิทยาลัยมหาสารคาม',
   tabStu:'นิสิต',tabStaff:'เจ้าหน้าที่',lbEmail:'อีเมลมหาวิทยาลัย',lbPass:'รหัสผ่าน',
   btnLogin:'เข้าสู่ระบบ',hintPass:'รหัสผ่านเริ่มต้นคือรหัสนิสิตของคุณ',lbStaffEmail:'อีเมลเจ้าหน้าที่',
   btnOut:'ออก',lbAct:'กิจกรรมที่กำลังรับสแกน',actPick:'— เลือกกิจกรรม —',
@@ -275,7 +275,7 @@ var I18N={
   gotPts:'ได้ {n} คะแนน', totalNow:'รวม {n} คะแนน',
   saved:'บันทึกแล้ว',dup:'สแกนซ้ำ',dupAt:'บันทึกไว้แล้วเมื่อ',fail:'ไม่สำเร็จ',
   netTitle:'เชื่อมต่อไม่ได้',netSub:'ตรวจสอบสัญญาณอินเทอร์เน็ตและค่า API_URL'},
- en:{title:'Scan activity QR',sub:'Student Affairs · Mahasarakham University',
+ en:{ ptsLink:'My points', phBName:'Helping set up the venue',title:'Scan activity QR',sub:'Student Affairs · Mahasarakham University',
   tabStu:'Student',tabStaff:'Staff',lbEmail:'University email',lbPass:'Password',
   btnLogin:'Sign in',hintPass:'Your default password is your student ID',lbStaffEmail:'Staff email',
   btnOut:'Sign out',lbAct:'Activity being scanned',actPick:'— Select activity —',
@@ -298,7 +298,7 @@ var I18N={
   gotPts:'+{n} points', totalNow:'total {n}',
   saved:'Recorded',dup:'Already scanned',dupAt:'recorded on',fail:'Failed',
   netTitle:'Connection failed',netSub:'Check your internet connection and API_URL'},
- zh:{title:'扫描活动二维码',sub:'玛哈沙拉堪大学 · 学生事务',
+ zh:{ ptsLink:'我的积分', phBName:'协助布置场地',title:'扫描活动二维码',sub:'玛哈沙拉堪大学 · 学生事务',
   tabStu:'学生',tabStaff:'职员',lbEmail:'学校邮箱',lbPass:'密码',
   btnLogin:'登录',hintPass:'初始密码为您的学号',lbStaffEmail:'职员邮箱',
   btnOut:'退出',lbAct:'当前扫描的活动',actPick:'— 选择活动 —',
@@ -329,6 +329,7 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.title=t('title')+' — '+t('sub');
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-ph]').forEach(function(el){ el.placeholder=t(el.dataset.ph); });
   var co=document.getElementById('camoff'); if(co && !scanning) co.textContent=t('camTap');
   if(me) labelsFor();
 }

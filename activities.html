@@ -275,6 +275,7 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.title=t('title')+' — '+t('sub');
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-ph]').forEach(function(el){ el.placeholder=t(el.dataset.ph); });
 }
 
 /* วันที่จาก Google Sheets อาจมาเป็น ISO — แปลงให้อ่านง่าย */

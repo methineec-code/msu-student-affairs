@@ -259,7 +259,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
       <div class="page-head">
         <div><div class="kick" data-i18n="kickStudents">ทะเบียน</div><h2 data-i18n="tabStudents">นิสิต</h2></div>
         <div class="tools">
-          <input id="stuQ" type="search" data-i18n-ph="searchStu" placeholder="ค้นหารหัส / ชื่อ">
+          <input id="stuQ" type="search" data-i18n-ph="searchStu" data-ph="phStuQ" placeholder="ค้นหารหัส / ชื่อ">
           <select id="stuDept"><option value="" data-i18n="allDept">ทุกสาขา</option></select>
           <button class="btn sm" id="stuExport" data-i18n="exportCsv">ส่งออก CSV</button>
         </div>
@@ -287,7 +287,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
                 <option value="news" data-i18n="kNews">ประกาศ / แจ้งข่าว (ไม่มีลงทะเบียน)</option>
               </select></div>
             <div class="field"><label for="actName" data-i18n="actName">ชื่อกิจกรรม</label>
-              <input id="actName" required placeholder="ปฐมนิเทศนิสิตใหม่"></div>
+              <input id="actName" required data-ph="phActName" placeholder="ปฐมนิเทศนิสิตใหม่"></div>
             <div class="row2">
               <div class="field"><label for="actScore" data-i18n="actScore">คะแนน</label>
                 <input id="actScore" type="number" min="1" value="5" required></div>
@@ -295,15 +295,15 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
                 <input id="actDate" type="date"></div>
             </div>
             <div class="field"><label for="actPlace" data-i18n="actPlace">สถานที่จัด</label>
-              <input id="actPlace" placeholder="หอประชุม มมส"></div>
+              <input id="actPlace" data-ph="phActPlace" placeholder="หอประชุม มมส"></div>
             <div class="field"><label for="actDesc" data-i18n="actDesc">รายละเอียดการอบรม</label>
-              <textarea id="actDesc" rows="3" placeholder="อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป"
+              <textarea id="actDesc" rows="3" data-ph="phActDesc" placeholder="อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป"
                 style="width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--paper);font:inherit;resize:vertical"></textarea></div>
             <div class="row2">
               <div class="field"><label for="actClose" data-i18n="actClose">ปิดรับลงทะเบียนวันที่</label>
                 <input id="actClose" type="date"></div>
               <div class="field"><label for="actCap" data-i18n="actCap">จำนวนที่รับ</label>
-                <input id="actCap" type="number" min="0" placeholder="0 = ไม่จำกัด"></div>
+                <input id="actCap" type="number" min="0" data-ph="phActCap" placeholder="0 = ไม่จำกัด"></div>
               <div class="field"><label for="actOpen" data-i18n="actOpen">เปิดรับลงชื่อ</label>
                 <select id="actOpen"><option value="true" data-i18n="yesOpen">เปิด</option><option value="false" data-i18n="noOpen">ไม่เปิด</option></select></div>
             </div>
@@ -390,7 +390,7 @@ var DEMO = false;
 
 /* ============================ ภาษา ============================= */
 var I18N = {
-  th:{appName:'ระบบกิจการนิสิต',forStaff:'เข้าสู่ระบบสำหรับเจ้าหน้าที่',email:'อีเมล',password:'รหัสผ่าน',
+  th:{ phStuQ:'ค้นหารหัส / ชื่อ', phActName:'ปฐมนิเทศนิสิตใหม่', phActPlace:'หอประชุม มมส', phActDesc:'อบรมเรื่องอะไร ใครควรเข้าร่วม ได้อะไรกลับไป', phActCap:'0 = ไม่จำกัด',appName:'ระบบกิจการนิสิต',forStaff:'เข้าสู่ระบบสำหรับเจ้าหน้าที่',email:'อีเมล',password:'รหัสผ่าน',
     signIn:'เข้าสู่ระบบ', needHelp:'เข้าสู่ระบบไม่ได้?', helpBody:'บัญชีเจ้าหน้าที่ต้องให้ผู้ดูแลระบบสร้างและกำหนดรหัสผ่านให้ก่อน หากลืมรหัสผ่านให้ติดต่อผู้ดูแลระบบเพื่อขอรีเซ็ต',signOut:'ออก',tabDash:'ภาพรวม',tabStudents:'นิสิต',tabActs:'กิจกรรม',tabScans:'การสแกน',
     goScan:'สแกน QR',tabRank:'อันดับคะแนน',kickDash:'ภาพรวมระบบ',kickStudents:'ทะเบียน',kickActs:'คะแนนกิจกรรม',
     kickScans:'บันทึกการเข้าร่วม',kickRank:'คะแนนสะสม',refresh:'รีเฟรช',byDept:'นิสิตแยกตามสาขา',
@@ -409,7 +409,7 @@ var I18N = {
     demoMsg:'โหมดตัวอย่าง — ยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อหลังบ้านไม่ได้ ตัวเลขที่เห็นเป็นข้อมูลสมมติ',
     hint:'ยังไม่ได้ตั้งค่า API_URL — กดเข้าสู่ระบบเพื่อดูโหมดตัวอย่าง',
     saved:'บันทึกแล้ว',copied:'คัดลอกแล้ว',confirmDel:'กดอีกครั้งเพื่อยืนยัน',edit:'แก้ไข',del:'ลบ',deleted:'ลบแล้ว',cancelEdit:'ยกเลิกการแก้ไข',editingAct:'แก้ไขกิจกรรม',saveEdit:'บันทึกการแก้ไข',delUsed:'กิจกรรมนี้มีนิสิตสแกนเข้าร่วมแล้ว {n} คน ถ้าลบ ประวัติคะแนนที่ให้ไปจะยังอยู่ แต่กิจกรรมจะหายจากระบบ ยืนยันลบหรือไม่?'},
-  en:{appName:'Student Affairs',forStaff:'Staff sign-in',email:'Email',password:'Password',
+  en:{ phStuQ:'Search ID or name', phActName:'New student orientation', phActPlace:'MSU Auditorium', phActDesc:'Topic, who should attend, what they gain', phActCap:'0 = unlimited',appName:'Student Affairs',forStaff:'Staff sign-in',email:'Email',password:'Password',
     signIn:'Sign in', needHelp:'Cannot sign in?', helpBody:'Staff accounts must be created by an administrator. If you forgot your password, contact the administrator to reset it.',signOut:'Out',tabDash:'Overview',tabStudents:'Students',tabActs:'Activities',tabScans:'Scans',
     goScan:'Scan QR',tabRank:'Leaderboard',kickDash:'System overview',kickStudents:'Registry',kickActs:'Activity points',
     kickScans:'Attendance log',kickRank:'Accumulated points',refresh:'Refresh',byDept:'Students by department',
@@ -428,7 +428,7 @@ var I18N = {
     demoMsg:'Demo mode — API_URL is not set or the backend is unreachable. These figures are sample data.',
     hint:'API_URL is not set — sign in to view the demo.',
     saved:'Saved',copied:'Copied',confirmDel:'Click again to confirm',edit:'Edit',del:'Delete',deleted:'Deleted',cancelEdit:'Cancel editing',editingAct:'Edit activity',saveEdit:'Save changes',delUsed:'{n} student(s) already scanned this activity. Deleting removes the activity but keeps their points. Delete anyway?'},
-  zh:{appName:'学生事务系统',forStaff:'职员登录',email:'邮箱',password:'密码',
+  zh:{ phStuQ:'搜索学号或姓名', phActName:'新生入学教育', phActPlace:'马哈沙拉堪大学礼堂', phActDesc:'主题、适合人群、收获', phActCap:'0 = 不限',appName:'学生事务系统',forStaff:'职员登录',email:'邮箱',password:'密码',
     signIn:'登录', needHelp:'无法登录?', helpBody:'工作人员账号需由管理员创建并设置密码。如忘记密码,请联系管理员重置。',signOut:'退出',tabDash:'总览',tabStudents:'学生',tabActs:'活动',tabScans:'扫码记录',
     goScan:'扫码',tabRank:'积分排行',kickDash:'系统总览',kickStudents:'学籍',kickActs:'活动积分',
     kickScans:'参与记录',kickRank:'累计积分',refresh:'刷新',byDept:'各专业学生数',
@@ -454,6 +454,7 @@ function t(k){ return (I18N[lang] && I18N[lang][k]) || I18N.th[k] || k; }
 
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-ph]').forEach(function(el){ el.placeholder = t(el.dataset.ph); });
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.dataset.i18nPh); });
   document.getElementById('gateNote').textContent = API_URL ? '' : t('hint');
   if(DEMO) document.getElementById('demoBanner').textContent = t('demoMsg');
